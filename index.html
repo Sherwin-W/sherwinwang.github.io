@@ -1,13 +1,100 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="%BASE_URL%vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + React</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="%BASE_URL%src/main.jsx"></script>
-  </body>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sherwin Wang — Machine Learning Engineer</title>
+
+  <!-- SEO -->
+  <meta name="description" content="Sherwin Wang is a Machine Learning Engineer specializing in LLM inference optimization, CUDA kernels, and ML systems performance.">
+  <meta name="author" content="Sherwin Wang">
+  <meta name="keywords" content="machine learning engineer, LLM inference, ML systems, CUDA, PyTorch, performance engineering, vLLM, quantization">
+  <link rel="canonical" href="https://sherwinwang.dev/">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Sherwin Wang — Machine Learning Engineer">
+  <meta property="og:description" content="Machine Learning Engineer specializing in LLM inference optimization, CUDA kernels, and ML systems performance.">
+  <meta property="og:url" content="https://sherwinwang.dev/">
+  <meta property="og:type" content="website">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="/assets/css/styles.css">
+</head>
+<body>
+
+  <!-- ── Navigation ──────────────────────────────────────────────────── -->
+  <nav class="nav" aria-label="Main navigation">
+    <div class="nav-inner">
+      <a href="/" class="nav-logo">sherwin wang</a>
+      <button id="nav-toggle" class="nav-toggle" aria-expanded="false" aria-controls="nav-links" aria-label="Toggle navigation">
+        &#9776;
+      </button>
+      <ul id="nav-links" class="nav-links" role="list">
+        <li><a href="/index.html" class="nav-link">Home</a></li>
+        <li><a href="/projects.html" class="nav-link">Projects</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- ── Main content ────────────────────────────────────────────────── -->
+  <main>
+    <div class="container">
+
+      <!-- Hero -->
+      <section class="hero">
+        <p class="hero-label">Machine Learning Engineer</p>
+        <h1 class="hero-name">Sherwin Wang</h1>
+        <p class="hero-tagline">Building fast, efficient inference for large language models.</p>
+        <p class="hero-bio">
+          I work on the systems that make LLMs fast — custom CUDA kernels, KV cache management,
+          speculative decoding, and low-precision compute. I care about closing the gap between
+          research and production throughput.
+        </p>
+        <div class="hero-cta">
+          <a href="https://github.com/sherwinwang" class="btn btn-primary" target="_blank" rel="noopener">
+            GitHub
+          </a>
+          <a href="/projects.html" class="btn btn-secondary">
+            View Projects
+          </a>
+        </div>
+      </section>
+
+      <!-- Skills -->
+      <section>
+        <h2 class="section-title">Skills &amp; Tools</h2>
+        <div class="skills-grid">
+          <span class="skill-tag">Python</span>
+          <span class="skill-tag">C++</span>
+          <span class="skill-tag">CUDA</span>
+          <span class="skill-tag">PyTorch</span>
+          <span class="skill-tag">Triton</span>
+          <span class="skill-tag">FlashAttention</span>
+          <span class="skill-tag">LLM Inference</span>
+          <span class="skill-tag">ML Systems</span>
+          <span class="skill-tag">vLLM</span>
+          <span class="skill-tag">Quantization</span>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- ── Footer ──────────────────────────────────────────────────────── -->
+  <footer>
+    <div class="footer-inner">
+      <span class="footer-copy">&copy; 2026 Sherwin Wang</span>
+      <nav class="footer-links" aria-label="Footer navigation">
+        <a href="https://github.com/sherwinwang" target="_blank" rel="noopener">GitHub</a>
+        <a href="/projects.html">Projects</a>
+      </nav>
+    </div>
+  </footer>
+
+  <script src="/assets/js/main.js" defer></script>
+</body>
 </html>

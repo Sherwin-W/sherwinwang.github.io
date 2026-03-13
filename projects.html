@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Projects — Sherwin Wang</title>
+
+  <!-- SEO -->
+  <meta name="description" content="Projects by Sherwin Wang — LLM inference optimization, ML systems, and machine learning experiments.">
+  <meta name="author" content="Sherwin Wang">
+  <meta name="keywords" content="machine learning engineer, LLM inference, ML systems, CUDA, PyTorch, performance engineering">
+  <link rel="canonical" href="https://sherwinwang.dev/projects.html">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Projects — Sherwin Wang">
+  <meta property="og:description" content="Projects by Sherwin Wang — LLM inference optimization, ML systems, and machine learning experiments.">
+  <meta property="og:url" content="https://sherwinwang.dev/projects.html">
+  <meta property="og:type" content="website">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="/assets/css/styles.css">
+</head>
+<body>
+
+  <!-- ── Navigation ──────────────────────────────────────────────────── -->
+  <nav class="nav" aria-label="Main navigation">
+    <div class="nav-inner">
+      <a href="/" class="nav-logo">sherwin wang</a>
+      <button id="nav-toggle" class="nav-toggle" aria-expanded="false" aria-controls="nav-links" aria-label="Toggle navigation">
+        &#9776;
+      </button>
+      <ul id="nav-links" class="nav-links" role="list">
+        <li><a href="/index.html" class="nav-link">Home</a></li>
+        <li><a href="/projects.html" class="nav-link">Projects</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- ── Main content ────────────────────────────────────────────────── -->
+  <main>
+    <div class="container">
+
+      <section>
+        <h1 class="section-title">Projects</h1>
+
+        <div class="projects-grid">
+
+          <!-- ── Card: LLM Inference Optimization Engine ── -->
+          <article class="project-card">
+            <h2 class="project-card-title">LLM Inference Optimization Engine</h2>
+            <p class="project-card-desc">
+              A from-scratch inference engine for transformer-based language models, implementing
+              KV caching, paged attention, speculative decoding, FlashAttention, and low-precision
+              matrix multiply to maximize throughput and reduce latency.
+            </p>
+            <div class="project-card-tags">
+              <span class="tag">CUDA</span>
+              <span class="tag">Python</span>
+              <span class="tag">C++</span>
+              <span class="tag">FlashAttention</span>
+              <span class="tag">Quantization</span>
+            </div>
+            <a href="/projects/llm-inference-engine.html" class="project-card-link">
+              View project &rarr;
+            </a>
+          </article>
+
+          <!-- ── Card: Machine Learning Projects ── -->
+          <article class="project-card">
+            <h2 class="project-card-title">Machine Learning Projects</h2>
+            <p class="project-card-desc">
+              A collection of ML experiments spanning classification, data mining, and model
+              experimentation — exploring techniques from traditional statistical learning
+              through deep neural networks.
+            </p>
+            <div class="project-card-tags">
+              <span class="tag">PyTorch</span>
+              <span class="tag">Python</span>
+              <span class="tag">scikit-learn</span>
+              <span class="tag">Data Mining</span>
+            </div>
+            <a href="/projects/ml-projects.html" class="project-card-link">
+              View project &rarr;
+            </a>
+          </article>
+
+          <!--
+            ════════════════════════════════════════════════════
+            ADD NEW PROJECT CARDS HERE
+            Copy the <article> block above and update:
+              - project-card-title
+              - project-card-desc
+              - project-card-tags (add/remove <span class="tag"> items)
+              - project-card-link href and text
+            ════════════════════════════════════════════════════
+          -->
+
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- ── Footer ──────────────────────────────────────────────────────── -->
+  <footer>
+    <div class="footer-inner">
+      <span class="footer-copy">&copy; 2026 Sherwin Wang</span>
+      <nav class="footer-links" aria-label="Footer navigation">
+        <a href="https://github.com/sherwinwang" target="_blank" rel="noopener">GitHub</a>
+        <a href="/projects.html">Projects</a>
+      </nav>
+    </div>
+  </footer>
+
+  <script src="/assets/js/main.js" defer></script>
+</body>
+</html>

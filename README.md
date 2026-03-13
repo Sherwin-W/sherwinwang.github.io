@@ -1,8 +1,39 @@
-# React + Vite
+# sherwinwang.github.io
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Personal portfolio site for [Sherwin Wang](https://sherwinwang.dev) — Machine Learning Engineer.
 
-Currently, two official plugins are available:
+Live at **[sherwinwang.dev](https://sherwinwang.dev)**
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Stack
+
+Plain HTML, CSS, and vanilla JavaScript. No build step, no framework, no dependencies.
+
+## Structure
+
+```
+.
+├── index.html                        # Home page
+├── projects.html                     # Projects gallery
+├── 404.html                          # 404 error page
+├── CNAME                             # Custom domain: sherwinwang.dev
+│
+├── assets/
+│   ├── css/styles.css                # Single stylesheet (14 sections)
+│   ├── js/main.js                    # Nav toggle + active link (~50 lines)
+│   └── images/                       # Static images
+│
+└── projects/
+    ├── llm-inference-engine.html     # LLM inference project detail
+    └── ml-projects.html              # ML experiments detail
+```
+
+## Deployment
+
+Served via GitHub Pages from the `main` branch, root `/`.
+
+**GitHub Pages settings:** Settings → Pages → Source: Deploy from branch → Branch: `main` / `/ (root)`
+
+## Adding a new project
+
+1. Create `projects/your-project.html` using an existing project page as a template.
+2. Add a card to `projects.html` following the `<!-- ADD NEW PROJECT CARDS HERE -->` comment.

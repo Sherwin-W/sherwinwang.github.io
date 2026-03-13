@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LLM Inference Optimization Engine — Sherwin Wang</title>
+
+  <!-- SEO -->
+  <meta name="description" content="A from-scratch LLM inference engine implementing KV caching, paged attention, speculative decoding, FlashAttention, and quantization.">
+  <meta name="author" content="Sherwin Wang">
+  <meta name="keywords" content="LLM inference, KV cache, paged attention, speculative decoding, FlashAttention, quantization, CUDA">
+  <link rel="canonical" href="https://sherwinwang.dev/projects/llm-inference-engine.html">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="LLM Inference Optimization Engine — Sherwin Wang">
+  <meta property="og:description" content="A from-scratch LLM inference engine implementing KV caching, paged attention, speculative decoding, FlashAttention, and quantization.">
+  <meta property="og:url" content="https://sherwinwang.dev/projects/llm-inference-engine.html">
+  <meta property="og:type" content="website">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="/assets/css/styles.css">
+</head>
+<body>
+
+  <!-- ── Navigation ──────────────────────────────────────────────────── -->
+  <nav class="nav" aria-label="Main navigation">
+    <div class="nav-inner">
+      <a href="/" class="nav-logo">sherwin wang</a>
+      <button id="nav-toggle" class="nav-toggle" aria-expanded="false" aria-controls="nav-links" aria-label="Toggle navigation">
+        &#9776;
+      </button>
+      <ul id="nav-links" class="nav-links" role="list">
+        <li><a href="/index.html" class="nav-link">Home</a></li>
+        <li><a href="/projects.html" class="nav-link">Projects</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- ── Main content ────────────────────────────────────────────────── -->
+  <main>
+    <div class="container">
+
+      <a href="/projects.html" class="back-link">&larr; All Projects</a>
+
+      <h1 class="page-title">LLM Inference Optimization Engine</h1>
+      <p class="page-subtitle">CUDA &middot; Python &middot; C++ &middot; FlashAttention &middot; Quantization</p>
+
+      <div class="prose">
+
+        <h2>Overview</h2>
+        <p>
+          A from-scratch inference engine for transformer-based language models, built to explore
+          the performance engineering techniques that underpin production systems like vLLM and TensorRT-LLM.
+          The goal was to understand — and measure — each optimization in isolation before combining them.
+        </p>
+
+        <h2>Technical Implementation</h2>
+
+        <p>
+          <strong>KV Cache &amp; Paged Attention</strong><br>
+          Autoregressive decoding is memory-bound: the key/value tensors from prior tokens must be
+          re-read on every step. A contiguous KV cache eliminates recomputation but wastes GPU memory
+          due to fragmentation. Paged attention (as in vLLM) allocates KV blocks in fixed pages,
+          allowing non-contiguous physical storage and near-zero internal fragmentation.
+        </p>
+
+        <div class="code-block"><pre><span class="comment"># Simplified paged-attention KV lookup</span>
+<span class="keyword">def</span> gather_kv(block_table, cache, seq_len, block_size):
+    blocks = block_table[:seq_len // block_size + 1]
+    pages  = cache[blocks]          <span class="comment"># gather physical pages</span>
+    <span class="keyword">return</span> pages.view(-1, HEAD_DIM)[:seq_len]</pre></div>
+
+        <p>
+          <strong>FlashAttention</strong><br>
+          Standard attention materializes the full N&times;N score matrix in HBM, which becomes the
+          bottleneck at long context. FlashAttention tiles the computation into SRAM-resident blocks,
+          computing a numerically stable softmax with online updates — reducing HBM reads/writes from
+          O(N²) to O(N).
+        </p>
+
+        <div class="code-block"><pre><span class="comment">// Tiled SRAM attention kernel (pseudocode)</span>
+<span class="keyword">for</span> (int j = 0; j &lt; Tc; ++j) {
+    load_kv_tile(K, V, j);           <span class="comment">// K,V tile → SRAM</span>
+    S_ij = Q_i @ K_j.T;             <span class="comment">// score tile</span>
+    m_new = max(m_i, rowmax(S_ij));  <span class="comment">// online max</span>
+    P_ij  = exp(S_ij - m_new);
+    O_i   = rescale(O_i, m_i, m_new) + P_ij @ V_j;
+    m_i   = m_new;
+}</pre></div>
+
+        <p>
+          <strong>Speculative Decoding</strong><br>
+          A small draft model proposes K tokens in parallel; the target model verifies them in a
+          single forward pass. Accepted tokens are kept; the first rejection rolls back. When the
+          draft acceptance rate is high, this yields near-K&times; throughput improvement with
+          identical output distribution.
+        </p>
+
+        <p>
+          <strong>Low-Precision Matrix Multiply</strong><br>
+          INT8 weight quantization (with per-channel scaling) reduces memory bandwidth by 2&times;
+          relative to FP16, the dominant bottleneck during decode. FP8 and W4A16 schemes were also
+          benchmarked using custom CUDA extensions and Triton kernels.
+        </p>
+
+        <div class="code-block"><pre><span class="comment"># W8A8 linear layer (simplified)</span>
+<span class="keyword">def</span> linear_int8(x, W_q, scale_x, scale_w):
+    x_q   = quantize_per_tensor(x,   scale_x)   <span class="comment"># → INT8</span>
+    out_q = torch._int_mm(x_q, W_q.T)           <span class="comment">// INT32 accum</span>
+    <span class="keyword">return</span> out_q.float() * (scale_x * scale_w)</pre></div>
+
+        <h2>Results</h2>
+        <ul>
+          <li>Paged attention reduced peak KV memory by ~35% vs. contiguous cache at batch size 32.</li>
+          <li>FlashAttention kernel achieved ~3.1&times; lower attention latency vs. eager PyTorch at seq_len=2048.</li>
+          <li>INT8 weight quantization delivered ~1.8&times; decode throughput vs. BF16 baseline on A100.</li>
+          <li>Speculative decoding (3-token draft) achieved ~2.4&times; tokens/sec on greedy tasks.</li>
+        </ul>
+
+        <h2>Links</h2>
+        <ul class="link-list">
+          <li><a href="https://github.com/sherwinwang" target="_blank" rel="noopener">&#8594; GitHub — sherwinwang</a></li>
+        </ul>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- ── Footer ──────────────────────────────────────────────────────── -->
+  <footer>
+    <div class="footer-inner">
+      <span class="footer-copy">&copy; 2026 Sherwin Wang</span>
+      <nav class="footer-links" aria-label="Footer navigation">
+        <a href="https://github.com/sherwinwang" target="_blank" rel="noopener">GitHub</a>
+        <a href="/projects.html">Projects</a>
+      </nav>
+    </div>
+  </footer>
+
+  <script src="/assets/js/main.js" defer></script>
+</body>
+</html>
