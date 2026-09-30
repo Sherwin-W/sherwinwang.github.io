@@ -1,0 +1,6 @@
+# Asset sources
+
+- `public/objects/*.svg`: original vector illustrations authored for this page by the implementation worker, following `ART_DIRECTION.md`; no external artwork, model, font, or stock asset used. Colors and shapes were customized to the paper-cutout specification.
+- `public/paper-fibers.svg`: original lightweight SVG turbulence texture authored for this page; no external source.
+- UI type uses system Georgia and system UI fonts. No remote assets or visitor uploads.
+- Recognition research reference: [Google Quick, Draw! dataset](https://github.com/googlecreativelab/quickdraw-dataset), dataset license CC BY 4.0. Its 345-category vector data is a possible future training/evaluation source, not bundled or used for inference. The [TensorFlow QuickDraw recurrent tutorial](https://github.com/tensorflow/docs/blob/master/site/en/r1/tutorials/sequences/recurrent_quickdraw.md) requires a roughly 1 GB training archive; available Magenta SketchRNN checkpoints are generative examples, not a validated multiclass recognizer for this catalog. No compact classifier checkpoint with verified class coverage and measured browser runtime was found, so no model was bundled and no classifier performance is claimed.

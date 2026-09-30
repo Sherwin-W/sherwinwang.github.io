@@ -1,0 +1,51 @@
+.play-canvas { --paper:#f4efe4; --paper-raised:#fbf8f1; --graphite:#2b2a28; --graphite-soft:#6b675f; --line:#3a3631; --clay:#d9785c; --focus:#1f5fbf; position:absolute; inset:0; z-index:1; overflow:hidden; touch-action:pan-y; }
+.play-object-layer { position:absolute; inset:0; pointer-events:none; }
+.play-object { position:absolute; left:var(--x); top:var(--y); width:96px; height:96px; padding:0; border:0; border-radius:50%; background:transparent; transform:translate(-50%,-50%); cursor:grab; touch-action:none; pointer-events:auto; filter:drop-shadow(0 1px 0 rgba(43,42,40,.25)) drop-shadow(0 3px 3px rgba(60,45,25,.18)); }
+.play-object-sprite { display:grid; place-items:center; width:100%; height:100%; transition:transform .16s ease; }
+.play-object-sprite img { width:96px; height:96px; user-select:none; }
+.play-object:focus-visible { outline:3px solid var(--focus); outline-offset:3px; }
+.play-object--selected { outline:2px dashed var(--focus); outline-offset:2px; }
+.play-object--dragging { z-index:3; cursor:grabbing; filter:drop-shadow(0 10px 7px rgba(60,45,25,.2)); }
+.play-object--dragging .play-object-sprite { transform:scale(1.06) rotate(-3deg); }
+.play-object--deleting .play-object-sprite { animation:object-delete .22s ease-in forwards; }
+.play-object:not(.play-object--dragging) .play-object-sprite { animation:object-spawn .32s cubic-bezier(.3,1.4,.5,1) both; }
+@keyframes object-spawn { 0%{transform:scale(.6)} 35%{transform:scale(1.15,.85)} 65%{transform:scale(.95,1.08)} 100%{transform:scale(1)} }
+@keyframes object-delete { to{transform:scale(.0) rotate(20deg);opacity:0} }
+.canvas-mode-controls { position:absolute; z-index:6; left:calc(50% + 180px); bottom:24px; display:flex; gap:0; }
+.canvas-mode-button,.draw-toolbar button,.word-editor button,.canvas-trash,.portfolio-dock button,.portfolio-sheet button { min-height:44px; padding:8px 14px; font:600 .95rem system-ui,sans-serif; color:var(--graphite); background:var(--paper-raised); border:1.5px solid var(--line); border-radius:12px; cursor:pointer; }
+.canvas-mode-button + .canvas-mode-button { margin-left:-1px; }
+.canvas-mode-button[aria-pressed=true] { color:var(--paper); background:var(--graphite); }
+.canvas-mode-button:focus-visible,.draw-toolbar button:focus-visible,.word-editor button:focus-visible,.canvas-trash:focus-visible,.portfolio-dock button:focus-visible,.portfolio-sheet button:focus-visible,.portfolio-sheet a:focus-visible { outline:3px solid var(--focus); outline-offset:3px; }
+.canvas-trash { position:absolute; right:24px; bottom:20px; z-index:6; width:72px; height:72px; padding:0; border:0; background:transparent; font-size:2.8rem; filter:drop-shadow(0 2px 2px #6b675f44); }
+.trash-bin-icon { width:34px;height:34px;fill:none;stroke:var(--line);stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round; }
+.canvas-trash--active { color:var(--clay); transform:scale(1.08); }
+.canvas-trash > span { display:block; position:relative; width:28px; height:27px; margin:auto; overflow:visible; border:2.5px solid var(--line); border-top:0; border-radius:0 0 6px 6px; font-size:0; }
+.canvas-trash > span::before { content:''; position:absolute; left:-5px; top:-5px; width:33px; height:3px; background:var(--line); border-radius:2px; transform-origin:right center; transition:transform .16s ease; }
+.canvas-trash > span::after { content:''; position:absolute; left:5px; top:4px; bottom:3px; width:13px; background:linear-gradient(90deg,transparent 0 3px,var(--line) 3px 5px,transparent 5px 10px,var(--line) 10px 12px,transparent 12px); }
+.canvas-trash--active > span::before { transform:rotate(12deg) translateY(-2px); }
+.draw-board { position:absolute; inset:0; width:100%; height:100%; display:none; touch-action:none; pointer-events:none; }
+.play-canvas--draw .draw-board { display:block; pointer-events:auto; }
+.draw-stroke { stroke:var(--graphite); stroke-linecap:round; stroke-linejoin:round; }
+.draw-toolbar { position:absolute; left:50%; bottom:80px; transform:translateX(-50%); z-index:6; display:flex; gap:6px; padding:6px; background:var(--paper-raised); border:1px solid #d7cdbc; border-radius:14px; }
+.draw-toolbar button { white-space:nowrap; }
+.word-editor { position:absolute; z-index:8; left:var(--x); top:var(--y); width:min(280px,calc(100vw - 24px)); transform:translate(-50%,-50%); padding:8px; border:1.5px solid var(--line); border-radius:16px; background:var(--paper-raised); box-shadow:0 4px 16px #3c2d1922; }
+.word-editor__row { display:flex; align-items:center; gap:4px; }
+.word-editor__input { width:0; flex:1; height:40px; padding:0 10px; background:transparent; border:0; color:var(--graphite); font:600 .95rem system-ui,sans-serif; outline:none; }
+.word-editor__row:focus-within { outline:3px solid var(--focus); outline-offset:2px; border-radius:8px; }
+.word-editor__row button { min-width:40px; padding:6px; }
+.word-editor__message { margin:8px 4px 2px; font: .85rem/1.4 system-ui,sans-serif; color:var(--graphite-soft); }
+.word-editor__suggestions { display:flex; flex-wrap:wrap; gap:6px; padding:4px; }
+.word-editor__suggestions p { flex-basis:100%; margin:4px 0; font:.85rem/1.4 system-ui,sans-serif; }
+.canvas-trash--active { outline:3px solid var(--clay); outline-offset:2px; border-radius:50%; }
+.play-live-region,.visually-hidden { position:absolute!important; width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0; }
+@media(max-width:599px) {
+ .canvas-mode-controls { left:auto; right:96px; bottom:20px; }
+ .draw-toolbar { bottom:140px; max-width:calc(100vw - 24px); flex-wrap:wrap; justify-content:center; }
+ .draw-toolbar button { padding:6px 10px; font-size:.85rem; }
+ .canvas-trash { right:12px; bottom:12px; }
+ .word-editor { position:fixed; top:auto; bottom:calc(180px + env(safe-area-inset-bottom)); left:50%; transform:translateX(-50%); }
+}
+@media(prefers-reduced-motion:reduce) {
+ .play-object-sprite,.canvas-trash { transition:none; animation:none!important; }
+ .play-object--dragging .play-object-sprite { transform:none; }
+}

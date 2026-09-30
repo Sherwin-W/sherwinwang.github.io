@@ -1,8 +1,8 @@
 # Tasks
 
-- P0 lead: inspect, checkpoint, baseline, contracts — in progress.
-- P1/P4 canvas worker: src/playable/PlayCanvas.jsx and interaction.js plus interaction.test.js; typed spawn, drag, trash, keyboard, drawing/manual choice — assigned.
-- P2A matching worker: src/playable/catalog.js and catalog.test.js; twelve entries and conservative matching — assigned.
-- P2B lead: scoped styles and original SVG art; check finished ART_DIRECTION.md before work.
-- P3 lead: portfolio integration and accessible project sheets; preserve verified content.
-- P5 lead: test/build/lint, available browser validation, evidence and local commits.
+- P0 lead: inspect, checkpoint, baseline, contracts - complete (checkpoint 99ac6c8).
+- P1/P4 canvas: typed spawn, drag, trash, keyboard, draw capture/manual choice, cancellation - complete.
+- P2A matching: 12 entries, aliases, conservative typo matching, edge case tests - complete.
+- P2B visual: paper composition, responsive dock, original SVG art and reduced motion - complete.
+- P3 portfolio: project/about/contact/resume sheets; focus and Escape handling - complete. Verified architecture/link gaps are documented; no unsupported diagrams or URLs added.
+- P5 validation: unit and browser checks, screenshots, build and scoped lint - complete. Full lint baseline failures recorded.

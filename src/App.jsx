@@ -1,5 +1,5 @@
 // src/App.jsx
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import Home from './pages/Home';
@@ -10,30 +10,38 @@ import Sidebar from './components/Sidebar';
 import './App.css'; // Import CSS
 
 const App = () => {
+  return (
+    <Router>
+      <SiteShell />
+    </Router>
+  );
+};
+
+const SiteShell = () => {
   const [isSidebarOpen, setSidebarOpen] = useState(false);
+  const location = useLocation();
+  const isHome = location.pathname === '/';
 
   const toggleSidebar = () => {
     setSidebarOpen(!isSidebarOpen);
   };
 
   return (
-    <Router>
-      <div className="app">
-        {/* Hamburger Button */}
-        <button className="hamburger" onClick={toggleSidebar} aria-label="Toggle Sidebar">
+    <div className="app">
+        {/* Keep the existing site navigation available on legacy pages. */}
+        {!isHome && <button className="hamburger" onClick={toggleSidebar} aria-label="Toggle Sidebar">
           &#9776; {/* Hamburger icon */}
-        </button>
+        </button>}
 
         {/* Sidebar */}
-        <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
+        {!isHome && <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />}
 
         {/* Overlay */}
-        {isSidebarOpen && <div className="overlay" onClick={toggleSidebar}></div>}
+        {isSidebarOpen && !isHome && <div className="overlay" onClick={toggleSidebar}></div>}
 
         {/* Main Content with Animated Routes */}
         <AnimatedRoutes />
-      </div>
-    </Router>
+    </div>
   );
 };
 
