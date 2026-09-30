@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { addObject, clampPoint, deleteObject, initialInteraction, MAX_OBJECTS, moveObject, transitionInteraction, trashContainsPoint } from './interaction.js';
+import { addObject, clampPoint, deleteObject, getObjectSize, initialInteraction, MAX_OBJECTS, moveObject, transitionInteraction, trashContainsPoint } from './interaction.js';
 
 const entry = { id: 'cat', label: 'Cat' };
 const bounds = { width: 400, height: 300 };
@@ -25,9 +25,15 @@ test('clamps points and keeps spawned objects within canvas bounds', () => {
   assert.deepEqual({ x: result.objects[0].x, y: result.objects[0].y }, { x: 48, y: 48 });
 });
 
+test('uses larger art on wide canvases while preserving mobile sizing', () => {
+  assert.equal(getObjectSize(390), 96);
+  assert.equal(getObjectSize(900), 120);
+  assert.equal(addObject([], entry, { x: 200, y: 150 }, { width: 1440, height: 900 }, 'wide').objects[0].size, 120);
+});
+
 test('moves and deletes only the requested object', () => {
   const objects = [{ id: 'one', x: 50, y: 50 }, { id: 'two', x: 80, y: 80 }];
-  assert.deepEqual(moveObject(objects, 'one', { x: 100, y: 110 }, bounds)[0], { id: 'one', x: 100, y: 110 });
+  assert.deepEqual(moveObject(objects, 'one', { x: 100, y: 110 }, bounds)[0], { id: 'one', x: 100, y: 110, size: 96 });
   assert.deepEqual(deleteObject(objects, 'one'), [objects[1]]);
 });
 

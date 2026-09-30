@@ -1,5 +1,6 @@
 export const MAX_OBJECTS = 30
 export const OBJECT_SIZE = 96
+export const getObjectSize = (canvasWidth) => canvasWidth >= 900 ? 120 : OBJECT_SIZE
 export const DRAG_THRESHOLD = 4
 
 export const initialInteraction = () => ({ mode: 'idle', selectedId: null })
@@ -19,7 +20,7 @@ export function transitionInteraction(state, event) {
   }
 }
 
-export function clampPoint(point, bounds, size = OBJECT_SIZE) {
+export function clampPoint(point, bounds, size = getObjectSize(bounds.width)) {
   const half = size / 2
   return {
     x: Math.max(half, Math.min(bounds.width - half, point.x)),
@@ -28,8 +29,11 @@ export function clampPoint(point, bounds, size = OBJECT_SIZE) {
 }
 
 export function moveObject(objects, id, point, bounds) {
-  const safePoint = clampPoint(point, bounds)
-  return objects.map((object) => object.id === id ? { ...object, ...safePoint } : object)
+  const object = objects.find((item) => item.id === id)
+  if (!object) return objects
+  const size = object.size ?? getObjectSize(bounds.width)
+  const safePoint = clampPoint(point, bounds, size)
+  return objects.map((item) => item.id === id ? { ...item, size, ...safePoint } : item)
 }
 
 export function deleteObject(objects, id) {
@@ -38,8 +42,9 @@ export function deleteObject(objects, id) {
 
 export function addObject(objects, entry, point, bounds, id = `${entry.id}-${Date.now()}`) {
   if (objects.length >= MAX_OBJECTS) return { objects, added: false }
+  const size = getObjectSize(bounds.width)
   return {
-    objects: [...objects, { id, entry, ...clampPoint(point, bounds) }],
+    objects: [...objects, { id, entry, size, ...clampPoint(point, bounds, size) }],
     added: true,
   }
 }

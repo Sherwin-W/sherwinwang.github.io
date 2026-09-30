@@ -1,19 +1,30 @@
 ﻿import { useCallback, useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { catalog, resolveWord } from './catalog.js'
 import {
-  addObject, clampPoint, deleteObject, initialInteraction, moveObject,
-  OBJECT_SIZE, transitionInteraction, trashContainsPoint,
+  addObject, clampPoint, deleteObject, getObjectSize, initialInteraction, moveObject,
+  transitionInteraction, trashContainsPoint,
 } from './interaction.js'
 import './PlayCanvas.css'
 
 const LIMIT = 24
 const makeId = () => `object-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`
+const STARTER_DELETE_KEY = 'playable-portfolio-starter-cat-deleted'
+
+function initialObjects() {
+  const bounds = { width: window.innerWidth, height: window.innerHeight }
+  if (window.sessionStorage.getItem(STARTER_DELETE_KEY) === 'true') return []
+  const size = getObjectSize(bounds.width)
+  const point = { x: bounds.width * 0.68, y: bounds.height * 0.58 }
+  return [{ id: 'starter-cat', entry: catalog.find((entry) => entry.id === 'cat'), size, starter: true, ...clampPoint(point, bounds, size) }]
+}
 
 export default function PlayCanvas() {
   const canvasRef = useRef(null)
   const dragRef = useRef(null)
   const drawingRef = useRef(null)
-  const [objects, setObjects] = useState([])
+  const [objects, setObjects] = useState(initialObjects)
+  const [dockHost, setDockHost] = useState(null)
   const [interaction, setInteraction] = useState(initialInteraction)
   const [mode, setMode] = useState('type')
   const [editor, setEditor] = useState(null)
@@ -32,10 +43,17 @@ export default function PlayCanvas() {
   }, [])
 
   useEffect(() => {
+    setDockHost(document.getElementById('play-dock-controls'))
+  }, [])
+
+  useEffect(() => {
     const onResize = () => {
       const size = bounds()
-      setObjects((current) => current.map((object) => ({ ...object, ...clampPoint(object, size) })))
-      setEditor((current) => current ? { ...current, ...clampPoint(current, size, 220) } : current)
+      setObjects((current) => current.map((object) => {
+        const objectSize = getObjectSize(size.width)
+        return { ...object, size: objectSize, ...clampPoint(object, size, objectSize) }
+      }))
+      setEditor((current) => current ? { ...current, ...clampPoint(current.drawingPoint || current, size, 220) } : current)
     }
     window.addEventListener('resize', onResize)
     return () => window.removeEventListener('resize', onResize)
@@ -75,6 +93,7 @@ export default function PlayCanvas() {
     setDeletingId(id)
     window.setTimeout(() => {
       setObjects((current) => deleteObject(current, id))
+      if (object.starter) window.sessionStorage.setItem(STARTER_DELETE_KEY, 'true')
       setDeletingId(null)
       setInteraction((current) => transitionInteraction(current, { type: 'DELETE' }))
       setNotice(`${object.entry.label} sent to trash.`)
@@ -84,7 +103,10 @@ export default function PlayCanvas() {
   const submitWord = (value = word) => {
     const result = resolveWord(value)
     if (result.status === 'match') {
-      if (spawn(result.entry, editor || { x: bounds().width / 2, y: bounds().height / 2 })) closeEditor()
+      if (spawn(result.entry, editor?.drawingPoint || editor || { x: bounds().width / 2, y: bounds().height / 2 })) {
+        if (editor?.drawingPoint) setStrokes([])
+        closeEditor()
+      }
       return
     }
     setResolution(result)
@@ -125,7 +147,7 @@ export default function PlayCanvas() {
     if (Math.hypot(point.x - drag.start.x, point.y - drag.start.y) > 2) drag.moved = true
     if (!drag.moved) return
     const safe = clampPoint(point, bounds())
-    const trash = canvasRef.current.querySelector('.canvas-trash')
+    const trash = document.querySelector('.canvas-trash')
     const trashRect = trash?.getBoundingClientRect()
     const overTrash = trashContainsPoint({ x: event.clientX, y: event.clientY }, trashRect)
     trash?.classList.toggle('canvas-trash--active', overTrash)
@@ -141,7 +163,7 @@ export default function PlayCanvas() {
     if (!drag || drag.pointerId !== event.pointerId) return
     dragRef.current = null
     setTrashActive(false)
-    canvasRef.current?.querySelector('.canvas-trash')?.classList.remove('canvas-trash--active')
+    document.querySelector('.canvas-trash')?.classList.remove('canvas-trash--active')
     if (cancelled) {
       event.currentTarget.style.setProperty('--x', `${drag.origin.x}px`)
       event.currentTarget.style.setProperty('--y', `${drag.origin.y}px`)
@@ -149,7 +171,7 @@ export default function PlayCanvas() {
       return
     }
     if (drag.moved && drag.latest) {
-      const trash = canvasRef.current.querySelector('.canvas-trash')
+      const trash = document.querySelector('.canvas-trash')
       if (drag.latest.overTrash || trashContainsPoint({ x: drag.latest.clientX, y: drag.latest.clientY }, trash?.getBoundingClientRect())) {
         animateDelete(drag.id)
       } else {
@@ -184,18 +206,32 @@ export default function PlayCanvas() {
   }
 
   const beginCreate = () => {
-    if (!strokes.length) { setNotice('Draw something first, then choose Create.'); return }
-    setEditor({ ...clampPoint({ x: bounds().width / 2, y: bounds().height / 2 }, bounds(), 220), drawingChoice: true })
+    if (!strokes.length) { setNotice('Draw something first, then choose object.'); return }
+    const points = strokes.flatMap((stroke) => stroke.points)
+    const drawingPoint = {
+      x: (Math.min(...points.map((point) => point.x)) + Math.max(...points.map((point) => point.x))) / 2,
+      y: (Math.min(...points.map((point) => point.y)) + Math.max(...points.map((point) => point.y))) / 2,
+    }
+    setEditor({ ...clampPoint({ x: bounds().width / 2, y: bounds().height / 2 }, bounds(), 220), drawingPoint, drawingChoice: true })
     setWord('')
-    setResolution({ status: 'unknown', suggestions: catalog.slice(0, 3) })
-    setNotice('Choose what you drew from the catalog, or type instead.')
-    setInteraction((current) => transitionInteraction(current, { type: 'TYPE' }))
+    setResolution(null)
+    setNotice('')
+  }
+
+  const typeInstead = () => {
+    setEditor((current) => ({ ...current, drawingChoice: false }))
+    setMode('type')
+    setWord('')
+    setResolution(null)
+    setNotice('')
   }
 
   const selectDrawn = (entry) => {
-    const at = { x: bounds().width / 2, y: bounds().height / 2 }
+    const at = editor?.drawingPoint || { x: bounds().width / 2, y: bounds().height / 2 }
     if (spawn(entry, at)) {
       setStrokes([])
+      setMode('type')
+      setInteraction((current) => transitionInteraction(current, { type: 'CANCEL' }))
       closeEditor()
     }
   }
@@ -226,20 +262,20 @@ export default function PlayCanvas() {
   }, [editor, mode])
 
   return (
-    <section className={`play-canvas play-canvas--${mode}`} ref={canvasRef} onClick={onCanvasClick} aria-label="Play canvas">
+    <section className={`play-canvas play-canvas--${mode}${hasSpawned ? ' play-canvas--spawned' : ''}`} ref={canvasRef} onClick={onCanvasClick} aria-label="Play canvas">
       <div className="play-object-layer" aria-label="Canvas objects">
         {objects.map((object) => (
           <button
             className={`play-object${interaction.selectedId === object.id ? ' play-object--selected' : ''}${interaction.mode === 'dragging' && interaction.selectedId === object.id ? ' play-object--dragging' : ''}${deletingId === object.id ? ' play-object--deleting' : ''}`}
             key={object.id} type="button" aria-label={`${object.entry.label}, use arrow keys to move or Delete to remove`}
-            style={{ '--x': `${object.x}px`, '--y': `${object.y}px` }}
+            style={{ '--x': `${object.x}px`, '--y': `${object.y}px`, '--object-size': `${object.size}px` }}
             onPointerDown={(event) => startDrag(event, object)}
             onPointerMove={moveDrag}
             onPointerUp={(event) => endDrag(event)}
             onPointerCancel={(event) => endDrag(event, true)}
             onKeyDown={(event) => keyDown(event, object.id)}
           >
-            <span className="play-object-sprite"><img src={`/objects/${object.entry.id}.svg`} width={OBJECT_SIZE} height={OBJECT_SIZE} alt="" draggable="false" /></span>
+            <span className="play-object-sprite"><img src={`/objects/${object.entry.id}.svg`} width={object.size} height={object.size} alt="" draggable="false" /></span>
           </button>
         ))}
       </div>
@@ -248,7 +284,19 @@ export default function PlayCanvas() {
         {strokes.map((stroke) => <polyline className="draw-stroke" key={stroke.id} points={stroke.points.map((point) => `${point.x},${point.y}`).join(' ')} fill="none" strokeWidth={stroke.width} />)}
       </svg>
 
-      {editor && <form className="word-editor" style={{ '--x': `${editor.x}px`, '--y': `${editor.y}px` }} onSubmit={(event) => { event.preventDefault(); submitWord() }} onClick={(event) => event.stopPropagation()}>
+      {editor?.drawingChoice && <fieldset className="drawing-picker" onClick={(event) => event.stopPropagation()}>
+        <legend>What did you draw?</legend>
+        <p>Choose an object to replace your drawing.</p>
+        <div className="drawing-picker__objects">
+          {catalog.map((entry, index) => <button autoFocus={index === 0} type="button" key={entry.id} onClick={() => selectDrawn(entry)}>{entry.label}</button>)}
+        </div>
+        <div className="drawing-picker__actions">
+          <button type="button" onClick={typeInstead}>Type instead</button>
+          <button type="button" onClick={closeEditor}>Cancel</button>
+        </div>
+      </fieldset>}
+
+      {editor && !editor.drawingChoice && <form className="word-editor" style={{ '--x': `${editor.x}px`, '--y': `${editor.y}px` }} onSubmit={(event) => { event.preventDefault(); submitWord() }} onClick={(event) => event.stopPropagation()}>
         <label className="visually-hidden" htmlFor="play-word">Name an object</label>
         <div className="word-editor__row">
           <input autoFocus id="play-word" className="word-editor__input" value={word} maxLength={LIMIT} placeholder="e.g. cat" onChange={(event) => { setWord(event.target.value); setResolution(null); setNotice('') }} onKeyDown={(event) => { if (event.key === 'Escape') closeEditor() }} />
@@ -258,27 +306,26 @@ export default function PlayCanvas() {
         {notice && <p className="word-editor__message" role="status">{notice}</p>}
         {resolution && resolution.status !== 'match' && <div className="word-editor__suggestions" role="group" aria-label="Object suggestions">
           <p className="word-editor__message">{resolution.status === 'unknown' ? 'No matching object yet. Try one of these:' : 'Choose a match:'}</p>
-          {resolution.suggestions.slice(0, 3).map((entry) => <button type="button" key={entry.id} onClick={() => editor.drawingChoice ? selectDrawn(entry) : chooseSuggestion(entry)}>{entry.label}</button>)}
+          {resolution.suggestions.slice(0, 3).map((entry) => <button type="button" key={entry.id} onClick={() => chooseSuggestion(entry)}>{entry.label}</button>)}
         </div>}
       </form>}
 
-      {mode === 'draw' && <div className="draw-toolbar" onClick={(event) => event.stopPropagation()}>
+      {mode === 'draw' && !editor?.drawingChoice && <div className="draw-toolbar" onClick={(event) => event.stopPropagation()}>
         <button type="button" onClick={() => setStrokes((items) => items.slice(0, -1))}>Undo</button>
         <button type="button" onClick={() => setStrokes([])}>Clear</button>
-        <button type="button" aria-pressed={brush === 4} onClick={() => setBrush(4)}>Small brush</button>
-        <button type="button" aria-pressed={brush === 7} onClick={() => setBrush(7)}>Large brush</button>
-        <button type="button" onClick={beginCreate}>Create</button>
-        <button type="button" onClick={() => { closeEditor(); setStrokes([]); setMode('type') }}>Type instead</button>
+        <button type="button" aria-label={`Brush size ${brush} pixels; activate to change size`} onClick={() => setBrush((current) => current === 4 ? 7 : 4)}>Brush {brush}px</button>
+        <button type="button" onClick={beginCreate}>Choose object</button>
       </div>}
 
-      <div className="canvas-mode-controls" role="group" aria-label="Canvas mode">
-        <button className="canvas-mode-button" type="button" aria-pressed={mode === 'type'} onClick={() => { closeEditor(); setMode('type'); setInteraction((current) => transitionInteraction(current, { type: 'CANCEL' })) }}>Type</button>
-        <button className="canvas-mode-button" type="button" aria-pressed={mode === 'draw'} onClick={() => { closeEditor(); setMode('draw'); setInteraction((current) => transitionInteraction(current, { type: 'DRAW' })) }}>Draw</button>
-      </div>
-
-      <button className={`canvas-trash${trashActive ? ' canvas-trash--active' : ''}`} type="button" aria-label="Trash. Select an object and press Delete, or drag it here." onClick={() => {
-        if (interaction.selectedId) animateDelete(interaction.selectedId)
-      }}><span aria-hidden="true"></span></button>
+      {dockHost && createPortal(<>
+        <div className="canvas-mode-controls" role="group" aria-label="Canvas mode">
+          <button className="canvas-mode-button" type="button" aria-pressed={mode === 'type'} onClick={() => { closeEditor(); setMode('type'); setInteraction((current) => transitionInteraction(current, { type: 'CANCEL' })) }}>Type</button>
+          <button className="canvas-mode-button" type="button" aria-pressed={mode === 'draw'} onClick={() => { closeEditor(); setMode('draw'); setInteraction((current) => transitionInteraction(current, { type: 'DRAW' })) }}>Draw</button>
+        </div>
+        <button className={`canvas-trash${trashActive ? ' canvas-trash--active' : ''}`} type="button" aria-label="Trash. Select an object and press Delete, or drag it here." onClick={() => {
+          if (interaction.selectedId) animateDelete(interaction.selectedId)
+        }}><span aria-hidden="true"></span></button>
+      </>, dockHost)}
       <span className="play-live-region" aria-live="polite">{notice || (hasSpawned ? '' : 'Click anywhere to name something.')}</span>
     </section>
   )
