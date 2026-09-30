@@ -1,0 +1,417 @@
+{
+  "seed": 20260930,
+  "pythonVersion": "3.13.5",
+  "numpyVersion": "2.2.6",
+  "scikitLearnVersion": "1.8.0",
+  "splitPolicy": {
+    "rowWindowsPerSourceCategory": 10,
+    "rowsPerWindow": 300,
+    "supportedCategoryWindows": {
+      "train": 6,
+      "validation": 2,
+      "test": 2
+    },
+    "unsupportedCategoryWindows": {
+      "train": 4,
+      "validation": 3,
+      "test": 3
+    },
+    "randomizedStrata": "one deterministic random window from each of ten equal row-index strata; split strata are shuffled per class and disjoint"
+  },
+  "trainRows": 31200,
+  "validationRows": 14400,
+  "testRows": 14400,
+  "trainingSeconds": 3.77,
+  "hiddenLayerSizes": [
+    96
+  ],
+  "labelOrder": [
+    "cat",
+    "dog",
+    "rabbit",
+    "bird",
+    "fish",
+    "butterfly",
+    "tree",
+    "flower",
+    "mushroom",
+    "cactus",
+    "sun",
+    "moon",
+    "other"
+  ],
+  "top1Accuracy": 0.7630555555555556,
+  "top3Accuracy": 0.91625,
+  "unsupportedScoreThreshold": 0.28,
+  "heldOutAcceptedSupportedCoverage": 0.8643055555555555,
+  "heldOutUnsupportedRejection": 0.8786111111111111,
+  "validationThresholdTargetCoverage": 0.8634722222222222,
+  "validationThresholdOtherRejection": 0.8756944444444444,
+  "perLabel": [
+    {
+      "label": "cat",
+      "samples": 600,
+      "top1Accuracy": 0.55,
+      "top3Accuracy": 0.82
+    },
+    {
+      "label": "dog",
+      "samples": 600,
+      "top1Accuracy": 0.49333333333333335,
+      "top3Accuracy": 0.8533333333333334
+    },
+    {
+      "label": "rabbit",
+      "samples": 600,
+      "top1Accuracy": 0.6283333333333333,
+      "top3Accuracy": 0.8633333333333333
+    },
+    {
+      "label": "bird",
+      "samples": 600,
+      "top1Accuracy": 0.52,
+      "top3Accuracy": 0.7883333333333333
+    },
+    {
+      "label": "fish",
+      "samples": 600,
+      "top1Accuracy": 0.6916666666666667,
+      "top3Accuracy": 0.8816666666666667
+    },
+    {
+      "label": "butterfly",
+      "samples": 600,
+      "top1Accuracy": 0.7383333333333333,
+      "top3Accuracy": 0.8866666666666667
+    },
+    {
+      "label": "tree",
+      "samples": 600,
+      "top1Accuracy": 0.7366666666666667,
+      "top3Accuracy": 0.9183333333333333
+    },
+    {
+      "label": "flower",
+      "samples": 600,
+      "top1Accuracy": 0.735,
+      "top3Accuracy": 0.875
+    },
+    {
+      "label": "mushroom",
+      "samples": 600,
+      "top1Accuracy": 0.765,
+      "top3Accuracy": 0.93
+    },
+    {
+      "label": "cactus",
+      "samples": 600,
+      "top1Accuracy": 0.6166666666666667,
+      "top3Accuracy": 0.8583333333333333
+    },
+    {
+      "label": "sun",
+      "samples": 600,
+      "top1Accuracy": 0.7316666666666667,
+      "top3Accuracy": 0.915
+    },
+    {
+      "label": "moon",
+      "samples": 600,
+      "top1Accuracy": 0.655,
+      "top3Accuracy": 0.8316666666666667
+    },
+    {
+      "label": "other",
+      "samples": 7200,
+      "top1Accuracy": 0.8709722222222223,
+      "top3Accuracy": 0.9640277777777778
+    }
+  ],
+  "unsupportedHeldOut": [
+    {
+      "sourceCategory": "airplane",
+      "samples": 900,
+      "rejectedAsOther": 0.7655555555555555,
+      "mostCommonFalseSupportedGuess": "bird"
+    },
+    {
+      "sourceCategory": "car",
+      "samples": 900,
+      "rejectedAsOther": 0.9022222222222223,
+      "mostCommonFalseSupportedGuess": "dog"
+    },
+    {
+      "sourceCategory": "house",
+      "samples": 900,
+      "rejectedAsOther": 0.8966666666666666,
+      "mostCommonFalseSupportedGuess": "cactus"
+    },
+    {
+      "sourceCategory": "clock",
+      "samples": 900,
+      "rejectedAsOther": 0.9288888888888889,
+      "mostCommonFalseSupportedGuess": "moon"
+    },
+    {
+      "sourceCategory": "cloud",
+      "samples": 900,
+      "rejectedAsOther": 0.8811111111111111,
+      "mostCommonFalseSupportedGuess": "fish"
+    },
+    {
+      "sourceCategory": "star",
+      "samples": 900,
+      "rejectedAsOther": 0.7366666666666667,
+      "mostCommonFalseSupportedGuess": "sun"
+    },
+    {
+      "sourceCategory": "mountain",
+      "samples": 900,
+      "rejectedAsOther": 0.9166666666666666,
+      "mostCommonFalseSupportedGuess": "bird"
+    },
+    {
+      "sourceCategory": "apple",
+      "samples": 900,
+      "rejectedAsOther": 0.94,
+      "mostCommonFalseSupportedGuess": "rabbit"
+    }
+  ],
+  "confusionMatrix": [
+    [
+      330,
+      77,
+      50,
+      22,
+      14,
+      10,
+      5,
+      5,
+      2,
+      2,
+      21,
+      2,
+      60
+    ],
+    [
+      47,
+      296,
+      39,
+      47,
+      15,
+      13,
+      6,
+      7,
+      15,
+      5,
+      6,
+      5,
+      99
+    ],
+    [
+      37,
+      45,
+      377,
+      26,
+      2,
+      18,
+      3,
+      17,
+      0,
+      13,
+      5,
+      4,
+      53
+    ],
+    [
+      16,
+      57,
+      19,
+      312,
+      4,
+      6,
+      20,
+      11,
+      12,
+      14,
+      19,
+      6,
+      104
+    ],
+    [
+      7,
+      24,
+      5,
+      12,
+      415,
+      5,
+      0,
+      1,
+      0,
+      2,
+      4,
+      1,
+      124
+    ],
+    [
+      10,
+      17,
+      10,
+      8,
+      8,
+      443,
+      4,
+      6,
+      1,
+      14,
+      5,
+      1,
+      73
+    ],
+    [
+      4,
+      7,
+      5,
+      4,
+      1,
+      2,
+      442,
+      54,
+      39,
+      16,
+      6,
+      2,
+      18
+    ],
+    [
+      6,
+      13,
+      12,
+      12,
+      0,
+      25,
+      32,
+      441,
+      4,
+      19,
+      10,
+      1,
+      25
+    ],
+    [
+      2,
+      10,
+      1,
+      12,
+      2,
+      0,
+      73,
+      14,
+      459,
+      5,
+      2,
+      2,
+      18
+    ],
+    [
+      7,
+      12,
+      25,
+      12,
+      4,
+      10,
+      20,
+      33,
+      9,
+      370,
+      7,
+      3,
+      88
+    ],
+    [
+      13,
+      5,
+      2,
+      10,
+      2,
+      16,
+      4,
+      5,
+      0,
+      5,
+      439,
+      5,
+      94
+    ],
+    [
+      5,
+      25,
+      12,
+      8,
+      18,
+      7,
+      6,
+      6,
+      6,
+      7,
+      9,
+      393,
+      98
+    ],
+    [
+      87,
+      160,
+      65,
+      152,
+      94,
+      53,
+      23,
+      27,
+      30,
+      79,
+      100,
+      59,
+      6271
+    ]
+  ],
+  "confidenceCalibration": "Uncalibrated softmax scores; not probabilities of correctness.",
+  "modelBytes": 306484,
+  "modelSha256": "a4c7733478beb26046fd836ae32affa231b9f406024eb4066f5781fcf24b288e",
+  "inputShape": [
+    28,
+    28
+  ],
+  "inputConvention": "float32 grayscale, black=0, white ink=1; row-major",
+  "layerSizes": [
+    784,
+    96,
+    13
+  ],
+  "weightPacking": "For each dense layer: row-major input\u00d7output float32 weights, then float32 biases; ReLU hidden, softmax output.",
+  "sourceCategories": {
+    "supported": [
+      "cat",
+      "dog",
+      "rabbit",
+      "bird",
+      "fish",
+      "butterfly",
+      "tree",
+      "flower",
+      "mushroom",
+      "cactus",
+      "sun",
+      "moon"
+    ],
+    "unsupportedOtherTrainingExamples": [
+      "airplane",
+      "car",
+      "house",
+      "clock",
+      "cloud",
+      "star",
+      "mountain",
+      "apple"
+    ]
+  }
+}

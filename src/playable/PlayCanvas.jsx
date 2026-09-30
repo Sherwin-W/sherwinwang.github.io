@@ -1,6 +1,7 @@
 ﻿import { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { catalog, resolveWord } from './catalog.js'
+import { rasterizeStrokes } from './recognitionMath.js'
 import {
   addObject, clampPoint, deleteObject, getObjectSize, initialInteraction, moveObject,
   transitionInteraction, trashContainsPoint,
@@ -9,6 +10,7 @@ import './PlayCanvas.css'
 
 const LIMIT = 24
 const makeId = () => `object-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`
+const formatModelScore = (score) => score < 0.01 ? '<1%' : `${Math.round(score * 100)}%`
 const STARTER_DELETE_KEY = 'playable-portfolio-starter-cat-deleted'
 
 function initialObjects() {
@@ -23,6 +25,8 @@ export default function PlayCanvas() {
   const canvasRef = useRef(null)
   const dragRef = useRef(null)
   const drawingRef = useRef(null)
+  const recognitionWorkerRef = useRef(null)
+  const recognitionRequestRef = useRef(0)
   const [objects, setObjects] = useState(initialObjects)
   const [dockHost, setDockHost] = useState(null)
   const [interaction, setInteraction] = useState(initialInteraction)
@@ -31,6 +35,8 @@ export default function PlayCanvas() {
   const [word, setWord] = useState('')
   const [resolution, setResolution] = useState(null)
   const [strokes, setStrokes] = useState([])
+  const [drawingPoint, setDrawingPoint] = useState(null)
+  const [recognition, setRecognition] = useState({ status: 'idle' })
   const [brush, setBrush] = useState(4)
   const [trashActive, setTrashActive] = useState(false)
   const [notice, setNotice] = useState('')
@@ -41,6 +47,17 @@ export default function PlayCanvas() {
     const rect = canvasRef.current?.getBoundingClientRect()
     return { width: rect?.width || window.innerWidth, height: rect?.height || window.innerHeight }
   }, [])
+
+  const invalidateRecognition = () => {
+    recognitionRequestRef.current += 1
+    setRecognition({ status: 'idle' })
+  }
+
+  const clearDrawing = () => {
+    invalidateRecognition()
+    setStrokes([])
+    setDrawingPoint(null)
+  }
 
   useEffect(() => {
     setDockHost(document.getElementById('play-dock-controls'))
@@ -59,7 +76,14 @@ export default function PlayCanvas() {
     return () => window.removeEventListener('resize', onResize)
   }, [bounds])
 
+  useEffect(() => () => {
+    recognitionRequestRef.current += 1
+    recognitionWorkerRef.current?.terminate()
+    recognitionWorkerRef.current = null
+  }, [])
+
   const closeEditor = () => {
+    clearDrawing()
     setEditor(null)
     setWord('')
     setResolution(null)
@@ -104,7 +128,6 @@ export default function PlayCanvas() {
     const result = resolveWord(value)
     if (result.status === 'match') {
       if (spawn(result.entry, editor?.drawingPoint || editor || { x: bounds().width / 2, y: bounds().height / 2 })) {
-        if (editor?.drawingPoint) setStrokes([])
         closeEditor()
       }
       return
@@ -185,6 +208,8 @@ export default function PlayCanvas() {
 
   const drawStart = (event) => {
     if (mode !== 'draw' || editor) return
+    invalidateRecognition()
+    setDrawingPoint(null)
     event.preventDefault()
     event.currentTarget.setPointerCapture(event.pointerId)
     const point = canvasPoint(event)
@@ -205,20 +230,77 @@ export default function PlayCanvas() {
     if (drawingRef.current?.pointerId === event.pointerId) drawingRef.current = null
   }
 
-  const beginCreate = () => {
-    if (!strokes.length) { setNotice('Draw something first, then choose object.'); return }
-    const points = strokes.flatMap((stroke) => stroke.points)
-    const drawingPoint = {
+  const getDrawingCenter = (drawingStrokes = strokes) => {
+    if (!drawingStrokes.length) return null
+    const points = drawingStrokes.flatMap((stroke) => stroke.points)
+    return {
       x: (Math.min(...points.map((point) => point.x)) + Math.max(...points.map((point) => point.x))) / 2,
       y: (Math.min(...points.map((point) => point.y)) + Math.max(...points.map((point) => point.y))) / 2,
     }
-    setEditor({ ...clampPoint({ x: bounds().width / 2, y: bounds().height / 2 }, bounds(), 220), drawingPoint, drawingChoice: true })
+  }
+
+  const chooseManually = () => {
+    if (!strokes.length) { setNotice('Draw something first, then choose an object.'); return }
+    invalidateRecognition()
+    const point = drawingPoint || getDrawingCenter()
+    setDrawingPoint(point)
+    setEditor({ ...clampPoint({ x: bounds().width / 2, y: bounds().height / 2 }, bounds(), 220), drawingPoint: point, drawingChoice: true })
     setWord('')
     setResolution(null)
     setNotice('')
   }
 
+  const recognizeDrawing = () => {
+    if (!strokes.length) {
+      invalidateRecognition()
+      setRecognition({ status: 'blank' })
+      return
+    }
+    const point = getDrawingCenter()
+    setDrawingPoint(point)
+    setNotice('')
+    setEditor(null)
+    const pixels = rasterizeStrokes(strokes)
+    if (pixels.every((value) => value === 0)) {
+      invalidateRecognition()
+      setRecognition({ status: 'blank' })
+      return
+    }
+    let worker = recognitionWorkerRef.current
+    try {
+      if (!worker) {
+        worker = new Worker(new URL('./recognizer.worker.js', import.meta.url), { type: 'module' })
+        recognitionWorkerRef.current = worker
+      }
+    } catch (error) {
+      setRecognition({ status: 'error', message: error instanceof Error ? error.message : 'Recognition could not start.' })
+      return
+    }
+    const requestId = ++recognitionRequestRef.current
+    const startedAt = performance.now()
+    setRecognition({ status: 'loading', requestId })
+    worker.onmessage = (event) => {
+      const message = event.data
+      if (message.id !== recognitionRequestRef.current || message.id !== requestId) return
+      if (message.type === 'status') {
+        setRecognition({ status: 'loading', requestId })
+      } else if (message.type === 'error') {
+        setRecognition({ status: 'error', message: message.message || 'Recognition failed.', requestId })
+      } else if (message.type === 'result') {
+        setRecognition({ ...message, status: message.blank ? 'blank' : message.isUnsupported ? 'unsupported' : 'result', requestId, elapsedMs: performance.now() - startedAt })
+      }
+    }
+    worker.onerror = (event) => {
+      if (requestId !== recognitionRequestRef.current) return
+      worker.terminate()
+      if (recognitionWorkerRef.current === worker) recognitionWorkerRef.current = null
+      setRecognition({ status: 'error', message: event.message || 'Recognition worker failed.', requestId })
+    }
+    worker.postMessage({ type: 'recognize', id: requestId, pixels }, [pixels.buffer])
+  }
+
   const typeInstead = () => {
+    invalidateRecognition()
     setEditor((current) => ({ ...current, drawingChoice: false }))
     setMode('type')
     setWord('')
@@ -227,12 +309,22 @@ export default function PlayCanvas() {
   }
 
   const selectDrawn = (entry) => {
-    const at = editor?.drawingPoint || { x: bounds().width / 2, y: bounds().height / 2 }
+    const at = editor?.drawingPoint || drawingPoint || { x: bounds().width / 2, y: bounds().height / 2 }
     if (spawn(entry, at)) {
-      setStrokes([])
+      clearDrawing()
       setMode('type')
       setInteraction((current) => transitionInteraction(current, { type: 'CANCEL' }))
       closeEditor()
+    }
+  }
+
+  const selectRecognitionSuggestion = (label) => {
+    const entry = catalog.find((item) => item.id === label)
+    const at = drawingPoint || getDrawingCenter()
+    if (entry && at && spawn(entry, at)) {
+      clearDrawing()
+      setMode('type')
+      setInteraction((current) => transitionInteraction(current, { type: 'CANCEL' }))
     }
   }
 
@@ -253,8 +345,15 @@ export default function PlayCanvas() {
   useEffect(() => {
     const onKey = (event) => {
       if (event.key === 'Escape' && (editor || mode === 'draw')) {
-        closeEditor()
+        recognitionRequestRef.current += 1
+        setRecognition({ status: 'idle' })
         setStrokes([])
+        setDrawingPoint(null)
+        setEditor(null)
+        setWord('')
+        setResolution(null)
+        setNotice('')
+        setInteraction((current) => transitionInteraction(current, { type: 'CANCEL' }))
       }
     }
     window.addEventListener('keydown', onKey)
@@ -286,7 +385,7 @@ export default function PlayCanvas() {
 
       {editor?.drawingChoice && <fieldset className="drawing-picker" onClick={(event) => event.stopPropagation()}>
         <legend>What did you draw?</legend>
-        <p>Choose an object to replace your drawing.</p>
+        <p>Choose an object to replace your drawing. Automatic recognition is a separate experimental option.</p>
         <div className="drawing-picker__objects">
           {catalog.map((entry, index) => <button autoFocus={index === 0} type="button" key={entry.id} onClick={() => selectDrawn(entry)}>{entry.label}</button>)}
         </div>
@@ -294,6 +393,38 @@ export default function PlayCanvas() {
           <button type="button" onClick={typeInstead}>Type instead</button>
           <button type="button" onClick={closeEditor}>Cancel</button>
         </div>
+      </fieldset>}
+
+      {recognition.status !== 'idle' && !editor?.drawingChoice && <fieldset
+        className="recognition-panel"
+        data-model-bytes={recognition.modelBytes}
+        data-inference-ms={recognition.inferenceMs}
+        data-cold-start-ms={recognition.elapsedMs}
+        aria-live="polite"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <legend>Drawing recognition</legend>
+        {recognition.status === 'loading' && <p role="status">Loading the local recognizer and analyzing your drawing…</p>}
+        {recognition.status === 'blank' && <p role="status">There are no visible strokes to recognize. Draw something or choose an object manually.</p>}
+        {recognition.status === 'error' && <p role="alert">Automatic recognition is unavailable: {recognition.message} Your drawing stays on this device. You can retry or choose manually.</p>}
+        {recognition.status === 'unsupported' && <p role="status">This drawing may be outside the supported set. Closest supported suggestions:</p>}
+        {recognition.status === 'result' && <p role="status">Best guess: {recognition.ranked?.find((item) => item.label !== 'other')?.label}. Choose a suggestion to add it.</p>}
+        {(recognition.status === 'result' || recognition.status === 'unsupported') && <>
+          <div className="recognition-suggestions" role="group" aria-label="Ranked drawing suggestions">
+            {recognition.ranked?.filter((item) => item.label !== 'other').slice(0, 3).map((item, index) => {
+              const entry = catalog.find((candidate) => candidate.id === item.label)
+              return entry && <button type="button" key={entry.id} onClick={() => selectRecognitionSuggestion(entry.id)}>
+                <span>{index + 1}. {entry.label}</span><small>{formatModelScore(item.score)} model score</small>
+              </button>
+            })}
+          </div>
+          <p className="recognition-disclaimer">Scores are uncalibrated model outputs, not probabilities of correctness.</p>
+        </>}
+        {recognition.status === 'blank' && <button type="button" onClick={chooseManually} disabled={!strokes.length}>Choose object</button>}
+        {recognition.status === 'error' && <button type="button" onClick={recognizeDrawing}>Retry recognition</button>}
+        {recognition.status !== 'blank' && <button type="button" onClick={chooseManually}>Choose object</button>}
+        <button type="button" onClick={() => { invalidateRecognition(); setDrawingPoint(null) }}>Cancel</button>
+        <button type="button" onClick={clearDrawing}>Clear and redraw</button>
       </fieldset>}
 
       {editor && !editor.drawingChoice && <form className="word-editor" style={{ '--x': `${editor.x}px`, '--y': `${editor.y}px` }} onSubmit={(event) => { event.preventDefault(); submitWord() }} onClick={(event) => event.stopPropagation()}>
@@ -310,11 +441,12 @@ export default function PlayCanvas() {
         </div>}
       </form>}
 
-      {mode === 'draw' && !editor?.drawingChoice && <div className="draw-toolbar" onClick={(event) => event.stopPropagation()}>
-        <button type="button" onClick={() => setStrokes((items) => items.slice(0, -1))}>Undo</button>
-        <button type="button" onClick={() => setStrokes([])}>Clear</button>
+      {mode === 'draw' && !editor?.drawingChoice && recognition.status === 'idle' && <div className="draw-toolbar" onClick={(event) => event.stopPropagation()}>
+        <button type="button" onClick={() => { invalidateRecognition(); setStrokes((items) => items.slice(0, -1)) }}>Undo</button>
+        <button type="button" onClick={clearDrawing}>Clear</button>
         <button type="button" aria-label={`Brush size ${brush} pixels; activate to change size`} onClick={() => setBrush((current) => current === 4 ? 7 : 4)}>Brush {brush}px</button>
-        <button type="button" onClick={beginCreate}>Choose object</button>
+        <button type="button" onClick={recognizeDrawing}>Recognize</button>
+        <button type="button" onClick={chooseManually}>Choose object</button>
       </div>}
 
       {dockHost && createPortal(<>

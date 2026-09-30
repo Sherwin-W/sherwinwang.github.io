@@ -35,6 +35,15 @@
 .drawing-picker__objects button,.drawing-picker__actions button { min-height:44px;padding:7px 8px;border:1.5px solid var(--line);border-radius:10px;background:var(--paper);color:var(--graphite);font:600 .88rem system-ui,sans-serif;cursor:pointer; }
 .drawing-picker__objects button:hover { background:#f0e6d2; }
 .drawing-picker__actions { display:flex;justify-content:flex-end;gap:8px;margin-top:10px;padding-top:8px;border-top:1px solid #d7cdbc; }
+.recognition-panel { position:absolute;left:50%;bottom:92px;transform:translateX(-50%);z-index:8;width:min(560px,calc(100vw - 32px));max-height:min(360px,calc(100svh - 240px));overflow:auto;padding:12px 14px 14px;border:1.5px solid var(--line);border-radius:16px;background:var(--paper-raised);box-shadow:0 8px 22px rgba(60,45,25,.22); }
+.recognition-panel legend { padding:0 6px;font:600 1rem system-ui,sans-serif;color:var(--graphite); }
+.recognition-panel > p { margin:4px 4px 10px;font:.88rem/1.4 system-ui,sans-serif;color:var(--graphite-soft); }
+.recognition-suggestions { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:8px 0; }
+.recognition-suggestions button { min-height:48px;padding:6px 8px;border:1.5px solid var(--line);border-radius:10px;background:var(--paper);color:var(--graphite);font:600 .9rem system-ui,sans-serif;cursor:pointer; }
+.recognition-suggestions small { display:block;margin-top:3px;font-size:.72rem;font-weight:400;color:var(--graphite-soft); }
+.recognition-disclaimer { font-size:.76rem!important; }
+.recognition-panel > button { min-height:44px;margin:4px;padding:7px 10px;border:1.5px solid var(--line);border-radius:10px;background:var(--paper);color:var(--graphite);font:600 .86rem system-ui,sans-serif;cursor:pointer; }
+.recognition-panel button:focus-visible { outline:3px solid var(--focus);outline-offset:2px; }
 .word-editor { position:absolute; z-index:8; left:var(--x); top:var(--y); width:min(280px,calc(100vw - 24px)); transform:translate(-50%,-50%); padding:8px; border:1.5px solid var(--line); border-radius:16px; background:var(--paper-raised); box-shadow:0 4px 16px #3c2d1922; }
 .word-editor__row { display:flex; align-items:center; gap:4px; }
 .word-editor__input { width:0; flex:1; height:40px; padding:0 10px; background:transparent; border:0; color:var(--graphite); font:600 .95rem system-ui,sans-serif; outline:none; }
@@ -50,7 +59,10 @@
  .draw-toolbar::-webkit-scrollbar { display:none; }
  .draw-toolbar button { padding:6px 9px;font-size:.82rem; }
  .drawing-picker { left:12px;right:12px;bottom:132px;transform:none;width:auto;max-height:44svh;padding:10px; }
+ .recognition-panel { left:12px;right:12px;bottom:132px;transform:none;width:auto;max-height:44svh;padding:10px; }
  .drawing-picker__objects { grid-template-columns:repeat(3,minmax(0,1fr));gap:5px; }
+ .recognition-suggestions { grid-template-columns:1fr;gap:4px; }
+ .recognition-suggestions button { min-height:42px;display:flex;align-items:center;justify-content:space-between;gap:8px;text-align:left; }
  .drawing-picker__objects button,.drawing-picker__actions button { font-size:.82rem;padding:6px 4px; }
  .word-editor { position:fixed;top:auto;bottom:calc(140px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%); }
 }
