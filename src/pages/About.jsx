@@ -1,49 +1,19 @@
 // src/pages/About.jsx
 import React from 'react';
-import { motion } from 'framer-motion';
 import NavigationButtons from '../components/NavigationButtons';
-import './About.css'; // Import the reverted About page CSS
-
-const pageVariants = {
-  initial: {
-    opacity: 0,
-    x: 300, // Start off-screen to the right
-  },
-  in: {
-    opacity: 1,
-    x: 0, // Centered
-  },
-  out: {
-    opacity: 0,
-    x: -300, // Move off-screen to the left
-  },
-};
-
-const pageTransition = {
-  type: 'tween',
-  ease: 'anticipate',
-  duration: 0.5,
-};
+import './About.css';
 
 const About = () => {
   return (
-    <motion.div
-      className="about-page"
-      initial="initial"
-      animate="in"
-      exit="out"
-      variants={pageVariants}
-      transition={pageTransition}
-    >
+    <div className="about-page">
       <div className="bento-container">
-        <div className="bento-item item1">
+        <div className="bento-item">
           <h2>Background</h2>
           <p>
             I'm Sherwin, a passionate computer science student with interests in cybersecurity and artificial intelligence.
-            I enjoy building projects that solve real-world problems and continuously strive to learn new technologies.
           </p>
         </div>
-        <div className="bento-item item2">
+        <div className="bento-item">
           <h2>Skills</h2>
           <ul>
             <li>Cybersecurity</li>
@@ -52,7 +22,7 @@ const About = () => {
             <li>Mobile App Development</li>
           </ul>
         </div>
-        <div className="bento-item item3">
+        <div className="bento-item">
           <h2>Projects</h2>
           <ul>
             <li>Privacy Preserving Visualization Tool</li>
@@ -60,7 +30,7 @@ const About = () => {
             <li>Flutter Event Planning App</li>
           </ul>
         </div>
-        <div className="bento-item item4">
+        <div className="bento-item">
           <h2>Contact</h2>
           <p>Email: sherwin@example.com</p>
           <p>LinkedIn: linkedin.com/in/sherwin</p>
@@ -70,7 +40,7 @@ const About = () => {
 
       {/* Navigation Buttons */}
       <NavigationButtons />
-    </motion.div>
+    </div>
   );
 };
 

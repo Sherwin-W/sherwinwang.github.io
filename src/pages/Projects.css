@@ -1,28 +1,56 @@
 /* src/pages/Projects.css */
 
 .projects-page {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100vh;
-  background-color: #121212; /* Adjust as needed */
-  overflow: hidden;
-}
-
-.title-container {
-  display: flex;
-  font-size: 4rem;
-  color: #ffffff;
-  margin-bottom: 50px;
-}
-
-.title-letter {
-  display: inline-block;
-}
-
-.osu-animation-container {
   width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.projects-page h1 {
+  font-size: 2.5rem;
+  color: #333333;
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.projects-container {
   display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
   justify-content: center;
+}
+
+.project-widget {
+  background-color: #ffffff;
+  border: 1px solid #cccccc;
+  border-radius: 10px;
+  padding: 20px;
+  width: calc(33.333% - 40px);
+  box-sizing: border-box;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.project-widget h2 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  color: #333333;
+}
+
+.project-widget p {
+  font-size: 1rem;
+  color: #555555;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+  .project-widget {
+    width: calc(50% - 40px);
+  }
+}
+
+@media (max-width: 768px) {
+  .project-widget {
+    width: 100%;
+  }
 }

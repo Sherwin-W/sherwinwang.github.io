@@ -1,45 +1,35 @@
 // src/pages/Projects.jsx
 import React from 'react';
-import { motion } from 'framer-motion';
 import NavigationButtons from '../components/NavigationButtons';
-import OsuAnimation from '../components/OsuAnimation';
 import './Projects.css';
 
+const projects = [
+  {
+    title: 'Privacy Preserving Visualization Tool',
+    description: 'A tool to visualize data while preserving privacy using differential privacy techniques.',
+  },
+  {
+    title: 'HTML Transformer',
+    description: 'A utility to transform and manipulate HTML documents efficiently.',
+  },
+  {
+    title: 'Flutter Event Planning App',
+    description: 'A mobile application built with Flutter to help users plan and organize events.',
+  },
+];
+
 const Projects = () => {
-  const title = "My Projects";
-
-  const letterAnimation = {
-    hidden: { opacity: 0, y: 50 },
-    visible: (i) => ({
-      opacity: 1,
-      y: 0,
-      transition: {
-        delay: i * 0.1,
-        duration: 0.6,
-      },
-    }),
-  };
-
   return (
     <div className="projects-page">
-      <div className="title-container">
-        {title.split("").map((char, index) => (
-          <motion.span
-            key={index}
-            custom={index}
-            variants={letterAnimation}
-            initial="hidden"
-            animate="visible"
-            className="title-letter"
-          >
-            {char === " " ? "\u00A0" : char}
-          </motion.span>
+      <h1>My Projects</h1>
+      <div className="projects-container">
+        {projects.map((project, index) => (
+          <div className="project-widget" key={index}>
+            <h2>{project.title}</h2>
+            <p>{project.description}</p>
+            {/* Add links to GitHub or demos if available */}
+          </div>
         ))}
-      </div>
-
-      {/* Osu!-style animation */}
-      <div className="osu-animation-container">
-        <OsuAnimation />
       </div>
 
       {/* Navigation Buttons */}

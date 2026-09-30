@@ -1,77 +1,56 @@
 // src/pages/Contact.jsx
-import React from 'react';
-import { motion } from 'framer-motion';
+import React, { useRef } from 'react';
+import emailjs from 'emailjs-com';
 import NavigationButtons from '../components/NavigationButtons';
-import { useNavigate } from 'react-router-dom';
+import './Contact.css';
 
 const Contact = () => {
-  const navigate = useNavigate();
+  const form = useRef();
 
-  const pageVariants = {
-    initial: {
-      opacity: 0,
-      x: 100,
-    },
-    in: {
-      opacity: 1,
-      x: 0,
-    },
-    out: {
-      opacity: 0,
-      x: -100,
-    },
-  };
+  const sendEmail = (e) => {
+    e.preventDefault();
 
-  const pageTransition = {
-    type: 'tween',
-    ease: 'anticipate',
-    duration: 0.5,
-  };
-
-  const handleDragEnd = (event, info) => {
-    if (info.offset.x > 100) {
-      // Swiped right, navigate to Projects
-      navigate('/projects');
-    }
-    // No need to handle swipe left on Contact page as it's the last page
+    emailjs.sendForm('YOUR_SERVICE_ID', 'YOUR_TEMPLATE_ID', form.current, 'YOUR_USER_ID')
+      .then((result) => {
+          console.log(result.text);
+          alert('Message sent successfully!');
+          form.current.reset();
+      }, (error) => {
+          console.log(error.text);
+          alert('An error occurred, please try again.');
+      });
   };
 
   return (
-    <motion.div
-      className="contact-page"
-      initial="initial"
-      animate="in"
-      exit="out"
-      variants={pageVariants}
-      transition={pageTransition}
-      drag="x"
-      dragConstraints={{ left: 0, right: 0 }}
-      dragElastic={0.2}
-      onDragEnd={handleDragEnd}
-    >
+    <div className="contact-page">
       <h1>Contact Me</h1>
-      <p>
-        Feel free to reach out to me through the following channels:
-      </p>
-      <ul>
-        <li>Email: sherwin@example.com</li>
-        <li>
-          LinkedIn:{' '}
-          <a href="https://linkedin.com/in/sherwin" target="_blank" rel="noopener noreferrer">
-            linkedin.com/in/sherwin
-          </a>
-        </li>
-        <li>
-          GitHub:{' '}
-          <a href="https://github.com/sherwin-w" target="_blank" rel="noopener noreferrer">
-            github.com/sherwin-w
-          </a>
-        </li>
-      </ul>
+
+      <div className="social-buttons">
+        <a href="https://linkedin.com/in/your-linkedin-profile" target="_blank" rel="noopener noreferrer" className="social-button linkedin">
+          LinkedIn
+        </a>
+        <a href="https://github.com/your-github-username" target="_blank" rel="noopener noreferrer" className="social-button github">
+          GitHub
+        </a>
+      </div>
+
+      <form ref={form} onSubmit={sendEmail} className="contact-form">
+        <div className="form-group">
+          <input type="text" name="firstName" placeholder="First Name" required />
+          <input type="text" name="lastName" placeholder="Last Name" required />
+        </div>
+        <div className="form-group">
+          <input type="text" name="contactInfo" placeholder="Email or Phone Number" required />
+        </div>
+        <div className="form-group">
+          <textarea name="message" placeholder="Your Message" required></textarea>
+        </div>
+        <button type="submit" className="send-button">Send</button>
+      </form>
 
       {/* Navigation Buttons */}
       <NavigationButtons />
-    </motion.div>
+    </div>
   );
 };
 
