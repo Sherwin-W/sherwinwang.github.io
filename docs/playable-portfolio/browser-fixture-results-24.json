@@ -5,7 +5,7 @@
   "summary": {
     "samples": 12,
     "uiFilteredTop1": 5,
-    "uiFilteredTop3": 7,
+    "uiFilteredTop3": 8,
     "autoCreated": 1
   },
   "controls": [
@@ -112,8 +112,8 @@
         "airplane"
       ],
       "automatic": false,
-      "workerRoundtripMs": 17.600000001490116,
-      "inferenceMs": 1.1000000014901161,
+      "workerRoundtripMs": 24.599999994039536,
+      "inferenceMs": 1.2999999970197678,
       "modelBytes": 311140,
       "label": "cow",
       "uiRankedLabels": [
@@ -142,7 +142,7 @@
         "sun",
         "airplane"
       ],
-      "pointerUpToVisibleMs": 1864.1
+      "pointerUpToVisibleMs": 1887.4
     },
     {
       "status": "This may be outside the supported set. Your drawing is preserved; choose a suggestion or another object.",
@@ -174,7 +174,7 @@
         "chair"
       ],
       "automatic": false,
-      "workerRoundtripMs": 1.3999999985098839,
+      "workerRoundtripMs": 2.2000000029802322,
       "inferenceMs": 0.29999999701976776,
       "modelBytes": 311140,
       "label": "duck",
@@ -204,7 +204,7 @@
         "sun",
         "chair"
       ],
-      "pointerUpToVisibleMs": 1851.6
+      "pointerUpToVisibleMs": 1880.2
     },
     {
       "status": "This may be outside the supported set. Your drawing is preserved; choose a suggestion or another object.",
@@ -236,8 +236,8 @@
         "airplane"
       ],
       "automatic": false,
-      "workerRoundtripMs": 2,
-      "inferenceMs": 0.7999999970197678,
+      "workerRoundtripMs": 2.3000000044703484,
+      "inferenceMs": 0.29999999701976776,
       "modelBytes": 311140,
       "label": "elephant",
       "uiRankedLabels": [
@@ -266,7 +266,7 @@
         "bicycle",
         "airplane"
       ],
-      "pointerUpToVisibleMs": 1862.1
+      "pointerUpToVisibleMs": 1876.4
     },
     {
       "status": "Not sure what you drew. Choose a suggestion or open the object picker.",
@@ -298,8 +298,8 @@
         "airplane"
       ],
       "automatic": false,
-      "workerRoundtripMs": 1.5,
-      "inferenceMs": 0.19999999552965164,
+      "workerRoundtripMs": 2.5,
+      "inferenceMs": 0.30000000447034836,
       "modelBytes": 311140,
       "label": "frog",
       "uiRankedLabels": [
@@ -328,7 +328,7 @@
         "flower",
         "airplane"
       ],
-      "pointerUpToVisibleMs": 1840.7
+      "pointerUpToVisibleMs": 1881.5
     },
     {
       "status": "This may be outside the supported set. Your drawing is preserved; choose a suggestion or another object.",
@@ -360,8 +360,8 @@
         "mushroom"
       ],
       "automatic": false,
-      "workerRoundtripMs": 1.9000000059604645,
-      "inferenceMs": 0.09999999403953552,
+      "workerRoundtripMs": 2.899999998509884,
+      "inferenceMs": 0.29999999701976776,
       "modelBytes": 311140,
       "label": "leaf",
       "uiRankedLabels": [
@@ -390,7 +390,7 @@
         "apple",
         "mushroom"
       ],
-      "pointerUpToVisibleMs": 1856
+      "pointerUpToVisibleMs": 1872.8
     },
     {
       "status": "Not sure what you drew. Choose a suggestion or open the object picker.",
@@ -422,7 +422,7 @@
         "bicycle"
       ],
       "automatic": false,
-      "workerRoundtripMs": 0.7999999970197678,
+      "workerRoundtripMs": 0.8999999985098839,
       "inferenceMs": 0.19999999552965164,
       "modelBytes": 311140,
       "label": "house plant",
@@ -452,7 +452,7 @@
         "fish",
         "bicycle"
       ],
-      "pointerUpToVisibleMs": 1851.1
+      "pointerUpToVisibleMs": 1877.6
     },
     {
       "status": "Not sure what you drew. Choose a suggestion or open the object picker.",
@@ -484,8 +484,8 @@
         "chair"
       ],
       "automatic": false,
-      "workerRoundtripMs": 1.3999999985098839,
-      "inferenceMs": 0.10000000149011612,
+      "workerRoundtripMs": 1.8999999985098839,
+      "inferenceMs": 0.19999999552965164,
       "modelBytes": 311140,
       "label": "apple",
       "uiRankedLabels": [
@@ -514,7 +514,7 @@
         "bicycle",
         "chair"
       ],
-      "pointerUpToVisibleMs": 1867.2
+      "pointerUpToVisibleMs": 1884.7
     },
     {
       "status": "Not sure what you drew. Choose a suggestion or open the object picker.",
@@ -546,8 +546,8 @@
         "tree"
       ],
       "automatic": false,
-      "workerRoundtripMs": 1.5,
-      "inferenceMs": 0,
+      "workerRoundtripMs": 2.100000001490116,
+      "inferenceMs": 0.29999999701976776,
       "modelBytes": 311140,
       "label": "banana",
       "uiRankedLabels": [
@@ -576,7 +576,7 @@
         "sun",
         "tree"
       ],
-      "pointerUpToVisibleMs": 1854
+      "pointerUpToVisibleMs": 1886
     },
     {
       "status": "Not sure what you drew. Choose a suggestion or open the object picker.",
@@ -608,8 +608,8 @@
         "bicycle"
       ],
       "automatic": false,
-      "workerRoundtripMs": 0.6999999955296516,
-      "inferenceMs": 0.20000000298023224,
+      "workerRoundtripMs": 3,
+      "inferenceMs": 0.29999999701976776,
       "modelBytes": 311140,
       "label": "pizza",
       "uiRankedLabels": [
@@ -638,7 +638,7 @@
         "apple",
         "bicycle"
       ],
-      "pointerUpToVisibleMs": 1846.7
+      "pointerUpToVisibleMs": 1873.6
     },
     {
       "status": "Chair added at the center of your sketch.",
@@ -670,8 +670,8 @@
         "butterfly"
       ],
       "automatic": true,
-      "workerRoundtripMs": 1.5,
-      "inferenceMs": 0.10000000149011612,
+      "workerRoundtripMs": 2.3000000044703484,
+      "inferenceMs": 0.09999999403953552,
       "modelBytes": 311140,
       "label": "chair",
       "uiRankedLabels": [
@@ -700,69 +700,69 @@
         "apple",
         "butterfly"
       ],
-      "pointerUpToVisibleMs": 1853.5
+      "pointerUpToVisibleMs": 1875.6
     },
     {
       "status": "Not sure what you drew. Choose a suggestion or open the object picker.",
       "rankedLabels": [
-        "moon",
-        "banana",
         "cactus",
-        "other",
-        "rabbit",
-        "mushroom",
-        "tree",
-        "bird",
-        "duck",
         "airplane",
-        "frog",
+        "other",
+        "bird",
+        "moon",
+        "flower",
+        "mushroom",
+        "rabbit",
+        "sun",
+        "elephant",
+        "duck",
         "house plant",
         "leaf",
-        "apple",
-        "chair",
-        "fish",
-        "butterfly",
         "dog",
-        "flower",
-        "elephant",
-        "cat",
+        "frog",
+        "apple",
+        "fish",
         "pizza",
-        "sun",
+        "banana",
+        "cat",
+        "chair",
+        "butterfly",
         "cow",
+        "tree",
         "bicycle"
       ],
       "automatic": false,
-      "workerRoundtripMs": 1.4000000059604645,
-      "inferenceMs": 0.10000000149011612,
+      "workerRoundtripMs": 1.2999999970197678,
+      "inferenceMs": 0.30000000447034836,
       "modelBytes": 311140,
       "label": "airplane",
       "uiRankedLabels": [
-        "moon",
-        "banana",
         "cactus",
-        "rabbit",
-        "mushroom",
-        "tree",
-        "bird",
-        "duck",
         "airplane",
-        "frog",
+        "bird",
+        "moon",
+        "flower",
+        "mushroom",
+        "rabbit",
+        "sun",
+        "elephant",
+        "duck",
         "house plant",
         "leaf",
-        "apple",
-        "chair",
-        "fish",
-        "butterfly",
         "dog",
-        "flower",
-        "elephant",
-        "cat",
+        "frog",
+        "apple",
+        "fish",
         "pizza",
-        "sun",
+        "banana",
+        "cat",
+        "chair",
+        "butterfly",
         "cow",
+        "tree",
         "bicycle"
       ],
-      "pointerUpToVisibleMs": 1859.4
+      "pointerUpToVisibleMs": 1881.8
     },
     {
       "status": "Not sure what you drew. Choose a suggestion or open the object picker.",
@@ -794,8 +794,8 @@
         "banana"
       ],
       "automatic": false,
-      "workerRoundtripMs": 0.7999999970197678,
-      "inferenceMs": 0.09999999403953552,
+      "workerRoundtripMs": 2.1999999955296516,
+      "inferenceMs": 0.20000000298023224,
       "modelBytes": 311140,
       "label": "bicycle",
       "uiRankedLabels": [
@@ -824,7 +824,7 @@
         "chair",
         "banana"
       ],
-      "pointerUpToVisibleMs": 1865.6
+      "pointerUpToVisibleMs": 1874.5
     }
   ]
 }

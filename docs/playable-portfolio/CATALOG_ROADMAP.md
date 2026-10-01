@@ -80,7 +80,11 @@ training labels in exports; human-friendly labels appear in parentheses.
 The 24-label model, artwork, picker, and browser inference are integrated. Its
 per-class top-1/top-3, confusions, unknown rejection, and auto-spawn
 precision/coverage are reported in `RECOGNITION.md` and the JSON metrics. Review
-that evidence before selecting or integrating more classes. Choose any
+that evidence before selecting or integrating more classes. Here,
+recognition-supported means a label is wired into inference and suggestions;
+it does not promise automatic creation. The current auto-spawn allowlist excludes
+Dog, Rabbit, Bird, Cow, Duck, Elephant, Frog, and Sun based on the validation
+per-label gate; all remain in the picker and suggestions. Choose any further
 auto-spawn score-and-margin rule on validation data only; do not call raw
 softmax scores calibrated confidence or tune the rule on test data. If a label
 or group performs weakly, report that limitation and keep it picker-only or

@@ -32,7 +32,7 @@ const waitForRecognition = async (page) => {
   return panel;
 };
 
-test('a multi-stroke pause restarts 1,500 ms debounce; accepted sun transforms and can be undone safely', async ({ page }) => {
+test('a multi-stroke pause restarts 1,500 ms debounce; Sun is suggested and manual acceptance transforms it', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   const modelRequests = [];
   page.on('request', request => { if (request.url().includes('/models/drawing-recognizer-24-candidate/')) modelRequests.push(request.url()); });
@@ -47,13 +47,16 @@ test('a multi-stroke pause restarts 1,500 ms debounce; accepted sun transforms a
   expect(modelRequests).toEqual([]); // The second stroke reset the full pause interval.
   await expect(page.locator('.recognition-panel')).toHaveCount(0);
   const panel = await waitForRecognition(page);
+  await expect(panel.getByRole('status')).toContainText('Not sure what you drew');
+  const suggestions = panel.getByRole('group', { name: 'Ranked drawing suggestions' });
+  await expect(suggestions.locator('button').first()).toContainText('1. Sun');
+  const suggestionTiming = await page.evaluate(() => Number((performance.now() - performance.getEntriesByName('last-stroke-pointerup').at(-1).startTime).toFixed(1)));
+  const workerTiming = await panel.evaluate(element => ({ requestToResultMs: Number(element.dataset.workerRoundtripMs), inferenceMs: Number(element.dataset.inferenceMs), modelBytes: Number(element.dataset.modelBytes) }));
+  console.log(`Sun suggestion timing: ${JSON.stringify({ pointerUpToSuggestionVisibleMs: suggestionTiming, worker: workerTiming, debounceMs: 1500 })}`);
+  await suggestions.getByRole('button', { name: /1. Sun/ }).click();
   await expect(panel.getByRole('status')).toContainText('Sun added at the center');
   await expect(panel.locator('.recognition-suggestions')).toHaveCount(0);
   await expect(page.locator('.play-object img[src$="/sun.svg"]')).toHaveCount(1);
-  const automaticTiming = await page.evaluate(() => Number((performance.now() - performance.getEntriesByName('last-stroke-pointerup').at(-1).startTime).toFixed(1)));
-  const workerTiming = await panel.evaluate(element => ({ requestToResultMs: Number(element.dataset.workerRoundtripMs), inferenceMs: Number(element.dataset.inferenceMs), modelBytes: Number(element.dataset.modelBytes) }));
-  console.log(`Automatic sketch-to-object timing: ${JSON.stringify({ pointerUpToSpawnVisibleMs: automaticTiming, worker: workerTiming, debounceMs: 1500 })}`);
-  await page.screenshot({ path: 'docs/playable-portfolio/screenshots/recognition-auto-mobile.png' });
   await expect(page.locator('.draw-stroke-group--transforming')).toHaveCount(9);
   await expect(page.locator('.draw-stroke-core')).toHaveCount(9);
   await page.waitForTimeout(500);
@@ -66,7 +69,36 @@ test('a multi-stroke pause restarts 1,500 ms debounce; accepted sun transforms a
   await page.waitForTimeout(1650);
   expect(modelRequests).toHaveLength(requestsAfterUndo);
   await panel.getByRole('button', { name: 'Retry recognition' }).click();
+  const retriedSuggestions = page.getByRole('group', { name: 'Ranked drawing suggestions' });
+  await expect(retriedSuggestions.locator('button').first()).toContainText('1. Sun');
+  await retriedSuggestions.getByRole('button', { name: /1. Sun/ }).click();
   await expect(page.locator('.play-object img[src$="/sun.svg"]')).toHaveCount(1);
+});
+
+test('a validation-accepted Chair auto-transforms, and Undo restores ink without retrying', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  const modelRequests = [];
+  page.on('request', request => { if (request.url().includes('/models/drawing-recognizer-24-candidate/')) modelRequests.push(request.url()); });
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Brush', exact: true }).click();
+  await page.locator('.draw-board').evaluate(board => board.addEventListener('pointerup', () => performance.mark('chair-last-pointerup'), { capture: true }));
+  const fixture = JSON.parse(readFileSync('tests/fixtures/batch24-drawings.json', 'utf8')).drawings.find(drawing => drawing.label === 'chair');
+  const rect = await page.locator('.draw-board').boundingBox();
+  const strokes = fixture.strokes.map(stroke => stroke.map(([x, y]) => [rect.width * (0.15 + 0.7 * x / 100), rect.height * (0.23 + 0.46 * y / 100)]));
+  await drawStrokes(page, strokes);
+  const panel = await waitForRecognition(page);
+  await expect(panel.getByRole('status')).toContainText('Chair added at the center');
+  await expect(page.locator('.play-object img[src$="/chair.svg"]')).toHaveCount(1);
+  const elapsedMs = await page.evaluate(() => Number((performance.now() - performance.getEntriesByName('chair-last-pointerup').at(-1).startTime).toFixed(1)));
+  const worker = await panel.evaluate(element => ({ requestToResultMs: Number(element.dataset.workerRoundtripMs), inferenceMs: Number(element.dataset.inferenceMs), modelBytes: Number(element.dataset.modelBytes) }));
+  console.log(`Auto-created Chair timing: ${JSON.stringify({ pointerUpToVisibleObjectMs: elapsedMs, worker, debounceMs: 1500 })}`);
+  await page.screenshot({ path: 'docs/playable-portfolio/screenshots/recognition-auto-mobile.png' });
+  await panel.getByRole('button', { name: 'Undo transformation' }).click();
+  await expect(panel.getByRole('status')).toContainText('will not be checked again');
+  await expect(page.locator('.draw-stroke-core')).toHaveCount(fixture.strokes.length);
+  const requestsAfterUndo = modelRequests.length;
+  await page.waitForTimeout(1650);
+  expect(modelRequests).toHaveLength(requestsAfterUndo);
 });
 
 test('a slow uninterrupted pointer gesture is never recognized until pointer-up', async ({ page }) => {
@@ -158,7 +190,9 @@ test('new strokes, clear, mode changes, portfolio sheets and unmount cancel stal
   await drawStrokes(page, sun().slice(1)); // New rays invalidate the result for the earlier circle-only sketch.
   await expect(page.locator('.recognition-panel')).toHaveCount(0);
   pending = await waitForRecognition(page);
-  await expect(pending.getByRole('status')).toContainText('Sun added at the center', { timeout: 10000 });
+  await expect(pending.getByRole('group', { name: 'Ranked drawing suggestions' }).locator('button').first()).toContainText('1. Sun', { timeout: 10000 });
+  await pending.getByRole('group', { name: 'Ranked drawing suggestions' }).getByRole('button', { name: /1. Sun/ }).click();
+  await expect(pending.getByRole('status')).toContainText('Sun added at the center');
 
   await page.getByRole('button', { name: 'Brush', exact: true }).click();
   await drawStrokes(page, [[[80, 250], [180, 300], [260, 350]]]);

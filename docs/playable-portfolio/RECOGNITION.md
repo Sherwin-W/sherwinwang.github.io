@@ -44,14 +44,7 @@ Supported-only raw 25-output top-1/top-3 are 58.25%/78.40%. The browser filters
 top-1/top-3 are 60.96%/80.26%. Unknown rejection is separate at 73.42% across
 the eight named negative categories.
 
-Automatic creation requires a supported overall winner, score >= 0.94, and
-margin over the runner-up >= 0.70. This rule maximized supported coverage on
-validation while meeting 95% validation precision. Validation precision and
-coverage were 95.39% (2,320/2,432) and 16.68%. Without changing the rule, test
-precision and coverage were 95.26% (2,311/2,426) and 16.56%. These scores are
-uncalibrated model outputs; none is a probability of correctness. The accepted
-class quality varies sharply: Dog, Bird, Elephant, Frog, and Duck have low
-coverage and/or poor precision. Largest held-out confusions include Frog?Other
+Automatic creation requires a supported 25-output winner, score >= 0.94, margin over the runner-up >= 0.70, and membership in a label allowlist selected from validation only. A label must have at least 20 accepted validation predictions and >=90% precision for that predicted label. Dog, Rabbit, Bird, Cow, Duck, Elephant, Frog, and Sun fail this per-label gate and remain in ranked suggestions and the manual picker. The final rule had 96.15% validation precision (2,172/2,259) and 15.57% supported coverage; on held-out test it had 95.72% precision (2,146/2,242) and 15.35% coverage. Model outputs remain uncalibrated scores, not probabilities of correctness. Model quality varies sharply: Dog, Bird, Elephant, Frog, and Duck have low top-1/top-3 performance. Largest held-out confusions include Frog?Other
 (130/600), Dog?Cow (114/600), Duck?Bird (102/600), Elephant?Other (97/600),
 Bird?Duck (93/600), and Cow?Dog (71/600). Full class values and confusion
 matrix are in `recognition-metrics-24-candidate.json`; the validation rule selection is in
@@ -83,8 +76,8 @@ JSON rather than described as uniformly reliable.
 
 A separate set of twelve authored polylines for the new categories ran through
 the browser pointer path, production rasterizer, Worker, and active model at
-390?844. UI-filtered top-1/top-3 were 5/12 and 7/12; one object auto-created.
-Cow, Elephant, Banana, Airplane, and Bicycle missed the top three. This small
+390?844. UI-filtered top-1/top-3 were 5/12 and 8/12; one object auto-created.
+Cow, Elephant, Banana, and Bicycle missed the top three. This small
 integration set is synthetic, authored by the implementer, and not a human
 benchmark or training/threshold data. Per-drawing rankings and timings are in
 `browser-fixture-results-24.json`; geometry is in
@@ -94,7 +87,7 @@ treated as a sketch, so the single-point example was rejected as unsupported;
 a multi-line scribble was uncertain and an unsupported house was rejected.
 These controls are recorded separately and do not count toward class accuracy.
 
-Four fixed binary arrays are exported by
+The training and validation artifacts record the per-label gate. The active manifest enforces it before auto-creation. Four fixed binary arrays are exported by
 `export_batch24_parity.py`; `npm run test` runs each through the actual
 JavaScript math against the Python reference scores for all 25 outputs at
 absolute tolerance 1e-5. The candidate parity fixture is bound to the weight

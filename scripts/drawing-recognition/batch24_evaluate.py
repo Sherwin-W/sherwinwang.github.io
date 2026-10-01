@@ -37,7 +37,10 @@ def main() -> None:
     margin = top_score - scores[np.arange(len(truth)), ranking[:, 1]]
     other_index = LABELS.index(OTHER)
     true_supported = truth != other_index
-    auto_accepted = (winner != other_index) & (top_score >= auto["scoreThreshold"]) & (margin >= auto["marginThreshold"])
+    allowed_auto_labels = manifest.get("autoSpawnLabels", auto.get("autoSpawnLabels", []))
+    allowed_auto_indices = [LABELS.index(label) for label in allowed_auto_labels]
+    auto_accepted = ((winner != other_index) & (top_score >= auto["scoreThreshold"])
+                     & (margin >= auto["marginThreshold"]) & np.isin(winner, allowed_auto_indices))
     auto_count = int(np.sum(auto_accepted))
     auto_correct = int(np.sum(auto_accepted & (winner == truth)))
     supported_scores = np.max(scores[:, :len(SUPPORTED)], axis=1)
@@ -125,6 +128,7 @@ def main() -> None:
             "autoSpawn": {
                 "validationSelectedScoreThreshold": auto["scoreThreshold"],
                 "validationSelectedMarginThreshold": auto["marginThreshold"],
+                "allowedAutoSpawnLabels": allowed_auto_labels,
                 "accepted": auto_count,
                 "correct": auto_correct,
                 "precision": auto_correct / auto_count if auto_count else None,

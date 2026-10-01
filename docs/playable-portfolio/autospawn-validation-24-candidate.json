@@ -5,44 +5,210 @@
   "validationSupportedRows": 14400,
   "validationOtherRows": 7200,
   "selectedAutoSpawnRule": {
-    "criterion": "maximize supported coverage subject to precision >= 95%",
-    "decision": "25-output winner is supported AND top score >= scoreThreshold AND margin over runner-up >= marginThreshold",
+    "criterion": "select score/margin at precision >= 95%, then require each auto-created label to have >=90% validation precision over >=20 accepted predictions",
+    "decision": "25-output winner is supported, top score >= scoreThreshold, margin over runner-up >= marginThreshold, and winner is in autoSpawnLabels",
     "scoreThreshold": 0.94,
     "marginThreshold": 0.7,
-    "accepted": 2432,
-    "correct": 2320,
-    "precision": 0.9539473684210527,
-    "supportedCoverage": 0.16680555555555557,
+    "accepted": 2259,
+    "correct": 2172,
+    "precision": 0.9614873837981408,
+    "supportedCoverage": 0.15569444444444444,
+    "acceptedBeforePerLabelGate": 2432,
+    "correctBeforePerLabelGate": 2320,
+    "autoSpawnLabels": [
+      "cat",
+      "fish",
+      "butterfly",
+      "tree",
+      "flower",
+      "mushroom",
+      "cactus",
+      "moon",
+      "leaf",
+      "house plant",
+      "apple",
+      "banana",
+      "pizza",
+      "chair",
+      "airplane",
+      "bicycle"
+    ],
+    "perPredictedLabelValidation": {
+      "cat": {
+        "acceptedPredictions": 31,
+        "correctPredictions": 30,
+        "precisionAmongPredictions": 0.967741935483871,
+        "autoSpawnEnabled": true
+      },
+      "dog": {
+        "acceptedPredictions": 1,
+        "correctPredictions": 1,
+        "precisionAmongPredictions": 1.0,
+        "autoSpawnEnabled": false
+      },
+      "rabbit": {
+        "acceptedPredictions": 12,
+        "correctPredictions": 8,
+        "precisionAmongPredictions": 0.6666666666666666,
+        "autoSpawnEnabled": false
+      },
+      "bird": {
+        "acceptedPredictions": 3,
+        "correctPredictions": 2,
+        "precisionAmongPredictions": 0.6666666666666666,
+        "autoSpawnEnabled": false
+      },
+      "fish": {
+        "acceptedPredictions": 158,
+        "correctPredictions": 152,
+        "precisionAmongPredictions": 0.9620253164556962,
+        "autoSpawnEnabled": true
+      },
+      "butterfly": {
+        "acceptedPredictions": 183,
+        "correctPredictions": 174,
+        "precisionAmongPredictions": 0.9508196721311475,
+        "autoSpawnEnabled": true
+      },
+      "tree": {
+        "acceptedPredictions": 141,
+        "correctPredictions": 132,
+        "precisionAmongPredictions": 0.9361702127659575,
+        "autoSpawnEnabled": true
+      },
+      "flower": {
+        "acceptedPredictions": 57,
+        "correctPredictions": 52,
+        "precisionAmongPredictions": 0.9122807017543859,
+        "autoSpawnEnabled": true
+      },
+      "mushroom": {
+        "acceptedPredictions": 204,
+        "correctPredictions": 196,
+        "precisionAmongPredictions": 0.9607843137254902,
+        "autoSpawnEnabled": true
+      },
+      "cactus": {
+        "acceptedPredictions": 43,
+        "correctPredictions": 40,
+        "precisionAmongPredictions": 0.9302325581395349,
+        "autoSpawnEnabled": true
+      },
+      "sun": {
+        "acceptedPredictions": 124,
+        "correctPredictions": 110,
+        "precisionAmongPredictions": 0.8870967741935484,
+        "autoSpawnEnabled": false
+      },
+      "moon": {
+        "acceptedPredictions": 89,
+        "correctPredictions": 83,
+        "precisionAmongPredictions": 0.9325842696629213,
+        "autoSpawnEnabled": true
+      },
+      "cow": {
+        "acceptedPredictions": 24,
+        "correctPredictions": 19,
+        "precisionAmongPredictions": 0.7916666666666666,
+        "autoSpawnEnabled": false
+      },
+      "duck": {
+        "acceptedPredictions": 6,
+        "correctPredictions": 6,
+        "precisionAmongPredictions": 1.0,
+        "autoSpawnEnabled": false
+      },
+      "elephant": {
+        "acceptedPredictions": 1,
+        "correctPredictions": 0,
+        "precisionAmongPredictions": 0.0,
+        "autoSpawnEnabled": false
+      },
+      "frog": {
+        "acceptedPredictions": 2,
+        "correctPredictions": 2,
+        "precisionAmongPredictions": 1.0,
+        "autoSpawnEnabled": false
+      },
+      "leaf": {
+        "acceptedPredictions": 48,
+        "correctPredictions": 46,
+        "precisionAmongPredictions": 0.9583333333333334,
+        "autoSpawnEnabled": true
+      },
+      "house plant": {
+        "acceptedPredictions": 157,
+        "correctPredictions": 152,
+        "precisionAmongPredictions": 0.9681528662420382,
+        "autoSpawnEnabled": true
+      },
+      "apple": {
+        "acceptedPredictions": 417,
+        "correctPredictions": 403,
+        "precisionAmongPredictions": 0.9664268585131894,
+        "autoSpawnEnabled": true
+      },
+      "banana": {
+        "acceptedPredictions": 85,
+        "correctPredictions": 80,
+        "precisionAmongPredictions": 0.9411764705882353,
+        "autoSpawnEnabled": true
+      },
+      "pizza": {
+        "acceptedPredictions": 113,
+        "correctPredictions": 110,
+        "precisionAmongPredictions": 0.9734513274336283,
+        "autoSpawnEnabled": true
+      },
+      "chair": {
+        "acceptedPredictions": 225,
+        "correctPredictions": 220,
+        "precisionAmongPredictions": 0.9777777777777777,
+        "autoSpawnEnabled": true
+      },
+      "airplane": {
+        "acceptedPredictions": 63,
+        "correctPredictions": 60,
+        "precisionAmongPredictions": 0.9523809523809523,
+        "autoSpawnEnabled": true
+      },
+      "bicycle": {
+        "acceptedPredictions": 245,
+        "correctPredictions": 242,
+        "precisionAmongPredictions": 0.9877551020408163,
+        "autoSpawnEnabled": true
+      }
+    },
     "perClass": {
       "cat": {
         "samples": 600,
-        "accepted": 34,
-        "coverage": 0.056666666666666664,
-        "precisionAmongAcceptedForClass": 0.8823529411764706
+        "accepted": 32,
+        "coverage": 0.05333333333333334,
+        "precisionAmongAcceptedForClass": 0.9375
       },
       "dog": {
         "samples": 600,
-        "accepted": 8,
-        "coverage": 0.013333333333333334,
-        "precisionAmongAcceptedForClass": 0.125
+        "accepted": 3,
+        "coverage": 0.005,
+        "precisionAmongAcceptedForClass": 0.0
       },
       "rabbit": {
         "samples": 600,
-        "accepted": 12,
-        "coverage": 0.02,
-        "precisionAmongAcceptedForClass": 0.6666666666666666
+        "accepted": 4,
+        "coverage": 0.006666666666666667,
+        "precisionAmongAcceptedForClass": 0.0
       },
       "bird": {
         "samples": 600,
-        "accepted": 5,
-        "coverage": 0.008333333333333333,
-        "precisionAmongAcceptedForClass": 0.4
+        "accepted": 3,
+        "coverage": 0.005,
+        "precisionAmongAcceptedForClass": 0.0
       },
       "fish": {
         "samples": 600,
-        "accepted": 154,
-        "coverage": 0.25666666666666665,
-        "precisionAmongAcceptedForClass": 0.987012987012987
+        "accepted": 153,
+        "coverage": 0.255,
+        "precisionAmongAcceptedForClass": 0.9934640522875817
       },
       "butterfly": {
         "samples": 600,
@@ -70,33 +236,33 @@
       },
       "cactus": {
         "samples": 600,
-        "accepted": 43,
-        "coverage": 0.07166666666666667,
-        "precisionAmongAcceptedForClass": 0.9302325581395349
+        "accepted": 41,
+        "coverage": 0.06833333333333333,
+        "precisionAmongAcceptedForClass": 0.975609756097561
       },
       "sun": {
         "samples": 600,
-        "accepted": 112,
-        "coverage": 0.18666666666666668,
-        "precisionAmongAcceptedForClass": 0.9821428571428571
+        "accepted": 2,
+        "coverage": 0.0033333333333333335,
+        "precisionAmongAcceptedForClass": 0.0
       },
       "moon": {
         "samples": 600,
-        "accepted": 90,
-        "coverage": 0.15,
-        "precisionAmongAcceptedForClass": 0.9222222222222223
+        "accepted": 89,
+        "coverage": 0.14833333333333334,
+        "precisionAmongAcceptedForClass": 0.9325842696629213
       },
       "cow": {
         "samples": 600,
-        "accepted": 20,
-        "coverage": 0.03333333333333333,
-        "precisionAmongAcceptedForClass": 0.95
+        "accepted": 1,
+        "coverage": 0.0016666666666666668,
+        "precisionAmongAcceptedForClass": 0.0
       },
       "duck": {
         "samples": 600,
-        "accepted": 7,
-        "coverage": 0.011666666666666667,
-        "precisionAmongAcceptedForClass": 0.8571428571428571
+        "accepted": 0,
+        "coverage": 0.0,
+        "precisionAmongAcceptedForClass": null
       },
       "elephant": {
         "samples": 600,
@@ -106,9 +272,9 @@
       },
       "frog": {
         "samples": 600,
-        "accepted": 7,
-        "coverage": 0.011666666666666667,
-        "precisionAmongAcceptedForClass": 0.2857142857142857
+        "accepted": 5,
+        "coverage": 0.008333333333333333,
+        "precisionAmongAcceptedForClass": 0.0
       },
       "leaf": {
         "samples": 600,
@@ -118,9 +284,9 @@
       },
       "house plant": {
         "samples": 600,
-        "accepted": 155,
-        "coverage": 0.25833333333333336,
-        "precisionAmongAcceptedForClass": 0.9806451612903225
+        "accepted": 154,
+        "coverage": 0.25666666666666665,
+        "precisionAmongAcceptedForClass": 0.987012987012987
       },
       "apple": {
         "samples": 600,

@@ -57,7 +57,8 @@ self.onmessage = async (event) => {
       isUnsupported: ranked[0]?.label === model.manifest.otherLabel || topSupportedScore < model.manifest.unsupportedScoreThreshold,
       autoSpawnAccepted: ranked[0]?.label !== model.manifest.otherLabel
         && ranked[0]?.score >= model.manifest.autoSpawnScoreThreshold
-        && autoSpawnMargin >= model.manifest.autoSpawnMarginThreshold,
+        && autoSpawnMargin >= model.manifest.autoSpawnMarginThreshold
+        && model.manifest.autoSpawnLabels?.includes(ranked[0]?.label) === true,
       autoSpawnMargin,
       modelBytes: model.modelBytes, inferenceMs,
     })

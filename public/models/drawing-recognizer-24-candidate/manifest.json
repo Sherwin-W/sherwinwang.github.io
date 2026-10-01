@@ -91,5 +91,23 @@
   "unsupportedScoreThreshold": 0.21,
   "autoSpawnScoreThreshold": 0.94,
   "autoSpawnMarginThreshold": 0.7,
-  "thresholdMethod": "Validation-only: rejection threshold uses balanced supported-vs-Other accuracy; auto-spawn rule maximizes supported coverage subject to at least 95% precision. Scores remain uncalibrated."
+  "thresholdMethod": "Validation-only: rejection threshold uses balanced supported-vs-Other accuracy; auto-spawn rule maximizes supported coverage subject to at least 95% precision. Scores remain uncalibrated.",
+  "autoSpawnLabels": [
+    "cat",
+    "fish",
+    "butterfly",
+    "tree",
+    "flower",
+    "mushroom",
+    "cactus",
+    "moon",
+    "leaf",
+    "house plant",
+    "apple",
+    "banana",
+    "pizza",
+    "chair",
+    "airplane",
+    "bicycle"
+  ]
 }

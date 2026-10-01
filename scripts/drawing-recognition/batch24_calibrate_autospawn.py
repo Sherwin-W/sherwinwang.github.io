@@ -62,16 +62,40 @@ def main() -> None:
     balanced_ties = [item for item in reject_candidates if item[0] >= best - 0.005]
     _, reject_threshold, supported_acceptance, other_rejection = max(balanced_ties, key=lambda item: item[1])
 
+    accepted_before_class_gate = (winner != other_index) & (top >= selected["scoreThreshold"]) & (margin >= selected["marginThreshold"])
+    auto_spawn_labels = []
+    predicted_class_results = {}
+    for index, label in enumerate(SUPPORTED):
+        predicted = accepted_before_class_gate & (winner == index)
+        count = int(np.sum(predicted))
+        correct = int(np.sum(predicted & (truth == index)))
+        precision = correct / count if count else None
+        predicted_class_results[label] = {
+            "acceptedPredictions": count,
+            "correctPredictions": correct,
+            "precisionAmongPredictions": precision,
+            "autoSpawnEnabled": bool(count >= 20 and precision is not None and precision >= 0.90),
+        }
+        if count >= 20 and precision is not None and precision >= 0.90:
+            auto_spawn_labels.append(label)
+
+    auto_label_indices = [SUPPORTED.index(label) for label in auto_spawn_labels]
+    accepted = accepted_before_class_gate & np.isin(winner, auto_label_indices)
+    accepted_count = int(np.sum(accepted))
+    correct_count = int(np.sum(accepted & (winner == truth)))
+    final_precision = correct_count / accepted_count if accepted_count else None
+    final_coverage = float(np.sum(accepted & supported_truth) / np.sum(supported_truth))
+
     class_results = {}
     for index, label in enumerate(SUPPORTED):
         actual = truth == index
-        accepted = actual & (winner != other_index) & (top >= selected["scoreThreshold"]) & (margin >= selected["marginThreshold"])
-        n = int(np.sum(accepted))
+        class_accepted = actual & accepted
+        n = int(np.sum(class_accepted))
         class_results[label] = {
             "samples": int(np.sum(actual)),
             "accepted": n,
             "coverage": float(n / np.sum(actual)),
-            "precisionAmongAcceptedForClass": float(np.sum(accepted & (winner == index)) / n) if n else None,
+            "precisionAmongAcceptedForClass": float(np.sum(class_accepted & (winner == index)) / n) if n else None,
         }
     report = {
         "method": "Thresholds selected on validation rows only using candidate committed weights; no test rows or labels loaded.",
@@ -80,9 +104,17 @@ def main() -> None:
         "validationSupportedRows": int(np.sum(supported_truth)),
         "validationOtherRows": int(np.sum(~supported_truth)),
         "selectedAutoSpawnRule": {
-            "criterion": f"maximize supported coverage subject to precision >= {PRECISION_TARGET:.0%}",
-            "decision": "25-output winner is supported AND top score >= scoreThreshold AND margin over runner-up >= marginThreshold",
+            "criterion": f"select score/margin at precision >= {PRECISION_TARGET:.0%}, then require each auto-created label to have >=90% validation precision over >=20 accepted predictions",
+            "decision": "25-output winner is supported, top score >= scoreThreshold, margin over runner-up >= marginThreshold, and winner is in autoSpawnLabels",
             **selected,
+            "acceptedBeforePerLabelGate": selected["accepted"],
+            "correctBeforePerLabelGate": selected["correct"],
+            "autoSpawnLabels": auto_spawn_labels,
+            "perPredictedLabelValidation": predicted_class_results,
+            "accepted": accepted_count,
+            "correct": correct_count,
+            "precision": final_precision,
+            "supportedCoverage": final_coverage,
             "perClass": class_results,
         },
         "selectedUnknownRejectThreshold": {
@@ -98,6 +130,7 @@ def main() -> None:
     manifest["unsupportedScoreThreshold"] = float(reject_threshold)
     manifest["autoSpawnScoreThreshold"] = selected["scoreThreshold"]
     manifest["autoSpawnMarginThreshold"] = selected["marginThreshold"]
+    manifest["autoSpawnLabels"] = auto_spawn_labels
     manifest["thresholdMethod"] = (
         "Validation-only: rejection threshold uses balanced supported-vs-Other accuracy; "
         "auto-spawn rule maximizes supported coverage subject to at least 95% precision. "

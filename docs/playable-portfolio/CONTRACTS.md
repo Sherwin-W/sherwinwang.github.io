@@ -20,13 +20,7 @@ byte weights only when recognition is requested. The active manifest has 24
 supported outputs plus `other`; the prior 12-label model remains in its own
 folder for comparison and rollback.
 
-Validation selected automatic creation when the 25-output winner is supported,
-score >= 0.94, and margin over the runner-up >= 0.70. The separate unknown
-threshold is 0.21. The selected rule achieved 95.39% validation precision and
-16.68% supported coverage; on the untouched test split it achieved 95.26%
-precision and 16.56% coverage. These are sampled-set results; model scores are
-uncalibrated. Per-class low-quality categories are explicitly recorded in
-`RECOGNITION.md` and `recognition-metrics-24-candidate.json`.
+Automatic creation requires a supported 25-output winner, score >= 0.94, margin over the runner-up >= 0.70, and membership in the validation-selected `autoSpawnLabels` allowlist. A label enters the allowlist only after at least 20 accepted validation predictions and at least 90% per-label precision. Dog, Rabbit, Bird, Cow, Duck, Elephant, Frog, and Sun remain in suggestions and the picker but are not auto-created. The final rule achieved 96.15% validation precision / 15.57% supported coverage and 95.72% / 15.35% on held-out test. The separate unknown threshold is 0.21. These are sampled-set results; model scores are uncalibrated.
 
 Automatic acceptance inserts at the drawing center. Ink stays until insertion
 succeeds and then fades through a short local glow. Undo transformation removes

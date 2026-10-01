@@ -5,9 +5,10 @@
 - I1 current-12 interaction: complete and verified before catalog expansion.
   Select-first, Brush, accessible picker, pause/cancellation, auto-transform,
   Undo/retry, cursor, glow, touch and reduced motion are in the checkpoint.
-- M1 validation-gated creation: complete. The 24-label model uses a 0.94 score
-  / 0.70 margin threshold selected on validation; validation precision/coverage
-  95.39% / 16.68%, test 95.26% / 16.56%.
+- M1 validation-gated creation: complete. Auto-creation requires score >=0.94,
+  margin >=0.70, and a predicted label with at least 20 validation acceptances
+  and >=90% precision. Final validation precision/coverage are 96.15% / 15.57%;
+  held-out test is 95.72% / 15.35%. Eight weak labels stay picker/suggestion-only.
 - C1 batch 24: integrated and evaluated. Twelve additional exact labels,
   original art, adjusted Other classes, 24 model outputs, JavaScript parity,
   held-out metrics, and browser-preprocessing fixtures are present.
