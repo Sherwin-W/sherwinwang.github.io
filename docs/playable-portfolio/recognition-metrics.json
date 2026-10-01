@@ -413,5 +413,67 @@
       "mountain",
       "apple"
     ]
+  },
+  "evaluationFromCommittedWeights": {
+    "modelSha256": "a4c7733478beb26046fd836ae32affa231b9f406024eb4066f5781fcf24b288e",
+    "overall": {
+      "samples": 14400,
+      "top1Accuracy": 0.7630555555555556,
+      "top3Recall": 0.91625,
+      "ranking": "all 13 model outputs, including other"
+    },
+    "supportedOnly": {
+      "samples": 7200,
+      "top1Accuracy": 0.6551388888888889,
+      "top3Recall": 0.8684722222222222,
+      "ranking": "raw model ranking, all 13 outputs, including other"
+    },
+    "supportedUiFilteredRanking": {
+      "samples": 7200,
+      "top1Recall": 0.7155555555555555,
+      "top3Recall": 0.8922222222222222,
+      "ranking": "same as UI: filter other, rank 12 supported labels by descending model score, show first three"
+    },
+    "unknownRejection": {
+      "samples": 7200,
+      "rejectionRate": 0.8786111111111111,
+      "bySourceCategory": {
+        "airplane": {
+          "samples": 900,
+          "rejectionRate": 0.7744444444444445
+        },
+        "apple": {
+          "samples": 900,
+          "rejectionRate": 0.9433333333333334
+        },
+        "car": {
+          "samples": 900,
+          "rejectionRate": 0.9055555555555556
+        },
+        "clock": {
+          "samples": 900,
+          "rejectionRate": 0.9344444444444444
+        },
+        "cloud": {
+          "samples": 900,
+          "rejectionRate": 0.8833333333333333
+        },
+        "house": {
+          "samples": 900,
+          "rejectionRate": 0.9
+        },
+        "mountain": {
+          "samples": 900,
+          "rejectionRate": 0.9211111111111111
+        },
+        "star": {
+          "samples": 900,
+          "rejectionRate": 0.7666666666666667
+        }
+      },
+      "threshold": 0.28,
+      "decision": "top prediction is other OR maximum supported score is below threshold"
+    },
+    "note": "Computed from the already held-out cached split and committed weights; no model fitting or threshold retuning was performed."
   }
 }

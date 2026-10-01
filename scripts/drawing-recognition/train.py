@@ -237,6 +237,7 @@ def metric_report(model, arrays: dict[str, dict[str, np.ndarray]], training_seco
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--refresh-data", action="store_true", help="Download deterministic sample windows again")
+    parser.add_argument("--data-only", action="store_true", help="Create/reuse the deterministic data cache without fitting a model")
     args = parser.parse_args()
     split_path = CACHE / "sampled-splits.npz"
     if split_path.exists() and not args.refresh_data:
@@ -248,6 +249,10 @@ def main():
         print(f"Using cached selected sample windows: {split_path}", flush=True)
     else:
         arrays = load_splits()
+
+    if args.data_only:
+        print(json.dumps({"cachedRows": {split: len(values["y"]) for split, values in arrays.items()}, "modelTrained": False}, indent=2))
+        return
 
     started = time.perf_counter()
     model = MLPClassifier(

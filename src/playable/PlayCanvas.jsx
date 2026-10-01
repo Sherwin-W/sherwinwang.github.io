@@ -399,7 +399,7 @@ export default function PlayCanvas() {
         className="recognition-panel"
         data-model-bytes={recognition.modelBytes}
         data-inference-ms={recognition.inferenceMs}
-        data-cold-start-ms={recognition.elapsedMs}
+        data-worker-roundtrip-ms={recognition.elapsedMs}
         aria-live="polite"
         onClick={(event) => event.stopPropagation()}
       >

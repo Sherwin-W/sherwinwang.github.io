@@ -1,0 +1,155 @@
+{
+  "evaluation": "small, independently authored fixed-stroke browser integration set; not human-subject or Quick Draw! holdout evaluation",
+  "viewport": "390x844",
+  "timing": "Recognize activation through suggestions visible; Chromium desktop emulating 390x844, Vite local server, Playwright automation; includes browser interaction, rasterization, worker startup/model fetch and UI render; not a physical-phone benchmark",
+  "source": "tests/fixtures/hand-authored-drawings.json",
+  "modelSha256": "a4c7733478beb26046fd836ae32affa231b9f406024eb4066f5781fcf24b288e",
+  "top1Correct": 11,
+  "top3ContainsExpected": 11,
+  "results": [
+    {
+      "expected": "cat",
+      "rankedSupportedSuggestions": [
+        "Cat",
+        "Moon",
+        "Bird"
+      ],
+      "top1Correct": true,
+      "top3ContainsExpected": true,
+      "flaggedUnsupported": true,
+      "activationToVisibleSuggestionsMs": 80.3
+    },
+    {
+      "expected": "dog",
+      "rankedSupportedSuggestions": [
+        "Dog",
+        "Mushroom",
+        "Cat"
+      ],
+      "top1Correct": true,
+      "top3ContainsExpected": true,
+      "flaggedUnsupported": false,
+      "activationToVisibleSuggestionsMs": 59.9
+    },
+    {
+      "expected": "rabbit",
+      "rankedSupportedSuggestions": [
+        "Rabbit",
+        "Cactus",
+        "Dog"
+      ],
+      "top1Correct": true,
+      "top3ContainsExpected": true,
+      "flaggedUnsupported": false,
+      "activationToVisibleSuggestionsMs": 54.7
+    },
+    {
+      "expected": "bird",
+      "rankedSupportedSuggestions": [
+        "Bird",
+        "Sun",
+        "Dog"
+      ],
+      "top1Correct": true,
+      "top3ContainsExpected": true,
+      "flaggedUnsupported": false,
+      "activationToVisibleSuggestionsMs": 53
+    },
+    {
+      "expected": "fish",
+      "rankedSupportedSuggestions": [
+        "Fish",
+        "Moon",
+        "Cactus"
+      ],
+      "top1Correct": true,
+      "top3ContainsExpected": true,
+      "flaggedUnsupported": false,
+      "activationToVisibleSuggestionsMs": 53.6
+    },
+    {
+      "expected": "butterfly",
+      "rankedSupportedSuggestions": [
+        "Butterfly",
+        "Tree",
+        "Bird"
+      ],
+      "top1Correct": true,
+      "top3ContainsExpected": true,
+      "flaggedUnsupported": false,
+      "activationToVisibleSuggestionsMs": 55.1
+    },
+    {
+      "expected": "tree",
+      "rankedSupportedSuggestions": [
+        "Sun",
+        "Cactus",
+        "Cat"
+      ],
+      "top1Correct": false,
+      "top3ContainsExpected": false,
+      "flaggedUnsupported": true,
+      "activationToVisibleSuggestionsMs": 55.5
+    },
+    {
+      "expected": "flower",
+      "rankedSupportedSuggestions": [
+        "Flower",
+        "Tree",
+        "Dog"
+      ],
+      "top1Correct": true,
+      "top3ContainsExpected": true,
+      "flaggedUnsupported": false,
+      "activationToVisibleSuggestionsMs": 55.6
+    },
+    {
+      "expected": "mushroom",
+      "rankedSupportedSuggestions": [
+        "Mushroom",
+        "Dog",
+        "Cactus"
+      ],
+      "top1Correct": true,
+      "top3ContainsExpected": true,
+      "flaggedUnsupported": false,
+      "activationToVisibleSuggestionsMs": 53.4
+    },
+    {
+      "expected": "cactus",
+      "rankedSupportedSuggestions": [
+        "Cactus",
+        "Mushroom",
+        "Dog"
+      ],
+      "top1Correct": true,
+      "top3ContainsExpected": true,
+      "flaggedUnsupported": false,
+      "activationToVisibleSuggestionsMs": 52.4
+    },
+    {
+      "expected": "sun",
+      "rankedSupportedSuggestions": [
+        "Sun",
+        "Cactus",
+        "Bird"
+      ],
+      "top1Correct": true,
+      "top3ContainsExpected": true,
+      "flaggedUnsupported": false,
+      "activationToVisibleSuggestionsMs": 70
+    },
+    {
+      "expected": "moon",
+      "rankedSupportedSuggestions": [
+        "Moon",
+        "Mushroom",
+        "Tree"
+      ],
+      "top1Correct": true,
+      "top3ContainsExpected": true,
+      "flaggedUnsupported": false,
+      "activationToVisibleSuggestionsMs": 51.9
+    }
+  ]
+}
