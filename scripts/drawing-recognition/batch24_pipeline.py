@@ -135,7 +135,7 @@ def sample_and_cache() -> dict[str, dict[str, np.ndarray]]:
 def load_cached() -> dict[str, dict[str, np.ndarray]]:
     path = CACHE / "sampled-splits.npz"
     if not path.exists():
-        raise SystemExit(f"Missing candidate split cache {path}; run batch24_train.py once to sample and train.")
+        raise SystemExit(f"Missing candidate split cache {path}; run prepare_overnight_data.py to fetch the deterministic data sample.")
     with np.load(path) as saved:
         return {split: {key: saved[f"{split}_{key}"] for key in ("x", "y", "source")}
                 for split in ("train", "validation", "test")}

@@ -1,0 +1,201 @@
+{
+  "drawings": [
+    {
+      "label": "cow",
+      "top1": "chair",
+      "top3": [
+        "chair",
+        "dog",
+        "frog"
+      ],
+      "accepted": false,
+      "rasterMs": 1.7999999970197678,
+      "workerRoundtripMs": 18.200000002980232,
+      "inferenceMs": 5.799999997019768,
+      "modelBytes": 212452
+    },
+    {
+      "label": "duck",
+      "top1": "duck",
+      "top3": [
+        "duck",
+        "bird",
+        "cactus"
+      ],
+      "accepted": false,
+      "rasterMs": 0.5,
+      "workerRoundtripMs": 1.8999999985098839,
+      "inferenceMs": 1.6000000014901161,
+      "modelBytes": 212452
+    },
+    {
+      "label": "elephant",
+      "top1": "dog",
+      "top3": [
+        "dog",
+        "sun",
+        "frog"
+      ],
+      "accepted": false,
+      "rasterMs": 0.19999999552965164,
+      "workerRoundtripMs": 1.7000000029802322,
+      "inferenceMs": 1.5,
+      "modelBytes": 212452
+    },
+    {
+      "label": "frog",
+      "top1": "frog",
+      "top3": [
+        "frog",
+        "cat",
+        "sun"
+      ],
+      "accepted": false,
+      "rasterMs": 0.10000000149011612,
+      "workerRoundtripMs": 1.2999999970197678,
+      "inferenceMs": 1.1999999955296516,
+      "modelBytes": 212452
+    },
+    {
+      "label": "leaf",
+      "top1": "leaf",
+      "top3": [
+        "leaf",
+        "banana",
+        "pizza"
+      ],
+      "accepted": false,
+      "rasterMs": 0.20000000298023224,
+      "workerRoundtripMs": 1.1999999955296516,
+      "inferenceMs": 1.0999999940395355,
+      "modelBytes": 212452
+    },
+    {
+      "label": "house plant",
+      "top1": "house plant",
+      "top3": [
+        "house plant",
+        "cactus",
+        "rabbit"
+      ],
+      "accepted": true,
+      "rasterMs": 0.20000000298023224,
+      "workerRoundtripMs": 1.1999999955296516,
+      "inferenceMs": 1.0999999940395355,
+      "modelBytes": 212452
+    },
+    {
+      "label": "apple",
+      "top1": "moon",
+      "top3": [
+        "moon",
+        "banana",
+        "apple"
+      ],
+      "accepted": false,
+      "rasterMs": 0.10000000149011612,
+      "workerRoundtripMs": 1.2000000029802322,
+      "inferenceMs": 1.2000000029802322,
+      "modelBytes": 212452
+    },
+    {
+      "label": "banana",
+      "top1": "banana",
+      "top3": [
+        "banana",
+        "cat",
+        "fish"
+      ],
+      "accepted": true,
+      "rasterMs": 0,
+      "workerRoundtripMs": 1.2999999970197678,
+      "inferenceMs": 1.2000000029802322,
+      "modelBytes": 212452
+    },
+    {
+      "label": "pizza",
+      "top1": "pizza",
+      "top3": [
+        "pizza",
+        "leaf",
+        "flower"
+      ],
+      "accepted": true,
+      "rasterMs": 0.20000000298023224,
+      "workerRoundtripMs": 1.2999999970197678,
+      "inferenceMs": 1.1999999955296516,
+      "modelBytes": 212452
+    },
+    {
+      "label": "chair",
+      "top1": "chair",
+      "top3": [
+        "chair",
+        "cactus",
+        "dog"
+      ],
+      "accepted": true,
+      "rasterMs": 0.10000000149011612,
+      "workerRoundtripMs": 1.1999999955296516,
+      "inferenceMs": 1.0999999940395355,
+      "modelBytes": 212452
+    },
+    {
+      "label": "airplane",
+      "top1": "cactus",
+      "top3": [
+        "cactus",
+        "airplane",
+        "butterfly"
+      ],
+      "accepted": false,
+      "rasterMs": 0.20000000298023224,
+      "workerRoundtripMs": 1.2999999970197678,
+      "inferenceMs": 1.2000000029802322,
+      "modelBytes": 212452
+    },
+    {
+      "label": "bicycle",
+      "top1": "butterfly",
+      "top3": [
+        "butterfly",
+        "elephant",
+        "bicycle"
+      ],
+      "accepted": true,
+      "rasterMs": 0.20000000298023224,
+      "workerRoundtripMs": 1.2000000029802322,
+      "inferenceMs": 1.2000000029802322,
+      "modelBytes": 212452
+    }
+  ],
+  "controls": [
+    {
+      "blank": true
+    },
+    {
+      "unsupported": true,
+      "ranked": [
+        "other",
+        "cactus",
+        "airplane"
+      ],
+      "autoSpawnAccepted": false
+    },
+    {
+      "unsupported": true,
+      "ranked": [
+        "other",
+        "cactus",
+        "house plant"
+      ],
+      "autoSpawnAccepted": false
+    }
+  ],
+  "workerColdActivationToFirstResultMs": 18.200000002980232,
+  "workerConstructionMs": 0.20000000298023224,
+  "workerActivationToFirstResultMs": 18.400000005960464,
+  "modelBytes": 212452,
+  "correctTop1": 7,
+  "correctTop3": 10
+}

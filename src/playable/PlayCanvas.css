@@ -29,7 +29,9 @@
 .play-canvas--select.play-canvas--transforming .draw-board { display:block; }
 .draw-board { position:absolute; inset:0; z-index:4; width:100%; height:100%; display:block; pointer-events:none; touch-action:none; }
 .play-canvas--brush .draw-board { pointer-events:auto;cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='32' viewBox='0 0 28 32'%3E%3Cpath d='M2 28 7 16 20 3l5 5L12 21 2 28Z' fill='%23fbf8f1' stroke='%232b2a28' stroke-width='2' stroke-linejoin='round'/%3E%3Cpath d='m7 16 5 5M2 28l8-4-5-5-3 9Z' fill='%2378b8a2' stroke='%232b2a28' stroke-width='1.5'/%3E%3C/svg%3E") 2 28,crosshair; }
-.draw-stroke-glow { stroke:#71b69f;stroke-opacity:.34;stroke-linecap:round;stroke-linejoin:round;filter:blur(2px); }
+.draw-stroke-glow { fill:none;stroke:#43af91;stroke-linecap:round;stroke-linejoin:round;pointer-events:none; }
+.draw-stroke-glow--wide { stroke-opacity:.3;filter:blur(5px); }
+.draw-stroke-glow--tight { stroke-opacity:.4;filter:blur(1.5px); }
 .draw-stroke-core { stroke:#2b2a28;stroke-linecap:round;stroke-linejoin:round; }
 .draw-stroke-group--transforming { transform-box:fill-box;transform-origin:center;animation:ink-poof .44s ease-out forwards; }
 @keyframes ink-poof { 0%{opacity:1;transform:scale(1)} 38%{opacity:.9;transform:scale(1.045)} 100%{opacity:0;transform:scale(1.15)} }
@@ -38,8 +40,13 @@
 .drawing-picker { position:absolute;left:50%;bottom:92px;transform:translateX(-50%);z-index:8;width:min(560px,calc(100vw - 32px));max-height:min(330px,calc(100svh - 240px));overflow:auto;padding:12px 14px 14px;border:1.5px solid var(--line);border-radius:16px;background:var(--paper-raised);box-shadow:0 8px 22px rgba(60,45,25,.22); }
 .drawing-picker legend { padding:0 6px;font:600 1rem system-ui,sans-serif;color:var(--graphite); }
 .drawing-picker > p { margin:2px 0 10px;font: .9rem/1.4 system-ui,sans-serif;color:var(--graphite-soft); }
-.drawing-picker__objects { display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px; }
+.drawing-picker__objects { display:block; }
+.drawing-picker__category { margin:8px 0 12px; }
+.drawing-picker__category h3 { margin:0 0 5px;color:var(--graphite-soft);font:600 .76rem system-ui,sans-serif;letter-spacing:.04em;text-transform:uppercase; }
+.drawing-picker__category-items { display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px; }
 .drawing-picker__objects button,.drawing-picker__actions button { min-height:44px;padding:7px 8px;border:1.5px solid var(--line);border-radius:10px;background:var(--paper);color:var(--graphite);font:600 .88rem system-ui,sans-serif;cursor:pointer; }
+.drawing-picker__category-items button { display:flex;min-height:76px;flex-direction:column;align-items:center;justify-content:center;gap:1px;padding:3px 2px;font-size:.75rem; }
+.drawing-picker__category-items img { width:48px;height:48px;object-fit:contain; }
 .drawing-picker__objects button:hover { background:#f0e6d2; }
 .drawing-picker__actions { display:flex;justify-content:flex-end;gap:8px;margin-top:10px;padding-top:8px;border-top:1px solid #d7cdbc; }
 .recognition-panel { position:absolute;left:50%;bottom:92px;transform:translateX(-50%);z-index:8;width:min(560px,calc(100vw - 32px));max-height:min(360px,calc(100svh - 240px));overflow:auto;padding:12px 14px 14px;border:1.5px solid var(--line);border-radius:16px;background:var(--paper-raised);box-shadow:0 8px 22px rgba(60,45,25,.22); }
@@ -47,6 +54,7 @@
 .recognition-panel > p { margin:4px 4px 10px;font:.88rem/1.4 system-ui,sans-serif;color:var(--graphite-soft); }
 .recognition-suggestions { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:8px 0; }
 .recognition-suggestions button { min-height:48px;padding:6px 8px;border:1.5px solid var(--line);border-radius:10px;background:var(--paper);color:var(--graphite);font:600 .9rem system-ui,sans-serif;cursor:pointer; }
+.recognition-suggestions button:first-child { color:var(--paper);background:var(--graphite); }
 .recognition-suggestions small { display:block;margin-top:3px;font-size:.72rem;font-weight:400;color:var(--graphite-soft); }
 .recognition-disclaimer { font-size:.76rem!important; }
 .recognition-panel > button { min-height:44px;margin:4px;padding:7px 10px;border:1.5px solid var(--line);border-radius:10px;background:var(--paper);color:var(--graphite);font:600 .86rem system-ui,sans-serif;cursor:pointer; }
@@ -59,11 +67,17 @@
  .draw-toolbar { bottom:140px;max-width:calc(100vw - 24px);overflow-x:auto;justify-content:flex-start;scrollbar-width:none; }
  .draw-toolbar::-webkit-scrollbar { display:none; }
  .draw-toolbar button { padding:6px 9px;font-size:.82rem; }
- .drawing-picker { left:12px;right:12px;bottom:132px;transform:none;width:auto;max-height:44svh;padding:10px; }
- .recognition-panel { left:12px;right:12px;bottom:132px;transform:none;width:auto;max-height:44svh;padding:10px; }
- .drawing-picker__objects { grid-template-columns:repeat(3,minmax(0,1fr));gap:5px; }
- .recognition-suggestions { grid-template-columns:1fr;gap:4px; }
- .recognition-suggestions button { min-height:42px;display:flex;align-items:center;justify-content:space-between;gap:8px;text-align:left; }
+ .drawing-picker { left:12px;right:12px;bottom:132px;transform:none;width:auto;max-height:40svh;padding:9px; }
+ .recognition-panel { left:12px;right:12px;bottom:132px;transform:none;width:auto;max-height:30svh;padding:9px; }
+ .drawing-picker__category { margin:5px 0 8px; }
+ .drawing-picker__category-items { grid-template-columns:repeat(4,minmax(0,1fr));gap:4px; }
+ .drawing-picker__category-items button { min-height:66px;font-size:.68rem; }
+ .drawing-picker__category-items img { width:40px;height:40px; }
+ .recognition-suggestions { grid-template-columns:repeat(3,minmax(0,1fr));gap:4px; }
+ .recognition-suggestions button { min-height:46px;padding:5px;display:flex;align-items:center;justify-content:center;text-align:center;font-size:.78rem; }
+ .recognition-panel > p { margin:3px 2px 6px;font-size:.8rem; }
+ .recognition-disclaimer { font-size:.68rem!important; }
+ .recognition-panel > button { min-height:40px;margin:3px;padding:5px 8px;font-size:.78rem; }
  .drawing-picker__objects button,.drawing-picker__actions button { font-size:.82rem;padding:6px 4px; }
 }
 @media(prefers-reduced-motion:reduce) {

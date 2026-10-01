@@ -5,7 +5,7 @@ import { catalog, MAX_WORD_LENGTH, resolveWord } from './catalog.js';
 
 test('catalog has 24 local 96px assets with stable metadata', () => {
   assert.equal(catalog.length, 24);
-  const manifest = JSON.parse(readFileSync('public/models/drawing-recognizer-24-candidate/manifest.json', 'utf8'));
+  const manifest = JSON.parse(readFileSync('public/models/drawing-recognizer-cnn/manifest.json', 'utf8'));
   assert.deepEqual(catalog.map(({ recognitionLabel }) => recognitionLabel), manifest.supportedLabels);
   for (const entry of catalog) {
     assert.match(entry.asset, new RegExp(`^/objects/${entry.id}\\.svg$`));
@@ -15,6 +15,14 @@ test('catalog has 24 local 96px assets with stable metadata', () => {
     assert.ok(entry.animation);
     assert.ok(Array.isArray(entry.aliases));
   }
+});
+
+test('active small-CNN keeps the 24-label catalog and validation-gated creation set', () => {
+  const manifest = JSON.parse(readFileSync('public/models/drawing-recognizer-cnn/manifest.json', 'utf8'));
+  assert.equal(manifest.labels.length, 25);
+  assert.ok(manifest.autoSpawnLabels.length < manifest.supportedLabels.length);
+  assert.ok(manifest.autoSpawnLabels.every(label => manifest.supportedLabels.includes(label)));
+  assert.deepEqual(manifest.validation.autoSpawnRule.allowedLabels, manifest.autoSpawnLabels);
 });
 
 test('all 24 labels map uniquely to model outputs and house plant has a display alias', () => {

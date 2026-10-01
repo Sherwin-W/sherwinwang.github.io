@@ -20,12 +20,24 @@ test('starts in Select mode, offers the accessible catalog, supports dragging an
   await expect(page.getByRole('textbox')).toHaveCount(0);
   await page.screenshot({ path: 'docs/playable-portfolio/screenshots/desktop.png' });
 
+  const starter = page.getByRole('button', { name: /Cat, use arrow keys/ });
+  const starterBounds = await starter.boundingBox();
+  await page.mouse.move(starterBounds.x + starterBounds.width / 2, starterBounds.y + starterBounds.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(starterBounds.x + starterBounds.width / 2 + 90, starterBounds.y + starterBounds.height / 2 + 70, { steps: 5 });
+  await page.mouse.up();
+  await expect.poll(async () => (await starter.boundingBox()).x).toBeGreaterThan(starterBounds.x + 40);
+  await starter.press('Delete');
+  await expect(starter).toHaveCount(0);
+  await page.reload();
+  await expect(page.getByRole('button', { name: /Cat, use arrow keys/ })).toHaveCount(0);
+
   await page.getByRole('button', { name: 'Objects', exact: true }).click();
   const picker = page.getByRole('group', { name: 'Choose an object' });
   await expect(picker).toBeVisible();
   await expect(picker.locator('.drawing-picker__objects button')).toHaveCount(24);
   await picker.getByRole('button', { name: 'Dog' }).click();
-  await expect(page.locator('.play-object')).toHaveCount(2);
+  await expect(page.locator('.play-object')).toHaveCount(1);
   const dog = page.getByRole('button', { name: /Dog, use arrow keys/ });
   const box = await dog.boundingBox();
   const trash = await page.locator('.canvas-trash').boundingBox();
@@ -51,8 +63,9 @@ test('mobile Brush draws with glow, manual picker replaces a sketch, and reduced
   await page.setViewportSize({ width: 390, height: 844 });
   await page.emulateMedia({ reducedMotion: 'reduce' });
   const modelRequests = [];
-  page.on('request', request => { if (request.url().includes('/models/drawing-recognizer-24-candidate/')) modelRequests.push(request.url()); });
+  page.on('request', request => { if (request.url().includes('/models/drawing-recognizer-cnn/')) modelRequests.push(request.url()); });
   await page.goto('/');
+  await page.screenshot({ path: 'docs/playable-portfolio/screenshots/mobile-select.png' });
   const starterSprite = page.locator('.play-object img');
   await expect.poll(() => starterSprite.evaluate(image => image.naturalWidth)).toBeGreaterThan(0);
   const svgPage = await page.context().newPage();
@@ -71,7 +84,7 @@ test('mobile Brush draws with glow, manual picker replaces a sketch, and reduced
   await page.mouse.move(rect.x + 160, rect.y + 365, { steps: 3 });
   await page.mouse.up();
   await expect(page.locator('.draw-stroke-core')).toHaveCount(1);
-  await expect(page.locator('.draw-stroke-glow')).toHaveCount(1);
+  await expect(page.locator('.draw-stroke-glow')).toHaveCount(2);
   const toolbarBounds = await page.locator('.draw-toolbar').boundingBox();
   expect(toolbarBounds.height).toBeLessThanOrEqual(60);
   expect(modelRequests).toEqual([]);
@@ -79,8 +92,8 @@ test('mobile Brush draws with glow, manual picker replaces a sketch, and reduced
   const picker = page.getByRole('group', { name: 'Choose an object' });
   await expect(picker).toBeVisible();
   await expect(picker.locator('.drawing-picker__objects button')).toHaveText([
-    'Cat', 'Dog', 'Rabbit', 'Bird', 'Fish', 'Butterfly', 'Tree', 'Flower', 'Mushroom', 'Cactus', 'Sun', 'Moon',
-    'Cow', 'Duck', 'Elephant', 'Frog', 'Leaf', 'Potted plant', 'Apple', 'Banana', 'Pizza', 'Chair', 'Airplane', 'Bicycle',
+    'Cat', 'Dog', 'Rabbit', 'Bird', 'Fish', 'Butterfly', 'Cow', 'Duck', 'Elephant', 'Frog',
+    'Tree', 'Flower', 'Mushroom', 'Cactus', 'Leaf', 'Potted plant', 'Apple', 'Banana', 'Pizza', 'Chair', 'Airplane', 'Bicycle', 'Sun', 'Moon',
   ]);
   await expect(page.locator('.draw-toolbar')).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'Type', exact: true })).toHaveCount(0);
@@ -95,6 +108,41 @@ test('mobile Brush draws with glow, manual picker replaces a sketch, and reduced
   await expect(page.locator('.play-object img[src$="/bicycle.svg"]')).toHaveCount(0);
   await expect(page.locator('.draw-stroke-core')).toHaveCount(1);
   await expect(page.getByRole('status')).toContainText('will not be checked again');
+});
+
+test('mobile picker object thumbnails and repeated manual additions stay dispersed', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/');
+  for (const label of ['Cat', 'Dog', 'Rabbit', 'Bird', 'Fish', 'Butterfly', 'Tree', 'Flower', 'Mushroom', 'Cactus', 'Sun', 'Moon', 'Cow', 'Duck', 'Elephant', 'Frog', 'Leaf', 'Potted plant', 'Apple', 'Banana', 'Pizza', 'Chair', 'Airplane', 'Bicycle']) {
+    await page.getByRole('button', { name: 'Objects', exact: true }).click();
+    const picker = page.getByRole('group', { name: 'Choose an object' });
+    await expect(picker.getByRole('button', { name: label })).toBeVisible();
+    await expect(picker.getByRole('button', { name: label }).locator('img')).toHaveAttribute('src', /\/objects\//);
+    await picker.getByRole('button', { name: label }).click();
+  }
+  const boxes = await page.locator('.play-object').evaluateAll(objects => objects.map(object => {
+    const rect = object.getBoundingClientRect();
+    return { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2, size: rect.width };
+  }));
+  expect(boxes).toHaveLength(25);
+  for (const box of boxes) {
+    expect(box.x).toBeGreaterThanOrEqual(0);
+    expect(box.x).toBeLessThanOrEqual(390);
+    expect(box.y).toBeGreaterThanOrEqual(0);
+    expect(box.y).toBeLessThanOrEqual(844);
+  }
+  for (let first = 0; first < boxes.length; first += 1) {
+    for (let second = first + 1; second < boxes.length; second += 1) {
+      expect(Math.hypot(boxes[first].x - boxes[second].x, boxes[first].y - boxes[second].y)).toBeGreaterThanOrEqual(0.6 * boxes[first].size);
+    }
+  }
+  await page.getByRole('button', { name: 'Objects', exact: true }).click();
+  const picker = page.getByRole('group', { name: 'Choose an object' });
+  const pickerBounds = await picker.boundingBox();
+  const dockBounds = await page.locator('.portfolio-dock').boundingBox();
+  expect(pickerBounds.y + pickerBounds.height).toBeLessThan(dockBounds.y);
+  await picker.getByRole('button', { name: 'Bicycle' }).scrollIntoViewIfNeeded();
+  await expect(picker.getByRole('button', { name: 'Bicycle' })).toBeInViewport();
 });
 
 test('touch pointer input draws without depending on the custom cursor', async ({ browser }) => {

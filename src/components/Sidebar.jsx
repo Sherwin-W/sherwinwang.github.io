@@ -1,5 +1,5 @@
 // src/components/Sidebar.jsx
-import React from 'react';
+import PropTypes from 'prop-types';
 import { Link, useLocation } from 'react-router-dom';
 
 const Sidebar = ({ isOpen, toggleSidebar }) => {
@@ -48,6 +48,11 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
       </ul>
     </div>
   );
+};
+
+Sidebar.propTypes = {
+  isOpen: PropTypes.bool.isRequired,
+  toggleSidebar: PropTypes.func.isRequired,
 };
 
 export default Sidebar;

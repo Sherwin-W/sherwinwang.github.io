@@ -1,5 +1,4 @@
 // src/pages/About.jsx
-import React from 'react';
 import NavigationButtons from '../components/NavigationButtons';
 import './About.css';
 
@@ -10,7 +9,7 @@ const About = () => {
         <div className="bento-item">
           <h2>Background</h2>
           <p>
-            I'm Sherwin, a passionate computer science student with interests in cybersecurity and artificial intelligence.
+            I&apos;m Sherwin, a passionate computer science student with interests in cybersecurity and artificial intelligence.
           </p>
         </div>
         <div className="bento-item">

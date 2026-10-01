@@ -1,5 +1,5 @@
 // src/components/Navbar.jsx
-import React from 'react';
+import PropTypes from 'prop-types';
 
 const Navbar = ({ toggleSidebar }) => {
   return (
@@ -9,6 +9,10 @@ const Navbar = ({ toggleSidebar }) => {
       </button>
     </div>
   );
+};
+
+Navbar.propTypes = {
+  toggleSidebar: PropTypes.func.isRequired,
 };
 
 export default Navbar;

@@ -1,44 +1,67 @@
 # Status
 
-Branch `feature/playable-portfolio` now contains the revised drawing-first
-interaction and evaluated batch-24 catalog. The interaction checkpoint is
-`924aba8`; the 24-object integration is complete and evaluated on this branch.
-Select is the initial mode. Visitors create objects by drawing with Brush or
-using the accessible object picker. Click-to-type and the Type toggle are
-removed from the visitor UI.
+Branch: `feature/playable-portfolio`. Overnight work continued from
+`dd22ef4`; prior interaction checkpoint `924aba8` and batch-24 MLP work are
+preserved. The selected active recognizer is now the small CNN at
+`public/models/drawing-recognizer-cnn/`; the MLP remains available for
+rollback. Overnight implementation, evaluation, screenshots, and handoff are
+completed on this feature branch.
 
-The canvas waits 1,500 ms after pointer-up before recognition and invalidates
-scheduled or in-flight results on new strokes, clearing, undo, mode changes,
-portfolio sheets, and unmount. Accepted results replace ink at the drawing
-center with a reversible transition. Uncertain results retain the sketch and
-show three suggestions plus the picker. Brush glow and cursor respect reduced
-motion and touch input.
+The drawing interaction stays Select-first, with Brush and an accessible
+24-item object picker for creation. The 1,500 ms post-pointer-up recognizer is
+local and lazy. Cancellation, stale-response invalidation, auto-transform,
+Undo, suggestion fallback, glowing strokes, mobile picker layout, touch input
+and reduced-motion behavior are covered. Recent completed fixes improved
+spawn spacing, result wording, restrained ink glow, narrow-screen suggestion
+placement, and a transition race that could clear a new stroke after an
+earlier accepted transformation.
 
-The active 24-output browser model is 311,140 bytes. Its validation-selected
-score/margin rule is >=0.94 / >=0.70 plus a validation-selected predicted-label gate: at least 20 accepted validation examples and >=90% per-label precision. Dog, Rabbit, Bird, Cow, Duck, Elephant, Frog, and Sun stay suggestion/picker-only. The final rule has 96.15% validation precision / 15.57% supported coverage and 95.72% / 15.35% held-out test. Supported-only raw top-1/top-3 are 58.25% / 78.40%; matching the UI's
-Other-filtered ranking gives 60.96% / 80.26%. Unknown rejection is a separate
-73.42% over eight named negative categories. Scores remain uncalibrated.
+Six bounded recognition experiments completed. The selected CNN weighs
+212,452 bytes; held-out metrics are 73.86%/88.95% overall top-1/top-3,
+71.99%/87.96% for supported classes ranked with the UI's exact `Other`
+filtering, and 85.17% unknown rejection over 7,200 negatives. The unchanged
+validation-selected auto gate gives 95.35% precision and 40.88% supported
+coverage on test. These Quick, Draw! scores do not reflect human sketches.
+The twelve-stroke browser integration set gets 7/12 top-1, 10/12 top-3, and
+four correct auto-transformations out of five (one Bicycle becomes
+Butterfly). Dog/Frog/Duck are weak. Scores are not calibrated.
 
-The model is weak on Dog, Rabbit, Bird, Cow, Duck, Elephant, and Frog. Sun's validation auto-accept precision missed the per-label gate. These categories remain available as suggestions and in the picker, not automatic creation. In the independent 12-drawing browser preprocessing
-set, UI-filtered top-1/top-3 were 5/12 and 8/12, with one auto-created object.
-These fixed synthetic examples are not a human drawing benchmark. Full
-per-class, confusion, browser, and timing results are linked from
-`VALIDATION.md` and `RECOGNITION.md`.
+All 36 roadmap illustrations are prepared in `public/objects/roadmap/`,
+matched to the catalog direction, but are intentionally not active catalog or
+recognition labels. The 24 active labels remain fully wired. The six bounded
+validation experiments, metrics, class table, and limitations are documented
+in `MODEL_COMPARISON.md`, `RECOGNITION.md`, and `VALIDATION.md`.
 
-The 24-object stage is complete; the remaining 36 candidates are only a
-roadmap. Do not add them until these results are reviewed. Missing project
-architecture diagrams, verified project links, and LinkedIn-profile
-confirmation remain tracked in `CONTENT_GAPS.md`. Claude's review file remains
-untracked and untouched. No push or deployment occurred.
+Review triage (Claude files remain untouched): `01-current-experience.md`
+finding “objects pile at center” resolved with deterministic dispersed spawn
+placement; misleading raw percentage language resolved with `Best match`
+wording and no score display; mobile overlay resolved by repositioning/scaling
+ink above the compact picker and panels; weak glow strengthened; text-only
+picker resolved with labeled thumbnails and category grouping. Its request to
+start in Brush is obsolete because the newer explicit product direction
+requires Select-first; hint copy now explains Brush. The listed cat, dog,
+duck/frog, banana, bicycle and moon art defects were corrected and included in
+the all-art visual review. Extra starter objects were deferred because the
+specified first-load direction keeps one starter cat and most of the canvas
+empty. `02-expanded-object-art-direction.md` is adopted for the 36 roadmap-only
+assets; none are mislabeled recognition-supported. The review folder was
+checked at this milestone and contained only those two completed files (no
+drafts or new findings). The separate root Claude review artifact is untracked
+and untouched.
 
-Overnight continuation began from checkpoint `51f33c7`. `RUNBOOK.md` now
-authorizes work until 07:00 America/Los_Angeles on 2026-10-01 (or useful
-backlog completion / usage exhaustion) and allows six bounded validation
-experiments. The current full lint baseline has ten errors in seven legacy
-React components; these are queued for minimal cleanup. Next: validate model
-alternatives using train/validation only, audit the browser interaction, and
-prepare the remaining 36 asset-only objects without changing active labels.
-At milestone boundaries, check `claude-reviews/`, ignore drafts, and triage
-completed reviews in this status file. Current Claude review directory had
-no completed files at the first check; the existing root Claude review result
-remains untracked and untouched.
+Verification is complete: `npm run test` passed 20/20, `npm run lint` passed,
+`npm run build` passed, and the corrected full Playwright run passed 15/15.
+Independent source review found no concrete regression in model contracts,
+cancellation, or mobile panel placement. Screenshots were updated by browser
+tests and art review. Human sketch benchmark, physical mobile, network cold
+loading, and scaling to 30 simultaneous objects remain unmeasured. A synthetic
+single-point tap auto-created Banana; this is a known false-positive case.
+Missing verified project diagrams/URLs and LinkedIn confirmation remain
+tracked in `CONTENT_GAPS.md`.
+
+No push, deploy or main merge has occurred. Continue only until 07:00
+America/Los_Angeles on 2026-10-01, useful authorized work is complete, or
+account usage is exhausted. The useful authorized implementation queue is
+complete. The next evidence-dependent step is to collect an independent human
+sketch set and decide whether automatic creation should remain enabled before
+public release; do not tune against the held-out test split.

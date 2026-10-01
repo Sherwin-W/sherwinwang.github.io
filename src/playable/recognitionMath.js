@@ -91,3 +91,79 @@ export function predictScores(input, layers) {
   const total = exponentials.reduce((sum, value) => sum + value, 0)
   return exponentials.map((value) => value / total)
 }
+
+/** Unpack the small CNN's named, contiguous tensor blocks from its manifest. */
+export function unpackCnnWeights(weights, packing) {
+  return Object.fromEntries(Object.entries(packing).map(([name, part]) => [
+    name,
+    weights.subarray(part.offsetFloats, part.offsetFloats + part.lengthFloats),
+  ]))
+}
+
+function convolve(input, inputSize, inputChannels, outputChannels, weights, bias) {
+  const output = new Float32Array(outputChannels * inputSize * inputSize)
+  for (let channel = 0; channel < outputChannels; channel += 1) {
+    for (let y = 0; y < inputSize; y += 1) {
+      for (let x = 0; x < inputSize; x += 1) {
+        let sum = bias[channel]
+        for (let source = 0; source < inputChannels; source += 1) {
+          for (let ky = -1; ky <= 1; ky += 1) {
+            const sourceY = y + ky
+            if (sourceY < 0 || sourceY >= inputSize) continue
+            for (let kx = -1; kx <= 1; kx += 1) {
+              const sourceX = x + kx
+              if (sourceX < 0 || sourceX >= inputSize) continue
+              const inputIndex = source * inputSize * inputSize + sourceY * inputSize + sourceX
+              const weightIndex = channel * inputChannels * 9 + source * 9 + (ky + 1) * 3 + kx + 1
+              sum += input[inputIndex] * weights[weightIndex]
+            }
+          }
+        }
+        output[channel * inputSize * inputSize + y * inputSize + x] = Math.max(0, sum)
+      }
+    }
+  }
+  return output
+}
+
+function maxPool2(input, channels, inputSize) {
+  const outputSize = inputSize / 2
+  const output = new Float32Array(channels * outputSize * outputSize)
+  for (let channel = 0; channel < channels; channel += 1) {
+    for (let y = 0; y < outputSize; y += 1) {
+      for (let x = 0; x < outputSize; x += 1) {
+        const source = channel * inputSize * inputSize + (y * 2) * inputSize + x * 2
+        output[channel * outputSize * outputSize + y * outputSize + x] = Math.max(
+          input[source], input[source + 1], input[source + inputSize], input[source + inputSize + 1],
+        )
+      }
+    }
+  }
+  return output
+}
+
+function dense(input, weights, bias, outputSize, relu) {
+  const output = new Float32Array(outputSize)
+  for (let target = 0; target < outputSize; target += 1) {
+    let sum = bias[target]
+    for (let source = 0; source < input.length; source += 1) {
+      sum += input[source] * weights[source * outputSize + target]
+    }
+    output[target] = relu ? Math.max(0, sum) : sum
+  }
+  return output
+}
+
+/** Run the fixed 28x28 conv8/conv16/dense64 browser candidate. */
+export function predictCnnScores(input, model) {
+  if (input.length !== 784) throw new Error('Drawing input has the wrong size')
+  const first = maxPool2(convolve(input, 28, 1, 8, model.conv1Weights, model.conv1Bias), 8, 28)
+  const second = maxPool2(convolve(first, 14, 8, 16, model.conv2Weights, model.conv2Bias), 16, 14)
+  const hidden = dense(second, model.dense1Weights, model.dense1Bias, 64, true)
+  const logits = dense(hidden, model.dense2Weights, model.dense2Bias, 25, false)
+  let max = -Infinity
+  for (const value of logits) max = Math.max(max, value)
+  const exponential = logits.map((value) => Math.exp(value - max))
+  const total = exponential.reduce((sum, value) => sum + value, 0)
+  return exponential.map((value) => value / total)
+}

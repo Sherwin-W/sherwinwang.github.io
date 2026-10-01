@@ -1,34 +1,43 @@
 # Integration contracts
 
-The active model milestone contains 24 supported labels. Interaction milestone
-1 is preserved in local checkpoint `924aba8`; it starts in Select mode and
-creates only through Brush or the accessible object picker. Only the lead edits
-shared contracts and integrates model/artwork/catalog batches.
+The interaction milestone remains Select-first: creation is available through
+Brush or the accessible object picker; the visible UI has no typing mode.
+Only the lead edits shared contracts and integrates model/art/catalog batches.
 
-`catalog.js` entries provide a stable `id`, display `label`, optional distinct
-`recognitionLabel`, aliases, local SVG asset, dimensions, and animation key. The
-`house plant` model label maps to the `house-plant.svg` asset displayed as
-Potted plant. Select clicks do not create objects. Legacy text resolution stays
-covered by unit tests but is not a visible creation interaction.
+Each `catalog.js` entry has a stable ID, visible label, recognition label,
+aliases, local SVG and animation key. The `house plant` model output maps to
+the Potted plant catalog item. Select clicks never create objects. Legacy
+word resolution helpers remain tested for compatibility, not exposed as a
+visitor interaction.
 
-The canvas waits 1,500 ms after pointer-up before automatic recognition. New
-strokes, Clear, Undo stroke, mode changes, opening a portfolio sheet, and
-unmounting cancel the timer and invalidate pending results. Recognition stays
-lazy and local in a Worker. The Worker loads
-`public/models/drawing-recognizer-24-candidate/manifest.json` and its 311,140
-byte weights only when recognition is requested. The active manifest has 24
-supported outputs plus `other`; the prior 12-label model remains in its own
-folder for comparison and rollback.
+The canvas waits 1,500 ms after pointer-up before local recognition in a lazy
+Web Worker. New strokes, Clear, Undo stroke, mode changes, opening a portfolio
+sheet, and unmount invalidate scheduled or pending results. Creation is guarded
+against duplicates. Accepted transformations keep source ink until object
+insertion succeeds, then allow Undo transformation without immediately
+retrying. Uncertain/unsupported results preserve ink and show three ranked
+suggestions plus the picker. The recognizer receives clean stroke data, never
+the glow or a screenshot.
 
-Automatic creation requires a supported 25-output winner, score >= 0.94, margin over the runner-up >= 0.70, and membership in the validation-selected `autoSpawnLabels` allowlist. A label enters the allowlist only after at least 20 accepted validation predictions and at least 90% per-label precision. Dog, Rabbit, Bird, Cow, Duck, Elephant, Frog, and Sun remain in suggestions and the picker but are not auto-created. The final rule achieved 96.15% validation precision / 15.57% supported coverage and 95.72% / 15.35% on held-out test. The separate unknown threshold is 0.21. These are sampled-set results; model scores are uncalibrated.
+The active model is `public/models/drawing-recognizer-cnn/` (212,452 bytes,
+8/16-channel CNN with dense64 and 25 outputs). The prior 24-label MLP is
+preserved in `public/models/drawing-recognizer-24-candidate/` for rollback and
+comparison; the earlier 12-label checkpoint also remains available.
 
-Automatic acceptance inserts at the drawing center. Ink stays until insertion
-succeeds and then fades through a short local glow. Undo transformation removes
-the object and restores original strokes without immediately retrying. When
-uncertain or unsupported, the ink stays visible with three supported
-suggestions and the picker. The model receives clean stroke arrays, never the
-rendered glow or a screenshot.
+The validation-selected acceptance rule requires the winning supported score
+to be >=0.75, its margin over the runner-up >=0.66, and its label to be in the
+allowlist: Cat, Rabbit, Fish, Butterfly, Tree, Flower, Mushroom, Cactus, Sun,
+Duck, Leaf, Potted plant, Apple, Banana, Pizza, Chair, Airplane, or Bicycle.
+The allowlist requires at least 20 validation acceptances and at least 90%
+per-label precision. Dog, Bird, Moon, Cow, Elephant, and Frog remain suggestion
+and picker-only. Scores are uncalibrated softmax outputs, not confidence
+probabilities. The threshold and per-label rule were chosen on validation,
+not the held-out test set. CNN held-out auto-creation precision/coverage were
+95.35% / 40.88%; the separate 12-example browser fixture set auto-created five
+objects, four correctly and one incorrectly.
 
-Catalog expansion proceeds in evaluated batches. The first 24 are wired across
-training, exported labels, catalog, original SVG artwork, and browser inference.
-Do not continue toward 60 until the 24-class evidence is reviewed.
+The 24 active catalog labels are wired through training, exported weights,
+catalog, original illustrations and browser inference. The remaining 36
+illustrations are roadmap-only under `public/objects/roadmap/`; they are not
+registered or recognition-supported. Do not expand active recognition until
+the 24-class quality and auto-creation reliability are preserved.

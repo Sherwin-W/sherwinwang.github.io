@@ -1,102 +1,138 @@
 # Drawing recognition
 
-## Active 24-label browser model
+## Active browser model
 
-The active browser recognizer is the 24-object batch model at
-`public/models/drawing-recognizer-24-candidate/`. It extends the verified
-12-class checkpoint with Cow, Duck, Elephant, Frog, Leaf, Potted plant (`house
-plant` is the exact training prompt), Apple, Banana, Pizza, Chair, Airplane,
-and Bicycle. The Quick, Draw! source provides the exact labels under CC BY 4.0.
-The model runs locally in a lazy, dependency-free Web Worker; no visitor drawing
-is uploaded.
+The active recognizer is a small 24-label CNN plus `other`, stored at
+`public/models/drawing-recognizer-cnn/`. It has 53,113 float32 parameters,
+212,452 bytes of weights and SHA-256
+`6d8541e7267799d43dea6f092a2506c9b70babd30e42ecd1e75693b828703426`. It runs
+locally in a lazy, dependency-free Web Worker; drawings are not uploaded.
+Python and JavaScript scores for every output match within absolute tolerance
+`1e-5` (measured maximum difference `2.3841858e-7`). Fixed input fixtures and
+Python reference scores are in `scripts/drawing-recognition/fixtures/model-parity-cnn.json`.
 
-Training and evaluation are reproducible with `batch24_pipeline.py`,
-`batch24_train.py`, `batch24_calibrate_autospawn.py`, `batch24_evaluate.py`,
-and `export_batch24_parity.py`. Reproduce the existing data/model run and its
-validation/test reporting with:
+The exact supported training labels are Cat, Dog, Rabbit, Bird, Fish,
+Butterfly, Tree, Flower, Mushroom, Cactus, Sun, Moon, Cow, Duck, Elephant,
+Frog, Leaf, House plant (shown as Potted plant), Apple, Banana, Pizza, Chair,
+Airplane and Bicycle. `Other` examples are car, house, clock, cloud, star,
+mountain, violin and toothbrush. Quick, Draw! exact labels are sourced from
+Google Creative Lab under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
+The expanded negative set excludes Apple and Airplane, now supported labels.
+Scripts for reproducible preparation/training and the bounded overnight
+experiments are under `scripts/drawing-recognition/`; generated datasets and
+experiment scratch output stay local under `.cache/`.
 
-```powershell
-python scripts/drawing-recognition/batch24_train.py
-python scripts/drawing-recognition/batch24_calibrate_autospawn.py
-python scripts/drawing-recognition/batch24_evaluate.py
-python scripts/drawing-recognition/export_batch24_parity.py
-```
+From a fresh checkout with Python, NumPy, scikit-learn and CPU PyTorch
+installed, `python scripts/drawing-recognition/prepare_overnight_data.py`
+fetches the deterministic split cache into ignored `.cache/`. Then
+`python scripts/drawing-recognition/run_overnight_plan.py` runs the six
+predeclared validation experiments with individual timeouts. The CNN weights
+are exported and validation gate selected by
+`python scripts/drawing-recognition/export_overnight_cnn.py`; it writes a
+candidate model and parity fixture under `.cache/`, keeping the active public
+weights untouched. Only after choosing on validation, run
+`python scripts/drawing-recognition/evaluate_overnight_cnn_test.py` once for
+held-out evaluation. This final step overwrites the checked-in test report,
+so do not run it as a tuning loop. The canonical committed weights were
+promoted from that candidate and their hash is recorded above.
 
-The deterministic sampler uses non-overlapping train,
-validation, and test windows, seed 20260930, 300 rows per window. It sampled
-1,200 train, 600 validation, and 600 test examples per supported label; eight
-Other categories each contributed 600/900/900 rows. Total split sizes were
-33,600 / 21,600 / 21,600. Training ran once on CPU for 4.33 seconds with a
-20-iteration maximum; the fit reached that bound without convergence and was
-not repeatedly retrained. Range requests fetched 62,308,352 bytes including
-headers. The 784 ? 96 ? 25 model weighs 311,140 bytes.
+The CNN was trained for 12 CPU epochs in 53.055 seconds. Validation accuracy
+was still improving at the epoch limit, so it is not described as converged.
+No visitor data or paid service is involved. The previous 24-label MLP remains
+at `public/models/drawing-recognizer-24-candidate/` and the 12-label model is
+preserved separately.
 
-The expanded `Other` labels are car, house, clock, cloud, star, mountain,
-violin, and toothbrush. Apple and Airplane were removed from the negative set
-before training them as supported classes. The reject threshold is 0.21,
-selected on validation for balanced supported-vs-Other behavior.
+## Model comparison and selection
 
-## Results and limitations
+Six bounded experiments were scheduled and recorded in
+`MODEL_COMPARISON.md`: active MLP baseline, converged soft-intensity MLP,
+thresholded MLP, sqrt-intensity MLP, small CNN, and an identical-validation
+comparison of the old 12- and 24-label models over their shared classes. The
+CNN had the strongest validation ranking and rejection measurements among the
+tested 24-class candidates; its later single held-out test pass was not used
+for tuning. Comparison denominators and each input representation are stated
+in that report.
 
-On the untouched test split, overall 25-output top-1/top-3 are 62.93%/81.95%.
-Supported-only raw 25-output top-1/top-3 are 58.25%/78.40%. The browser filters
-`Other` before ranking suggestions; using that exact supported-only ranking,
-top-1/top-3 are 60.96%/80.26%. Unknown rejection is separate at 73.42% across
-the eight named negative categories.
+On 21,600 held-out Quick, Draw! examples (600 per supported label and 900 per
+each of eight negative categories), the CNN's overall 25-output top-1/top-3
+were **73.86% / 88.95%**. On the 14,400 supported rows, filtering `Other` and
+ranking the remaining labels exactly as the UI does gives **71.99% / 87.96%**.
+Unknown rejection is separate: `Other` won on **85.17% of 7,200** examples
+from the eight named negative categories. The test data was not used to select
+the thresholds.
 
-Automatic creation requires a supported 25-output winner, score >= 0.94, margin over the runner-up >= 0.70, and membership in a label allowlist selected from validation only. A label must have at least 20 accepted validation predictions and >=90% precision for that predicted label. Dog, Rabbit, Bird, Cow, Duck, Elephant, Frog, and Sun fail this per-label gate and remain in ranked suggestions and the manual picker. The final rule had 96.15% validation precision (2,172/2,259) and 15.57% supported coverage; on held-out test it had 95.72% precision (2,146/2,242) and 15.35% coverage. Model outputs remain uncalibrated scores, not probabilities of correctness. Model quality varies sharply: Dog, Bird, Elephant, Frog, and Duck have low top-1/top-3 performance. Largest held-out confusions include Frog?Other
-(130/600), Dog?Cow (114/600), Duck?Bird (102/600), Elephant?Other (97/600),
-Bird?Duck (93/600), and Cow?Dog (71/600). Full class values and confusion
-matrix are in `recognition-metrics-24-candidate.json`; the validation rule selection is in
-`autospawn-validation-24-candidate.json`.
+| Supported label | UI-ranked top-1 | UI-ranked top-3 |
+| --- | ---: | ---: |
+| Cat | 58.8% | 80.5% |
+| Dog | 35.0% | 77.5% |
+| Rabbit | 57.8% | 81.7% |
+| Bird | 43.5% | 82.3% |
+| Fish | 85.0% | 92.0% |
+| Butterfly | 87.2% | 93.0% |
+| Tree | 74.0% | 92.8% |
+| Flower | 80.2% | 91.0% |
+| Mushroom | 87.3% | 95.7% |
+| Cactus | 76.3% | 92.7% |
+| Sun | 86.3% | 91.8% |
+| Moon | 75.5% | 88.8% |
+| Cow | 70.8% | 88.2% |
+| Duck | 54.5% | 76.8% |
+| Elephant | 58.3% | 83.5% |
+| Frog | 35.8% | 69.0% |
+| Leaf | 71.5% | 85.7% |
+| Potted plant | 82.7% | 91.3% |
+| Apple | 92.0% | 95.2% |
+| Banana | 74.5% | 92.0% |
+| Pizza | 84.5% | 93.3% |
+| Chair | 88.2% | 93.8% |
+| Airplane | 75.0% | 86.5% |
+| Bicycle | 93.0% | 95.8% |
 
-Held-out per-class raw 25-output top-1/top-3 percentages (the Other output participates in this table):
+Dog, Frog, and Duck remain weak classes; their suggestions may be inaccurate.
+Common held-out confusions include Dog→Cow (105/600), Duck→Bird (84/600),
+Frog→Other (174/600), Bird→Duck (106/600), and Cow→Dog (55/600). Full
+per-source rejection and the complete confusion matrix are in
+`recognition-metrics-cnn-candidate.json`.
 
-| Label | Top-1 | Top-3 | Label | Top-1 | Top-3 |
-| --- | ---: | ---: | --- | ---: | ---: |
-| Cat | 42.8 | 66.2 | Cow | 58.3 | 79.0 |
-| Dog | 25.8 | 64.7 | Duck | 48.3 | 76.3 |
-| Rabbit | 45.2 | 72.7 | Elephant | 30.5 | 58.7 |
-| Bird | 33.8 | 72.2 | Frog | 19.5 | 51.2 |
-| Fish | 72.0 | 85.8 | Leaf | 56.8 | 75.2 |
-| Butterfly | 71.8 | 85.0 | Potted plant | 71.0 | 86.3 |
-| Tree | 63.2 | 85.8 | Apple | 87.2 | 93.3 |
-| Flower | 59.8 | 80.0 | Banana | 70.0 | 87.5 |
-| Mushroom | 76.2 | 89.2 | Pizza | 62.5 | 79.0 |
-| Cactus | 54.0 | 73.3 | Chair | 83.0 | 89.5 |
-| Sun | 73.3 | 84.7 | Airplane | 58.5 | 76.3 |
-| Moon | 54.5 | 81.0 | Bicycle | 79.8 | 88.8 |
+## Automatic creation and unknown handling
 
-All 24 labels are wired in the active manifest, catalog picker, original
-vector artwork, and browser ranking. Weak model classes remain available by
-picker and suggestions, but their observed evidence is clear in the table and
-JSON rather than described as uniformly reliable.
+Thresholds were selected on the 21,600-row validation split only: winning
+score >=0.75 and margin over runner-up >=0.66, plus a per-predicted-label gate
+requiring at least 20 accepted validation examples and >=90% precision. The
+enabled labels are Cat, Rabbit, Fish, Butterfly, Tree, Flower, Mushroom,
+Cactus, Sun, Duck, Leaf, Potted plant, Apple, Banana, Pizza, Chair, Airplane
+and Bicycle. Dog, Bird, Moon, Cow, Elephant and Frog remain suggestions and
+picker-only. Validation auto-spawn precision/coverage were **95.04%**
+(5,710/6,008) / **41.25%** of supported examples. With that rule unchanged,
+the held-out test was **95.35%** precision (5,674/5,951) / **40.88%**
+supported coverage. These are sampled-dataset measurements, not calibrated
+confidence or a guarantee for visitor drawings.
 
-## Browser integration examples
+The separate validation-selected unknown rejection threshold is 0.23. On test,
+rejection varied by source: car 80.9%, house 89.3%, clock 91.2%, cloud 84.9%,
+star 79.7%, mountain 90.9%, violin 79.0%, toothbrush 85.4%. This threshold is
+not the same as auto-spawn acceptance. Blank raster handling is explicit;
+uncertain/unsupported sketches retain their ink and offer three suggestions
+plus the accessible picker.
 
-A separate set of twelve authored polylines for the new categories ran through
-the browser pointer path, production rasterizer, Worker, and active model at
-390?844. UI-filtered top-1/top-3 were 5/12 and 8/12; one object auto-created.
-Cow, Elephant, Banana, and Bicycle missed the top three. This small
-integration set is synthetic, authored by the implementer, and not a human
-benchmark or training/threshold data. Per-drawing rankings and timings are in
-`browser-fixture-results-24.json`; geometry is in
-`tests/fixtures/batch24-drawings.json`. The actual Worker returns its explicit
-blank state for a zero-pixel raster. A pointer tap contains enough ink to be
-treated as a sketch, so the single-point example was rejected as unsupported;
-a multi-line scribble was uncertain and an unsupported house was rejected.
-These controls are recorded separately and do not count toward class accuracy.
+## Browser preprocessing integration set
 
-The training and validation artifacts record the per-label gate. The active manifest enforces it before auto-creation. Four fixed binary arrays are exported by
-`export_batch24_parity.py`; `npm run test` runs each through the actual
-JavaScript math against the Python reference scores for all 25 outputs at
-absolute tolerance 1e-5. The candidate parity fixture is bound to the weight
-SHA-256. The earlier 13-output model remains available and its independent
-parity test is retained.
+Twelve independently authored polylines, one for each of the twelve expanded
+labels, were run through the actual browser rasterizer, selected Worker and
+UI supported-label filtering in Chromium at 390×844 using the local Vite
+server. Correct UI top-1 was **7/12**, top-3 **10/12**. Five objects
+auto-created: **4 correct / 5 accepted (80%)**, with **4/12 correct auto
+coverage**. The wrong one transformed the Bicycle fixture into Butterfly,
+even though Bicycle was suggestion rank three. The five accepted labels were
+Potted plant, Banana, Pizza, Chair and Bicycle; only four transformations
+were correct. Cow, Elephant, Apple and Airplane were outside the UI top three.
+This tiny implementer-authored integration set is not a human-drawing
+benchmark and was not used for training or threshold tuning. Blank raster,
+scribble and unsupported house controls are separately recorded in
+`cnn-browser-fixture-results.json` and `browser-fixture-results-cnn.json`.
 
-Browser interaction tests cover debounce, long pointer holds, cancellation,
-manual selection, suggestions, and Undo transformation. Local timing boundaries
-and the measured cold/warm paths are in `VALIDATION.md`. The 24-class model
-improves catalog coverage but lowers overall recognition and unknown rejection
-compared with the earlier 12-class model. No classes beyond this batch are
-integrated; review these weak categories before planning the remaining 36.
+The browser integration discrepancy is material: sampled Quick, Draw!
+performance is substantially better than the 12 authored strokes, and one
+confident accepted prediction was visibly wrong. Human-drawn evaluation and
+possibly revised auto-creation behavior remain needed before treating the
+system as dependable outside the sampled domain.

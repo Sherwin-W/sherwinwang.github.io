@@ -1,22 +1,33 @@
 # Tasks
 
-- P0 checkpoint: preserved existing work; revised interaction checkpoint
-  `924aba8` is committed on `feature/playable-portfolio`.
-- I1 current-12 interaction: complete and verified before catalog expansion.
-  Select-first, Brush, accessible picker, pause/cancellation, auto-transform,
-  Undo/retry, cursor, glow, touch and reduced motion are in the checkpoint.
-- M1 validation-gated creation: complete. Auto-creation requires score >=0.94,
-  margin >=0.70, and a predicted label with at least 20 validation acceptances
-  and >=90% precision. Final validation precision/coverage are 96.15% / 15.57%;
-  held-out test is 95.72% / 15.35%. Eight weak labels stay picker/suggestion-only.
-- C1 batch 24: integrated and evaluated. Twelve additional exact labels,
-  original art, adjusted Other classes, 24 model outputs, JavaScript parity,
-  held-out metrics, and browser-preprocessing fixtures are present.
-- I2 verification: complete after the 24-class integration; unit, browser,
-  build, lint, desktop/mobile screenshot, and model-parity checks are recorded
-  in `VALIDATION.md`.
-- C2 expansion from 24 toward 60: intentionally not started. Review class
-  quality and choose the next batch before changing the model again.
+- P0 checkpoint: preserved prior work in `51f33c7`, overnight authorization
+  in `dd22ef4`, and the Select-first interaction checkpoint `924aba8`.
+- I1 interaction: complete. Select-first, Brush, object picker, delayed local
+  recognition, cancellation, reversible auto-transformation, ranked fallback,
+  cursor, glow, touch and reduced motion are implemented.
+- I2 review fixes: complete. Dispersed manual object placement, clearer
+  uncalibrated suggestion copy, compact picker/panel placement, stronger
+  readable ink, thumbnails/grouping, art revisions and transition-race fix
+  are covered by browser/unit checks. Review triage is in `STATUS.md`.
+- M1 recognition gate: current selected CNN rule uses score >=0.75, margin
+  >=0.66, and the validation-selected 18-label allowlist. Test auto precision
+  / supported coverage: 95.35% / 40.88%. Dog, Bird, Moon, Cow, Elephant and
+  Frog remain suggestion/picker-only.
+- M2 model investigation: six bounded validation experiments and one
+  held-out CNN test pass complete. Python/JavaScript parity is covered for
+  all outputs. Comparison and exact metric denominators are in
+  `MODEL_COMPARISON.md`.
+- C1 active batch 24: complete. Labels, original art, Quick Draw training,
+  exported CNN, catalog, browser inference, class metrics and fixtures are
+  linked end-to-end.
+- C2 remaining 36: original artwork and metadata are complete in a separate
+  roadmap-only directory. Do not mark these recognition-supported or add them
+  to the active catalog/model before a separately evaluated expansion.
+- I3 final verification: complete. Node tests 20/20, lint, build, Python/JS
+  parity, artwork/browser checks and full Playwright 15/15 passed. The starter
+  cat drag/delete/session persistence is explicitly covered.
+- H1 morning handoff: `MORNING_REPORT.md` complete; checkpoint locally on the
+  feature branch.
 
-Claude's untracked review file is excluded from the checkpoint and must remain
-untouched. Do not push or deploy.
+Do not push, deploy or merge to main. Leave Claude's untracked reviews and
+drafts untouched; inspect completed reviews at milestone boundaries.

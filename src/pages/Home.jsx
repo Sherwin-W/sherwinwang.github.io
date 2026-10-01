@@ -32,7 +32,7 @@ export default function Home() {
         <span className="folio-number">01 / a little room for ideas</span>
         <h1>Hello, I&apos;m Sherwin</h1>
         <p>Computer science student with interests in<br className="desktop-break" /> cybersecurity and artificial intelligence.</p>
-        <p className="sketchbook-hint"><span className="hint-initial">Select and move objects, or switch to Brush to draw one.</span><span className="hint-after-spawn">Drag objects to the bin to remove them.</span></p>
+        <p className="sketchbook-hint"><span className="hint-initial">Choose Brush, draw a shape, and pause to make an object. Use Objects for the picker.</span><span className="hint-after-spawn">Drag objects to the bin to remove them.</span></p>
       </header>
       <nav className="portfolio-dock" aria-label="Portfolio and canvas controls">
         <div className="portfolio-links">

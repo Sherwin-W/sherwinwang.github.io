@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { addObject, clampPoint, deleteObject, getObjectSize, initialInteraction, MAX_OBJECTS, moveObject, transitionInteraction, trashContainsPoint } from './interaction.js';
+import { addObject, clampPoint, deleteObject, findOpenSpawnPoint, getObjectSize, initialInteraction, MAX_OBJECTS, moveObject, transitionInteraction, trashContainsPoint } from './interaction.js';
 
 const entry = { id: 'cat', label: 'Cat' };
 const bounds = { width: 400, height: 300 };
@@ -29,6 +29,18 @@ test('uses larger art on wide canvases while preserving mobile sizing', () => {
   assert.equal(getObjectSize(390), 96);
   assert.equal(getObjectSize(900), 120);
   assert.equal(addObject([], entry, { x: 200, y: 150 }, { width: 1440, height: 900 }, 'wide').objects[0].size, 120);
+});
+
+test('manual picker positions remain dispersed and within the mobile canvas', () => {
+  const mobile = { width: 390, height: 844 };
+  let objects = [{ id: 'starter', x: 0.68 * mobile.width, y: 0.58 * mobile.height, size: 96 }];
+  for (let index = 0; index < 24; index += 1) {
+    const point = findOpenSpawnPoint(objects, mobile, 96);
+    assert.ok(point.x >= 48 && point.x <= mobile.width - 48);
+    assert.ok(point.y >= 48 && point.y <= mobile.height - 48);
+    assert.ok(objects.every((object) => Math.hypot(point.x - object.x, point.y - object.y) >= 57.6));
+    objects = [...objects, { id: `picked-${index}`, ...point, size: 96 }];
+  }
 });
 
 test('moves and deletes only the requested object', () => {

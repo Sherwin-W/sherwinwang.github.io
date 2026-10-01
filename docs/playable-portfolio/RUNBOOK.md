@@ -38,7 +38,8 @@ Do not run Claude and Codex as competing source writers in one checkout.
 
 ## Model and usage policy
 
-Use one strong Codex coordinator and at most two small coding workers.
+Use one strong Codex coordinator and at most two workers alongside the lead
+(three concurrent workers maximum).
 Use fresh bounded worker prompts instead of copying the whole conversation.
 Ask workers to read only the relevant brief, contracts and owned files.
 Maximum three concurrent implementation workers.
@@ -69,12 +70,14 @@ evaluated, including 24 labels, original artwork, adjusted Other training
 classes, model/runtime parity, per-class holdout evidence, and browser
 preprocessing fixtures. See `STATUS.md` and `VALIDATION.md`.
 
-The 24-object recognizer remains the active supported catalog unless measured
-validation evidence shows that expansion preserves its per-class quality and
-auto-creation reliability. The remaining 36 illustrations and metadata may
-be prepared separately, but asset-only entries must not be presented as
-recognition-supported. Preserve user work, commit only locally, and do not
-push or deploy.
+The active supported catalog remains at 24 objects. Six bounded recognition
+experiments selected a small CNN for better validation ranking and
+auto-creation coverage; the prior MLP remains preserved for rollback. The
+remaining 36 illustrations and metadata are prepared separately, but
+asset-only entries must not be presented as recognition-supported. Do not
+expand the active recognizer until validation shows that existing-class
+quality and auto-creation reliability are preserved. Preserve user work,
+commit only locally, and do not push or deploy.
 
 ## Unattended policy
 
@@ -111,20 +114,25 @@ measured replacement is independently reviewed and integrated.
 
 Use repository scripts where available.
 Meaningful automated checks:
-- Exact/alias/typo/ambiguous/unknown word cases.
-- Interaction mode transitions and spawn/delete behavior.
-- Drawing cancellation and stale asynchronous recognition responses.
+- Catalog label/asset contracts and retained resolver cases (word resolution
+  is not a visible typing interaction).
+- Select/Brush/picker transitions, drag, spawn, deletion, and cancellation.
+- Drawing debounce, stale asynchronous results, accepted transformation,
+  uncertain/unsupported results, and Undo transformation.
 
 Browser checks when browser tooling is available:
-- Type cat, spawn it, drag it, delete it.
+- Start in Select, open the picker, draw in Brush, and verify object creation.
+- Drag an object, open a portfolio sheet, delete an object.
 - Drag release outside the canvas and pointer cancellation.
-- Draw multiple strokes, submit, accept a result or handle uncertainty.
+- Draw multiple strokes, pause for automatic recognition, accept a result or
+  handle uncertainty and use the manual picker.
 - Open project sheet, keyboard navigate, Escape, focus restoration.
 - Narrow mobile viewport and reduced motion.
 - Repeated spawning, missing asset, recognition loading/failure.
 
 Capture desktop and mobile screenshots.
-Measure typed-spawn timing over repeated trials and record sample count.
+Measure pointer-up-to-visible-result and Worker timing separately; record
+sample count and local/network conditions separately.
 Inspect console errors and the production build.
 If browser tooling is unavailable, report "not browser-verified"; do not
 substitute unit tests for claims about visual quality or smoothness.

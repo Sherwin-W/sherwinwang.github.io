@@ -4,12 +4,11 @@ import { catalog } from './catalog.js'
 import { rasterizeStrokes } from './recognitionMath.js'
 import {
   addObject, clampPoint, deleteObject, getObjectSize, initialInteraction, moveObject,
-  transitionInteraction, trashContainsPoint,
+  findOpenSpawnPoint, transitionInteraction, trashContainsPoint,
 } from './interaction.js'
 import './PlayCanvas.css'
 
 const makeId = () => `object-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`
-const formatModelScore = (score) => score < 0.01 ? '<1%' : `${Math.round(score * 100)}%`
 const STARTER_DELETE_KEY = 'playable-portfolio-starter-cat-deleted'
 const PAUSE_BEFORE_RECOGNITION_MS = 1500
 const INK_TRANSITION_MS = 440
@@ -49,6 +48,32 @@ export default function PlayCanvas() {
   const [transformation, setTransformation] = useState(null)
   const [inkTransforming, setInkTransforming] = useState(false)
 
+  const suggestions = recognition.ranked?.filter((item) => item.label !== 'other').slice(0, 3) || []
+  const bestSuggestion = suggestions[0]
+  const bestSuggestionEntry = bestSuggestion && catalog.find((entry) =>
+    (entry.recognitionLabel || entry.id) === bestSuggestion.label)
+  const strongSuggestion = Boolean(bestSuggestion && bestSuggestion.score >= 0.8)
+  const compactInk = window.innerWidth < 600 && strokes.length > 0 &&
+    (pickerOpen || ['loading', 'uncertain', 'unsupported', 'error', 'blank', 'restored'].includes(recognition.status))
+  let inkTransform
+  if (compactInk) {
+    const points = strokes.flatMap((stroke) => stroke.points)
+    const minX = Math.min(...points.map((point) => point.x))
+    const maxX = Math.max(...points.map((point) => point.x))
+    const minY = Math.min(...points.map((point) => point.y))
+    const maxY = Math.max(...points.map((point) => point.y))
+    const width = Math.max(1, maxX - minX)
+    const height = Math.max(1, maxY - minY)
+    const panelTop = window.innerHeight * (pickerOpen ? 0.6 : 0.7) - 132
+    const available = Math.max(120, panelTop - 36)
+    const scale = Math.min(1, available / (height + 12), (window.innerWidth - 36) / (width + 12))
+    const centerX = (minX + maxX) / 2
+    const centerY = (minY + maxY) / 2
+    const targetX = Math.max(width * scale / 2 + 18, Math.min(window.innerWidth - width * scale / 2 - 18, centerX))
+    const targetY = Math.max(18 + height * scale / 2, Math.min(panelTop - height * scale / 2 - 18, (36 + panelTop) / 2))
+    inkTransform = `translate(${targetX - centerX * scale} ${targetY - centerY * scale}) scale(${scale})`
+  }
+
   const bounds = useCallback(() => {
     const rect = canvasRef.current?.getBoundingClientRect()
     return { width: rect?.width || window.innerWidth, height: rect?.height || window.innerHeight }
@@ -59,6 +84,11 @@ export default function PlayCanvas() {
     autoTimerRef.current = null
   }, [])
 
+  const cancelTransition = useCallback(() => {
+    if (transitionTimerRef.current !== null) window.clearTimeout(transitionTimerRef.current)
+    transitionTimerRef.current = null
+  }, [])
+
   const invalidateRecognition = useCallback((suppressAuto = false) => {
     cancelTimer()
     recognitionRequestRef.current += 1
@@ -67,6 +97,7 @@ export default function PlayCanvas() {
   }, [cancelTimer])
 
   const clearDrawing = () => {
+    cancelTransition()
     invalidateRecognition(true)
     drawingRef.current = null
     drawingRevisionRef.current += 1
@@ -167,7 +198,7 @@ export default function PlayCanvas() {
     setNotice('')
     setMode('select')
     setInteraction((current) => transitionInteraction(current, { type: 'CANCEL' }))
-    if (transitionTimerRef.current !== null) window.clearTimeout(transitionTimerRef.current)
+    cancelTransition()
     transitionTimerRef.current = window.setTimeout(() => {
       setStrokes([])
       setInkTransforming(false)
@@ -182,7 +213,7 @@ export default function PlayCanvas() {
       performTransformation(entry, 'manual')
       return
     }
-    const created = spawn(entry, { x: bounds().width / 2, y: bounds().height / 2 })
+    const created = spawn(entry, findOpenSpawnPoint(objects, bounds()))
     if (created) {
       setPickerOpen(false)
       setMode('select')
@@ -314,6 +345,7 @@ export default function PlayCanvas() {
   const drawStart = (event) => {
     if (mode !== 'brush' || pickerOpen) return
     cancelTimer()
+    cancelTransition()
     recognitionRequestRef.current += 1
     setRecognition({ status: 'idle' })
     suppressAutoRef.current = false
@@ -346,11 +378,13 @@ export default function PlayCanvas() {
   const cancelDraw = (event) => {
     if (drawingRef.current?.pointerId !== event.pointerId) return
     drawingRef.current = null
+    cancelTransition()
     invalidateRecognition(true)
     drawingRevisionRef.current += 1
   }
 
   const undoStroke = () => {
+    cancelTransition()
     invalidateRecognition(true)
     drawingRef.current = null
     drawingRevisionRef.current += 1
@@ -381,12 +415,19 @@ export default function PlayCanvas() {
   const changeMode = useCallback((nextMode) => {
     if (nextMode === mode) return
     invalidateRecognition(true)
+    cancelTransition()
+    if (transformation) {
+      setStrokes([])
+      setTransformation(null)
+      setInkTransforming(false)
+      creationLockRef.current = false
+    }
     if (drawingRef.current) drawingRef.current = null
     drawingRevisionRef.current += 1
     setPickerOpen(false)
     setMode(nextMode)
     setInteraction((current) => transitionInteraction(current, { type: 'CANCEL' }))
-  }, [invalidateRecognition, mode])
+  }, [cancelTransition, invalidateRecognition, mode, transformation])
 
   const openPicker = () => {
     invalidateRecognition(true)
@@ -446,10 +487,13 @@ export default function PlayCanvas() {
       </div>
 
       <svg className="draw-board" aria-label="Drawing surface" onPointerDown={drawStart} onPointerMove={drawMove} onPointerUp={drawEnd} onPointerCancel={cancelDraw}>
+        <g className="draw-ink-layer" transform={inkTransform}>
         {strokes.map((stroke) => <g key={stroke.id} className={inkTransforming ? 'draw-stroke-group draw-stroke-group--transforming' : 'draw-stroke-group'}>
-          <polyline className="draw-stroke-glow" points={stroke.points.map((point) => `${point.x},${point.y}`).join(' ')} fill="none" strokeWidth={stroke.width * 3.5} />
+          <polyline className="draw-stroke-glow draw-stroke-glow--wide" points={stroke.points.map((point) => `${point.x},${point.y}`).join(' ')} fill="none" strokeWidth={stroke.width * 4.5} />
+          <polyline className="draw-stroke-glow draw-stroke-glow--tight" points={stroke.points.map((point) => `${point.x},${point.y}`).join(' ')} fill="none" strokeWidth={stroke.width * 3} />
           <polyline className="draw-stroke-core" points={stroke.points.map((point) => `${point.x},${point.y}`).join(' ')} fill="none" strokeWidth={stroke.width} />
         </g>)}
+        </g>
       </svg>
 
       {mode === 'brush' && !pickerOpen && recognition.status === 'idle' && <div className="draw-toolbar" onPointerDown={(event) => event.stopPropagation()}>
@@ -463,7 +507,20 @@ export default function PlayCanvas() {
         <legend>Choose an object</legend>
         <p>{strokes.length ? 'Choose an object to replace your sketch.' : 'Choose an object to add to the canvas.'}</p>
         <div className="drawing-picker__objects">
-          {catalog.map((entry) => <button type="button" key={entry.id} onClick={() => chooseCatalogObject(entry)}>{entry.label}</button>)}
+          {[
+            ['Animals', ['cat', 'dog', 'rabbit', 'bird', 'fish', 'butterfly', 'cow', 'duck', 'elephant', 'frog']],
+            ['Plants', ['tree', 'flower', 'mushroom', 'cactus', 'leaf', 'house-plant']],
+            ['Food', ['apple', 'banana', 'pizza']],
+            ['Household', ['chair']],
+            ['Transport', ['airplane', 'bicycle']],
+            ['Sky', ['sun', 'moon']],
+          ].map(([category, ids]) => <div className="drawing-picker__category" key={category}>
+            <h3>{category}</h3>
+            <div className="drawing-picker__category-items">{catalog.filter((entry) => ids.includes(entry.id)).map((entry) => <button type="button" key={entry.id} onClick={() => chooseCatalogObject(entry)}>
+              <img src={`/objects/${entry.id}.svg`} alt="" width="48" height="48" />
+              <span>{entry.label}</span>
+            </button>)}</div>
+          </div>)}
         </div>
         <div className="drawing-picker__actions"><button type="button" onClick={() => setPickerOpen(false)}>Cancel</button></div>
       </fieldset>}
@@ -476,16 +533,19 @@ export default function PlayCanvas() {
         {recognition.status === 'loading' && <p role="status">Your drawing is paused. Recognizing it on this device…</p>}
         {recognition.status === 'error' && <p role="alert">Automatic recognition is unavailable: {recognition.message} Your drawing stays on this device.</p>}
         {recognition.status === 'blank' && <p role="status">There are no visible strokes. Draw something or choose an object.</p>}
-        {recognition.status === 'uncertain' && <p role="status">Not sure what you drew. Choose a suggestion or open the object picker.</p>}
-        {recognition.status === 'unsupported' && <p role="status">This may be outside the supported set. Your drawing is preserved; choose a suggestion or another object.</p>}
+        {(recognition.status === 'uncertain' || recognition.status === 'unsupported') && <p role="status">{strongSuggestion && bestSuggestionEntry
+          ? `Best match: ${bestSuggestionEntry.label}. Is that right?`
+          : recognition.status === 'unsupported'
+            ? 'This may be outside the supported set. Your drawing is preserved; choose a suggestion or another object.'
+            : 'Not sure what you drew. Choose a suggestion or open the object picker.'}</p>}
         {recognition.status === 'transformed' && <p role="status">{recognition.objectLabel} added at the center of your sketch.</p>}
         {recognition.status === 'restored' && <p role="status">Your original sketch is back. It will not be checked again unless you edit it or retry.</p>}
         {(recognition.status === 'uncertain' || recognition.status === 'unsupported') && <>
           <div className="recognition-suggestions" role="group" aria-label="Ranked drawing suggestions">
-            {recognition.ranked?.filter((item) => item.label !== 'other').slice(0, 3).map((item, index) => {
+            {suggestions.map((item, index) => {
               const entry = catalog.find((candidate) => (candidate.recognitionLabel || candidate.id) === item.label)
               return entry && <button type="button" key={entry.id} onClick={() => acceptSuggestion(entry.id)}>
-                <span>{index + 1}. {entry.label}</span><small>{formatModelScore(item.score)} model score</small>
+                <span>{index + 1}. {entry.label}</span>
               </button>
             })}
           </div>

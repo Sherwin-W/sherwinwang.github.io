@@ -1,5 +1,4 @@
 // src/pages/Projects.jsx
-import React from 'react';
 import NavigationButtons from '../components/NavigationButtons';
 import './Projects.css';
 

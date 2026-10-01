@@ -2,7 +2,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { createHash } from 'node:crypto'
 import { readFileSync } from 'node:fs'
-import { predictScores, rasterizeStrokes, unpackLayers } from './recognitionMath.js'
+import { predictCnnScores, predictScores, rasterizeStrokes, unpackCnnWeights, unpackLayers } from './recognitionMath.js'
 
 test('rasterizer handles blank, single-point and multi-stroke drawings', () => {
   assert.equal(rasterizeStrokes([]).every((pixel) => pixel === 0), true)
@@ -69,4 +69,26 @@ test('JavaScript inference matches Python reference scores for all 25 batch-24 o
       )
     }
   }
+})
+
+test('actual small-CNN browser math matches Python expected scores for every output', () => {
+  const manifest = JSON.parse(readFileSync('public/models/drawing-recognizer-cnn/manifest.json', 'utf8'))
+  const fixtures = JSON.parse(readFileSync('scripts/drawing-recognition/fixtures/model-parity-cnn.json', 'utf8'))
+  const bytes = readFileSync('public/models/drawing-recognizer-cnn/weights.f32')
+  const weights = new Float32Array(bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength))
+  assert.equal(bytes.byteLength, manifest.weightBytes)
+  assert.equal(createHash('sha256').update(bytes).digest('hex'), manifest.sha256)
+  assert.equal(fixtures.modelSha256, manifest.sha256)
+  const model = unpackCnnWeights(weights, manifest.packing)
+  let maximumError = 0
+  for (let sample = 0; sample < fixtures.inputs.length; sample += 1) {
+    const scores = predictCnnScores(Float32Array.from(fixtures.inputs[sample]), model)
+    assert.equal(scores.length, manifest.labels.length)
+    for (let label = 0; label < scores.length; label += 1) {
+      const error = Math.abs(scores[label] - fixtures.expectedScores[sample][label])
+      maximumError = Math.max(maximumError, error)
+      assert.ok(error <= fixtures.tolerance, `sample ${sample}, label ${manifest.labels[label]}: ${error}`)
+    }
+  }
+  console.log(`Small-CNN Python/JavaScript parity maximum absolute error: ${maximumError}`)
 })

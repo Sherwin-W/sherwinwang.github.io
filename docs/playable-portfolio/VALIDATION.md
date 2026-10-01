@@ -1,73 +1,96 @@
 # Validation
 
-## Completed interaction and batch-24 model
+## Checks run
 
-- Preserved interaction checkpoint: `924aba8` on `feature/playable-portfolio`.
-  Batch-24 model/art/catalog integration follows it; Claude's untracked review
-  file is not part of these changes.
-- `npm run test`: 17 Node tests pass, including parity against Python expected
-  scores for all 25 batch-24 outputs over four fixed inputs. Absolute tolerance
-  is `1e-5`; the earlier 13-output model parity check also remains.
-- `npm run test:browser`: 11 Chromium Playwright tests pass. They cover the
-  24-item accessible picker, no click-to-create, drag/trash/delete, portfolio
-  access, touch drawing, brush hotspot/glow, reduced motion, multi-stroke
-  1,500 ms debounce, a slow held pointer, accepted Sun transformation, Undo and
-  Retry, uncertain/unsupported picker flow, scheduled/in-flight cancellation,
-  unmount, load failure, and twelve new actual-browser rasterizer/model
-  fixtures.
-- The 24-label model was trained once: 33,600 train / 21,600 validation /
-  21,600 test rows; one CPU fit, 20 iterations, 4.33 seconds. The fit reached
-  its iteration cap without convergence and was not retrained. Deterministic range sampling fetched 62,308,352 bytes including NumPy headers. Exact
-  prompts were verified against Quick, Draw!'s official category list;
-  Quick, Draw! is CC BY 4.0. The `Other` set excludes newly supported Apple and
-  Airplane and now uses car, house, clock, cloud, star, mountain, violin, and
-  toothbrush. Python/JavaScript inference parity maximum absolute error was
-  `3.42e-8` in the worker's initial candidate check; committed-fixture tests
-  independently check all 25 scores within `1e-5`.
-- Model weights: 311,140 bytes; 784 ? 96 ReLU ? 25 softmax outputs. Browser
-  inference is local in a lazy Web Worker; visitor strokes are not uploaded.
+- `npm run test`: **20 passed**. Covers catalog contracts, Select/Brush state,
+  manual placement dispersion, pointer and movement helpers, and fixed actual
+  CNN Python/JavaScript parity for all outputs (absolute tolerance `1e-5`,
+  measured maximum absolute error `2.3841858e-7`).
+- `npm run lint`: passed with no findings after minimal cleanup of the
+  repository's existing React-component lint errors.
+- `npm run test:browser`: **15 passed** on the final full run (1.3 minutes).
+  The first run had 14 passed and one stale assertion that required Sun in a
+  suggestion panel; the validation gate now correctly auto-creates Sun. The
+  assertion was updated to verify the transformation, then the entire suite
+  passed.
+- Browser tests verified the accessible 24-object picker, Select-first/no
+  click-to-create, dragging/deletion/portfolio access, mobile touch input,
+  picker layout above the dock, glow/cursor/reduced motion, 1,500 ms
+  multi-stroke quiet period, uninterrupted pointer hold, accepted Sun and
+  Chair transformations, Undo, stale-result cancellation, unmount, model-load
+  failure, uncertain/unsupported flow, transformed-ink/new-stroke race, and
+  all twelve selected-model preprocessing fixtures.
+- The full browser run exposed and then clarified a stale assertion only; no
+  application behavior failure reproduced. First pass ended 14/15, the
+  focused cancellation rerun passed 1/1, and the corrected full suite passed
+  15/15.
+- `npm run build`: passed. Vite emitted a 308.08 kB JS chunk (100.54 kB gzip),
+  an 18.36 kB CSS chunk (4.60 kB gzip), and the 4.46 kB worker. The model
+  remains a separate lazy asset.
+- Independent source/visual review found no concrete regression in model
+  contract, cancellation, or mobile panel placement; it confirmed the 4/5
+  browser-fixture accepted prediction count matches the recorded results.
 
-## Held-out recognition quality
+## Recognition evidence
 
-The 21,600-row test split was not used to select thresholds. Overall 25-output
-top-1/top-3 are **62.93% / 81.95%**. The 14,400 supported drawings' raw
-25-output top-1/top-3 are **58.25% / 78.40%**. With `Other` removed and supported
-labels sorted exactly as the UI does, supported top-1/top-3 are **60.96% /
-80.26%**. Unknown rejection is reported separately: **73.42%** across 7,200
-examples from eight named negative categories.
+Six bounded candidate experiments and their validation-only selection are
+reported in `MODEL_COMPARISON.md`. The active 24-label CNN held-out report is
+`recognition-metrics-cnn-candidate.json`; its test split ran once after model
+selection. The held-out denominator is 21,600 total rows: 14,400 supported
+(600 per label) and 7,200 negative (900 each from eight named categories).
+Overall 25-output top-1/top-3: **73.86% / 88.95%**. Supported-only ranking
+after removing `Other`, matching the exact UI: **71.99% / 87.96%**. Unknown
+rejection is separately **85.17% of 7,200** negative rows. The
+validation-selected auto rule, unchanged on test, yielded **95.35% precision**
+(5,674/5,951 accepted) and **40.88% supported coverage**. The score/margin
+rule is not a calibrated confidence estimate.
 
-Validation first selected score >= **0.94** and runner-up margin >= **0.70** from validation rows. A second validation-only gate enables predicted labels only when there are at least 20 accepted examples and per-label precision is at least 90%. Dog, Rabbit, Bird, Cow, Duck, Elephant, Frog, and Sun fail that gate and remain suggestion/picker-only. The final rule achieved **96.15% validation precision / 15.57% supported coverage** (2,172 correct of 2,259 accepted). Applied unchanged to held-out test it achieved **95.72% precision / 15.35% coverage** (2,146 correct of 2,242 accepted). These are sampled Quick, Draw! measurements, not calibrated confidence or a freehand guarantee. Weak classes include Dog (25.8% top-1; 64.7% top-3), Bird (33.8%; 72.2%), Elephant (30.5%; 58.7%), and Frog (19.5%; 51.2%). Apple, Chair, and Bicycle are stronger (87.2%, 83.0%, and 79.8% top-1). Full per-class, source-specific unknown rejection, and confusion results are in `recognition-metrics-24-candidate.json`; validation gate results are in `autospawn-validation-24-candidate.json`.
+Twelve independently authored browser polylines ran through Chromium's real
+pointer path, production rasterizer, lazy Worker and UI supported-label
+ranking at 390×844. UI top-1/top-3 were **7/12 and 10/12**. Five suggestions
+auto-created objects: four correct, one wrong (the Bicycle stroke became
+Butterfly even though Bicycle ranked third). Correct automatic coverage was
+4/12. This hand-authored integration set is not a human-drawing benchmark and
+was not used to train or tune thresholds. A blank raster returned explicit
+blank; scribble stayed uncertain; unsupported house was rejected. A single
+point had enough nonblank mass to be treated as a sketch and was wrongly
+auto-created as Banana, so tiny taps remain a documented failure case rather
+than a successful blank test.
 
-## Independent browser preprocessing and timing
+## Browser timings and conditions
 
-Twelve separately authored synthetic strokes for Cow, Duck, Elephant, Frog,
-Leaf, Potted plant, Apple, Banana, Pizza, Chair, Airplane, and Bicycle were
-run through pointer events, the real browser rasterizer, the Worker, and the
-model at Chromium 390?844. The UI-filtered ranking placed the expected class
-first in **5/12** and in its three suggestions in **8/12**; one sketch (Chair)
-auto-created. Cow, Elephant, Banana, and Bicycle did not appear in
-the UI top three. These are small integration fixtures by the implementer,
-not held-out model data or human-subject evaluation; they were not used for
-training or threshold selection. Exact per-sketch rankings and timings are in
-`browser-fixture-results-24.json` and their authored paths in
-`tests/fixtures/batch24-drawings.json`. A zero-pixel vector sent through the
-actual Worker returned its explicit blank state. A single-point tap had enough
-ink mass to reach an unsupported result; a multi-line scribble reached the
-uncertain state, and an unsupported house reached the unsupported state. These
-control outcomes are recorded separately in the same browser results file.
+Local Vite server, Chromium Playwright, emulated 390×844 viewport. No physical
+device or network cold-load measurement was made.
 
-For the first batch-24 browser fixture, pointer-up to visible suggestions was
-**1,887.4 ms** (including the 1,500 ms debounce, local model loading, inference,
-and UI). Its worker postMessage-to-result was **24.6 ms** and inference **1.3
-ms**; warm worker roundtrip median over the remaining eleven fixtures was
-**2.2 ms**, with median inference **0.3 ms**. A manually accepted Sun suggestion appeared at **1,670.5 ms** after pointer-up. A validation-accepted Chair auto-created at **1,876.7 ms** on first local model use; worker request-to-result was **26.1 ms** and inference **1.3 ms**. The model payload was 311,140 bytes. These are local Chromium/Playwright measurements
-at a 390?844 viewport, not physical-device or network benchmarks.
+- Model file: **212,452 bytes**.
+- Direct Worker run: construction **0.3 ms**; activation through first result
+  **26.4 ms**; warm median request/response **1.5 ms**; warm median model
+  inference **1.4 ms**. The full UI path adds rasterization and rendering.
+- Real canvas Sun/Chair checks measured pointer-up through visible outcome at
+  **1,659 ms** (Sun) and **1,870 ms** (Chair), including the required 1,500 ms
+  quiet period. Their Worker request-to-result times were **32.1 ms** and
+  **22.8 ms**; CNN inference was **7.1 ms** and **4.4 ms**. This boundary
+  differs from direct Worker warm measurements and is recorded separately.
+- Direct browser-rasterizer fixture run: Worker construction **0.3 ms**,
+  activation through first result **26.4 ms**, warm roundtrip median **1.5 ms**,
+  warm inference median **1.4 ms**.
 
-Screenshots updated: `screenshots/desktop.png` (1440?900, Select default),
-`screenshots/mobile.png` (390?844, picker scrolls above the dock and the dock
-remains visible), `screenshots/recognition-auto-mobile.png` (390?844, accepted Chair auto-transformation and Undo), and `screenshots/catalog-24-review.png` (all 24
-original illustrations rendered together for a style/recognizability check). Model download is lazy; simple canvas interaction
-and picker use do not request weights.
+## Screenshots and remaining gaps
 
-Missing project architecture diagrams and verified project links remain
-tracked in `CONTENT_GAPS.md`; no project architecture or URLs were invented.
+Updated screenshots: `screenshots/desktop.png` (1440×900, Select default),
+`screenshots/mobile-select.png` (390×844, first-load Select with one starter
+cat and generous empty canvas), `screenshots/mobile.png` (390×844, picker and
+controls),
+`screenshots/recognition-auto-mobile.png` (Chair transformation and Undo),
+`screenshots/recognition-uncertain-mobile.png`,
+`screenshots/recognition-picker-mobile.png`, and
+`screenshots/catalog-60-art-review.png` (24 active and 36 roadmap-only
+illustrations). Screenshots document local Chromium rendering, not device
+coverage.
+
+Human-drawn evaluation, network load, physical mobile, and performance under
+30 simultaneous objects are unmeasured. Dog/Frog/Duck remain weak. The
+authored integration set reveals an accepted wrong object; assess whether
+default auto-creation should stay enabled before public release. Missing
+project diagrams and verified project links remain listed in
+`CONTENT_GAPS.md`; no unverified architecture or URLs were added.

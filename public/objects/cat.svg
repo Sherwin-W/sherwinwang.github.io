@@ -8,9 +8,9 @@
     @media(prefers-reduced-motion:reduce){.tail,.eye{animation:none}}
   </style>
   <!-- Tail is behind the body; its layered strokes join the body's sticker edge. -->
-  <path class="tail" d="M40 99C24 106 14 96 18 83c3-10 15-13 23-6" fill="none" stroke="#fbf8f1" stroke-width="15" stroke-linecap="round" stroke-linejoin="round"/>
-  <path class="tail" d="M40 99C24 106 14 96 18 83c3-10 15-13 23-6" fill="none" stroke="#3a3631" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
-  <path class="tail" d="M40 99C24 106 14 96 18 83c3-10 15-13 23-6" fill="none" stroke="#dc8a43" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path class="tail" d="M43 100C27 106 16 96 19 82c3-11 15-14 25-7" fill="none" stroke="#fbf8f1" stroke-width="15" stroke-linecap="round" stroke-linejoin="round"/>
+  <path class="tail" d="M43 100C27 106 16 96 19 82c3-11 15-14 25-7" fill="none" stroke="#3a3631" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+  <path class="tail" d="M43 100C27 106 16 96 19 82c3-11 15-14 25-7" fill="none" stroke="#dc8a43" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
   <path d="M32 72 28 36 51 47Q64 39 77 47l23-11-4 37q9 12 5 28-5 19-37 19T34 99q-4-15-2-27Z" fill="#fbf8f1" stroke="#fbf8f1" stroke-width="11" stroke-linejoin="round"/>
   <path d="M32 72 28 36 51 47Q64 39 77 47l23-11-4 37q9 12 5 28-5 19-37 19T34 99q-4-15-2-27Z" fill="#dc8a43" stroke="#3a3631" stroke-width="3" stroke-linejoin="round"/>
   <path d="m36 47-2-5 13 7-8 9Zm52 0 2-5-13 7 8 9Z" fill="#d9785c" stroke="#3a3631" stroke-width="1.5"/>
