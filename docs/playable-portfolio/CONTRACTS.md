@@ -1,6 +1,38 @@
 # Integration contracts
 
-Shared workspace; lead owns Git, App, styles, package files and docs. Workers do not delegate.
-Catalog exports `catalog` array ({id,label,aliases,asset,width,height,animation}) and `resolveWord(text)` -> {status: 'match'|'ambiguous'|'unknown', entry?, suggestions: entry[]}.
-Canvas exports default PlayCanvas. It imports catalog.js and ./PlayCanvas.css. Asset URLs use /objects/{id}.svg; dimensions 96x96. Typed spawning remains independent of the lazy drawing-recognition Web Worker. The worker loads a same-origin manifest and float32 weights only after explicit recognition, normalizes 28x28 pixels, and returns ranked supported labels or an `other`/blank/error result. Every response has a monotonically increasing request ID; cancellation, clearing and a new stroke invalidate older responses. All predictions are suggestions with uncalibrated model scores; choosing one spawns at the original drawing center. Manual catalog selection remains available.
-Interaction modes: idle, typing, drawing, dragging. Opening native portfolio dialog makes background inert. Pointer capture handles release outside; cancellation restores position; resizing clamps placements. Keyboard arrows move selected objects; Delete removes; Escape cancels typing/drawing. Input max 48 characters; exact/alias before conservative edit-distance matching. No arbitrary HTML.
+The current supported-model milestone contains 12 objects. Only the lead edits
+shared contracts and integrates worker/art/model changes. The preserved working
+checkpoint is `5bcf157`; do not amend or rewrite it.
+
+`catalog.js` exports `catalog` entries (`id`, `label`, `aliases`, `asset`,
+`width`, `height`, `animation`) and `resolveWord` for legacy matching tests.
+The visible creation path is now Brush or the accessible object picker; typed
+spawn and its Type control are removed. Select is the initial mode and keeps
+objects draggable and portfolio links available. Assets are original SVGs at
+`/objects/{id}.svg`.
+
+The canvas owns one stroke revision at a time. Pointer-up starts a 1,500 ms
+quiet timer; a new pointer-down cancels it and invalidates any old result.
+Recognition never runs while the pointer is down. Clear, Undo stroke, mode
+changes, the `portfolio:sheet-open` event, and unmount cancel scheduled or
+pending recognition. Recognition stays lazy and local in the Web Worker.
+
+The worker returns ranked labels, `other`/blank/error state, measured inference
+time, and `autoSpawnAccepted`. The current auto-spawn rule requires the top of
+all 13 labels to be supported, score >= 0.91, and margin over the runner-up >=
+0.50. This rule was selected on validation rows for >=95% empirical precision;
+scores remain uncalibrated. Only a successful object insertion consumes the
+sketch. Uncertain results retain ink and show three suggestions plus the object
+picker. A successful transformation is reversible once; Undo removes its
+spawned object, restores the source strokes, and suppresses recognition until
+the drawing changes or the visitor explicitly retries.
+
+Recognition preprocessing consumes the clean pointer stroke arrays, never a
+screenshot or the decorative glow. SVG core and glow share the same points.
+Decorative transitions use CSS, with reduced-motion behavior. Pointer events
+support mouse, pen, and touch.
+
+Catalog expansion proceeds in batches: finish/evaluate 24 wired objects before
+continuing toward 60. A label is recognized as supported only when training,
+exported manifest, catalog, original artwork, and browser inference all contain
+it. Training and inference remain lazy/independent of basic Select/Brush UI.

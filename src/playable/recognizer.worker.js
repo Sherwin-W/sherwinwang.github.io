@@ -51,9 +51,14 @@ self.onmessage = async (event) => {
     const ranked = scores.map((score, index) => ({ label: model.manifest.labels[index], score }))
       .sort((left, right) => right.score - left.score)
     const topSupportedScore = Math.max(...ranked.filter((item) => item.label !== model.manifest.otherLabel).map((item) => item.score))
+    const autoSpawnMargin = ranked[0]?.score - ranked[1]?.score
     self.postMessage({
       id, type: 'result', ranked,
       isUnsupported: ranked[0]?.label === model.manifest.otherLabel || topSupportedScore < model.manifest.unsupportedScoreThreshold,
+      autoSpawnAccepted: ranked[0]?.label !== model.manifest.otherLabel
+        && ranked[0]?.score >= model.manifest.autoSpawnScoreThreshold
+        && autoSpawnMargin >= model.manifest.autoSpawnMarginThreshold,
+      autoSpawnMargin,
       modelBytes: model.modelBytes, inferenceMs,
     })
   } catch (error) {

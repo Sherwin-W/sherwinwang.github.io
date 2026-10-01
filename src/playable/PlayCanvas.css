@@ -11,11 +11,13 @@
 .play-object:not(.play-object--dragging) .play-object-sprite { animation:object-spawn .32s cubic-bezier(.3,1.4,.5,1) both; }
 @keyframes object-spawn { 0%{transform:scale(.6)} 35%{transform:scale(1.15,.85)} 65%{transform:scale(.95,1.08)} 100%{transform:scale(1)} }
 @keyframes object-delete { to{transform:scale(.0) rotate(20deg);opacity:0} }
-.canvas-mode-controls { display:flex; align-items:center; gap:8px; }
-.canvas-mode-button,.draw-toolbar button,.word-editor button,.canvas-trash,.portfolio-dock button,.portfolio-sheet button { min-height:44px; padding:8px 14px; font:600 .95rem system-ui,sans-serif; color:var(--graphite); background:var(--paper-raised); border:1.5px solid var(--line); border-radius:12px; cursor:pointer; }
+.canvas-mode-controls { display:flex; align-items:center; gap:6px; }
+.canvas-mode-button,.draw-toolbar button,.canvas-trash,.portfolio-dock button,.portfolio-sheet button { min-height:44px; padding:8px 14px; font:600 .95rem system-ui,sans-serif; color:var(--graphite); background:var(--paper-raised); border:1.5px solid var(--line); border-radius:12px; cursor:pointer; }
 .canvas-mode-button { min-width:72px; }
 .canvas-mode-button[aria-pressed=true] { color:var(--paper); background:var(--graphite); }
-.canvas-mode-button:focus-visible,.draw-toolbar button:focus-visible,.word-editor button:focus-visible,.canvas-trash:focus-visible,.portfolio-dock button:focus-visible,.portfolio-sheet button:focus-visible,.portfolio-sheet a:focus-visible { outline:3px solid var(--focus); outline-offset:3px; }
+.canvas-mode-button--brush { display:flex;align-items:center;gap:6px; }
+.canvas-mode-button--brush svg { width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round; }
+.canvas-mode-button:focus-visible,.draw-toolbar button:focus-visible,.drawing-picker button:focus-visible,.recognition-panel button:focus-visible,.canvas-trash:focus-visible,.portfolio-dock button:focus-visible,.portfolio-sheet button:focus-visible,.portfolio-sheet a:focus-visible { outline:3px solid var(--focus); outline-offset:3px; }
 .canvas-trash { width:56px; height:52px; flex:0 0 56px; padding:0; border:2px solid var(--line); border-radius:12px; background:var(--paper-raised); box-shadow:0 1px 0 rgba(43,42,40,.25),0 3px 6px rgba(60,45,25,.18); }
 .trash-bin-icon { width:34px;height:34px;fill:none;stroke:var(--line);stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round; }
 .canvas-trash--active { color:var(--clay); transform:scale(1.08); }
@@ -23,10 +25,15 @@
 .canvas-trash > span::before { content:''; position:absolute; left:-5px; top:-5px; width:33px; height:3px; background:var(--line); border-radius:2px; transform-origin:right center; transition:transform .16s ease; }
 .canvas-trash > span::after { content:''; position:absolute; left:5px; top:4px; bottom:3px; width:13px; background:linear-gradient(90deg,transparent 0 3px,var(--line) 3px 5px,transparent 5px 10px,var(--line) 10px 12px,transparent 12px); }
 .canvas-trash--active > span::before { transform:rotate(12deg) translateY(-2px); }
-.draw-board { position:absolute; inset:0; width:100%; height:100%; display:none; touch-action:none; pointer-events:none; }
-.play-canvas--draw .draw-board { display:block; pointer-events:auto; }
-.draw-stroke { stroke:var(--graphite); stroke-linecap:round; stroke-linejoin:round; }
-.draw-toolbar { position:absolute; left:50%; bottom:92px; transform:translateX(-50%); z-index:6; display:flex; flex-wrap:nowrap; gap:6px; padding:6px; background:var(--paper-raised); border:1px solid #d7cdbc; border-radius:14px; }
+.play-canvas--select .draw-board { display:none;pointer-events:none; }
+.play-canvas--select.play-canvas--transforming .draw-board { display:block; }
+.draw-board { position:absolute; inset:0; z-index:4; width:100%; height:100%; display:block; pointer-events:none; touch-action:none; }
+.play-canvas--brush .draw-board { pointer-events:auto;cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='32' viewBox='0 0 28 32'%3E%3Cpath d='M2 28 7 16 20 3l5 5L12 21 2 28Z' fill='%23fbf8f1' stroke='%232b2a28' stroke-width='2' stroke-linejoin='round'/%3E%3Cpath d='m7 16 5 5M2 28l8-4-5-5-3 9Z' fill='%2378b8a2' stroke='%232b2a28' stroke-width='1.5'/%3E%3C/svg%3E") 2 28,crosshair; }
+.draw-stroke-glow { stroke:#71b69f;stroke-opacity:.34;stroke-linecap:round;stroke-linejoin:round;filter:blur(2px); }
+.draw-stroke-core { stroke:#2b2a28;stroke-linecap:round;stroke-linejoin:round; }
+.draw-stroke-group--transforming { transform-box:fill-box;transform-origin:center;animation:ink-poof .44s ease-out forwards; }
+@keyframes ink-poof { 0%{opacity:1;transform:scale(1)} 38%{opacity:.9;transform:scale(1.045)} 100%{opacity:0;transform:scale(1.15)} }
+.draw-toolbar { position:absolute; left:50%; bottom:144px; transform:translateX(-50%); z-index:6; display:flex; flex-wrap:nowrap; gap:6px; padding:6px; background:var(--paper-raised); border:1px solid #d7cdbc; border-radius:14px; }
 .draw-toolbar button { white-space:nowrap; }
 .drawing-picker { position:absolute;left:50%;bottom:92px;transform:translateX(-50%);z-index:8;width:min(560px,calc(100vw - 32px));max-height:min(330px,calc(100svh - 240px));overflow:auto;padding:12px 14px 14px;border:1.5px solid var(--line);border-radius:16px;background:var(--paper-raised);box-shadow:0 8px 22px rgba(60,45,25,.22); }
 .drawing-picker legend { padding:0 6px;font:600 1rem system-ui,sans-serif;color:var(--graphite); }
@@ -44,17 +51,11 @@
 .recognition-disclaimer { font-size:.76rem!important; }
 .recognition-panel > button { min-height:44px;margin:4px;padding:7px 10px;border:1.5px solid var(--line);border-radius:10px;background:var(--paper);color:var(--graphite);font:600 .86rem system-ui,sans-serif;cursor:pointer; }
 .recognition-panel button:focus-visible { outline:3px solid var(--focus);outline-offset:2px; }
-.word-editor { position:absolute; z-index:8; left:var(--x); top:var(--y); width:min(280px,calc(100vw - 24px)); transform:translate(-50%,-50%); padding:8px; border:1.5px solid var(--line); border-radius:16px; background:var(--paper-raised); box-shadow:0 4px 16px #3c2d1922; }
-.word-editor__row { display:flex; align-items:center; gap:4px; }
-.word-editor__input { width:0; flex:1; height:40px; padding:0 10px; background:transparent; border:0; color:var(--graphite); font:600 .95rem system-ui,sans-serif; outline:none; }
-.word-editor__row:focus-within { outline:3px solid var(--focus); outline-offset:2px; border-radius:8px; }
-.word-editor__row button { min-width:40px; padding:6px; }
-.word-editor__message { margin:8px 4px 2px; font: .85rem/1.4 system-ui,sans-serif; color:var(--graphite-soft); }
-.word-editor__suggestions { display:flex; flex-wrap:wrap; gap:6px; padding:4px; }
-.word-editor__suggestions p { flex-basis:100%; margin:4px 0; font:.85rem/1.4 system-ui,sans-serif; }
 .canvas-trash--active { outline:3px solid var(--clay); outline-offset:2px; border-radius:50%; }
 .play-live-region,.visually-hidden { position:absolute!important; width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0; }
 @media(max-width:599px) {
+ .canvas-mode-button { min-width:0;padding:7px 9px;font-size:.82rem; }
+ .canvas-mode-controls { gap:4px; }
  .draw-toolbar { bottom:140px;max-width:calc(100vw - 24px);overflow-x:auto;justify-content:flex-start;scrollbar-width:none; }
  .draw-toolbar::-webkit-scrollbar { display:none; }
  .draw-toolbar button { padding:6px 9px;font-size:.82rem; }
@@ -64,9 +65,9 @@
  .recognition-suggestions { grid-template-columns:1fr;gap:4px; }
  .recognition-suggestions button { min-height:42px;display:flex;align-items:center;justify-content:space-between;gap:8px;text-align:left; }
  .drawing-picker__objects button,.drawing-picker__actions button { font-size:.82rem;padding:6px 4px; }
- .word-editor { position:fixed;top:auto;bottom:calc(140px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%); }
 }
 @media(prefers-reduced-motion:reduce) {
  .play-object-sprite,.canvas-trash { transition:none; animation:none!important; }
  .play-object--dragging .play-object-sprite { transform:none; }
+ .draw-stroke-group--transforming { animation:none;opacity:0; }
 }

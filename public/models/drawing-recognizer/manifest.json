@@ -42,6 +42,9 @@
   "dataset": "Google Quick, Draw! bitmap subset, CC BY 4.0",
   "preprocessing": "Official centered 28x28 numpy_bitmap raster, uint8 divided by 255; black background and white strokes.",
   "confidence": "softmax score; uncalibrated",
+  "autoSpawnScoreThreshold": 0.91,
+  "autoSpawnMarginThreshold": 0.5,
+  "autoSpawnRule": "Top of all 13 outputs must be one of the 12 supported labels, score at least 0.91, and margin over runner-up at least 0.50; selected on validation to maximize coverage with at least 95% precision.",
   "unsupportedScoreThreshold": 0.28,
   "thresholdMethod": "Select the score threshold maximizing balanced accuracy on the separate validation windows for supported vs aggregated Other; tie favors higher rejection."
 }

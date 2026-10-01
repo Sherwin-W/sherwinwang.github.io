@@ -4,6 +4,15 @@ Owner: Sherwin Wang
 Existing domain: sherwinwang.dev
 Existing repository: inspect locally; do not assume remote or deployment settings.
 
+## Revised interaction direction
+
+This direction supersedes the original typing-first creation flow. Start in
+Select mode; create objects by drawing in Brush mode or choosing from the
+accessible catalog picker. Canvas clicks in Select mode do not create items.
+Brush pointer-up starts a 1,500 ms automatic-recognition pause. See
+`CONTRACTS.md` for cancellation, validation-gated auto-spawn, undo, and catalog
+expansion rules.
+
 ## Outcome
 
 Build a sleek, expressive indie-game landing page that demonstrates creativity
@@ -30,14 +39,23 @@ uses a static pose or minimal transition.
 
 ## Primary interaction
 
-Default mode: clicking empty canvas opens a small word input at that position.
-Enter resolves the word and spawns a supported object at the same location.
-Escape cancels. Clicking controls or dragging an object must not open an input.
+Start in Select mode; clicking empty canvas does nothing. Objects remain
+draggable/deletable and the Projects/About/Contact/Resume links stay accessible.
 
-Draw mode: pointer strokes appear immediately. Explicit "Create" submits the
-drawing so multi-stroke objects do not get recognized prematurely.
-Display the inferred word. High-confidence recognition may spawn automatically;
-uncertain results offer up to three choices. Always allow typing instead.
+Brush mode is the primary creation path. Pointer strokes appear immediately and
+never trigger recognition while the pointer is held. Each pointer-up starts a
+1,500 ms quiet timer; another stroke resets it. A validation-selected
+score-plus-margin gate can automatically replace a reliable supported sketch
+with its object at the drawing center. Keep the source ink until insertion
+succeeds, show a short local ink-to-object transition, and offer Undo
+transformation. Uncertain or unsupported input keeps its ink and offers three
+ranked suggestions plus the accessible object picker. Softmax scores are not
+calibrated probabilities. Clear, Undo stroke, mode changes, portfolio sheets,
+and unmounting cancel pending creation/results.
+
+The object picker is available independently of Brush, so drawing is optional.
+Touch and pen use the same pointer-event path; the custom brush cursor is only
+a desktop visual aid over the drawing surface.
 
 An object can be dragged, selected, or deleted using an accessible alternative.
 Dragging over the trash highlights it; release deletes the object.
@@ -53,10 +71,11 @@ Do not force an unrelated word to the nearest object.
 For unknown or ambiguous words show useful suggestions and preserve input.
 Bound input length. Render user text as text, never executable HTML.
 
-Initial catalog:
-cat, dog, rabbit, bird, fish, butterfly, tree, flower, mushroom, cactus,
-sun, moon.
-Expand only after the initial set is cohesive and working.
+The current 12-object set remains the interaction verification milestone.
+Expand to 24, evaluate and review per-class quality, then continue toward 60;
+the proposed exact-label roadmap is in `CATALOG_ROADMAP.md`. Do not describe a
+label as recognition-supported until it appears in training, exported labels,
+the catalog, original artwork, and browser inference.
 
 Each entry has a stable ID, label, aliases, asset, dimensions, and animation key.
 Spawn uses prebuilt local art. No image-generation API in the visitor interaction.
@@ -87,27 +106,23 @@ Do not add a game engine, physics system, backend, or state framework by default
 
 Keep dragging responsive without rerendering the entire page on every event.
 Separate object placement from sprite animation so transforms do not conflict.
-Use an explicit interaction state: idle, typing, drawing, dragging, modal-open.
+Use explicit Select, Brush, drawing, dragging, picker, recognition, and modal
+states; the UI contains no click-to-type creation path.
 
-Keep the typing path independent of recognition initialization.
-Lazy-load drawing recognition, and move expensive work off the main thread
-when practical. Handle worker errors, unavailable models, and cancellation.
-
-Drawing recognition is an experimental workstream:
-- Investigate an existing appropriately licensed browser model.
-- Check class coverage, download size, input preprocessing, and runtime support.
-- Evaluate held-out sketches; document errors and confidence behavior.
-- If no suitable model is available, ship capture and manual choice honestly.
-  Record automatic recognition as incomplete; do not fake a classifier.
+Keep basic canvas and picker use independent of model initialization. Lazy-load
+the local recognizer in a worker; handle errors, unavailable weights and stale
+responses. Choose auto-spawn gates with validation data, report precision and
+coverage separately, and do not tune against the test split.
 
 ## Performance targets, not claimed results
 
-Measure and report browser/device and cold/warm conditions.
-- Exact/alias word submission to visible spawn: p95 under 100 ms after readiness.
+Measure and report browser/device and local/network conditions.
+- Pointer strokes remain responsive during slow uninterrupted gestures.
+- Auto-recognition begins only after the 1,500 ms post-pointer-up pause.
+- Report pointer-up-to-visible-object and worker-only time separately.
 - Pointer movement: visually smooth around 60 fps on a normal laptop.
 - Support 30 simultaneous objects without pronounced input lag.
 - Drawing strokes remain immediate while recognition runs.
-- Aim for warm recognition under 500 ms; report actual cold-load latency.
 - Aim for initial compressed app payload under 1 MB excluding lazy ML assets.
 Preload starter art or provide an immediate spawn silhouette while it loads.
 

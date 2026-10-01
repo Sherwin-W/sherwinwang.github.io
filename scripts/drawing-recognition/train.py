@@ -174,6 +174,27 @@ def metric_report(model, arrays: dict[str, dict[str, np.ndarray]], training_seco
     eligible = [row for row in threshold_rows if row[0] >= best_balanced_accuracy - 0.005]
     _, reject_threshold, target_coverage, other_rejection = max(eligible, key=lambda row: row[1])
 
+    # Select auto-spawn thresholds on validation only: maximize supported
+    # coverage while requiring at least 95% precision across every accepted row.
+    validation_ranking = np.argsort(-validation_scores, axis=1, kind="stable")
+    validation_top = validation_ranking[:, 0]
+    validation_y = validation["y"]
+    validation_top_score = validation_scores[np.arange(len(validation_y)), validation_top]
+    validation_margin = validation_top_score - validation_scores[np.arange(len(validation_y)), validation_ranking[:, 1]]
+    auto_candidates = []
+    for score_threshold in np.round(np.arange(0.30, 1.001, 0.01), 2):
+        for margin_threshold in np.round(np.arange(0.00, 0.501, 0.01), 2):
+            accepted = (validation_top != LABELS.index(OTHER)) & (validation_top_score >= score_threshold) & (validation_margin >= margin_threshold)
+            count = int(accepted.sum())
+            correct = int(np.sum(accepted & (validation_top == validation_y)))
+            precision = correct / count if count else 1.0
+            coverage = float(np.mean(accepted[validation_supported]))
+            if count and precision >= 0.95:
+                auto_candidates.append((coverage, precision, float(score_threshold), float(margin_threshold), count, correct))
+    if not auto_candidates:
+        raise RuntimeError("No validation auto-spawn rule met the 95% precision target")
+    auto_coverage, auto_precision, auto_score_threshold, auto_margin_threshold, auto_count, auto_correct = max(auto_candidates)
+
     test_supported = test["y"] != LABELS.index(OTHER)
     supported_score = np.max(probabilities[:, :len(SUPPORTED)], axis=1)
     accepted_test = (predicted != LABELS.index(OTHER)) & (supported_score >= reject_threshold)
@@ -227,6 +248,15 @@ def metric_report(model, arrays: dict[str, dict[str, np.ndarray]], training_seco
         "heldOutUnsupportedRejection": float(np.mean(~accepted_test[~test_supported])),
         "validationThresholdTargetCoverage": target_coverage,
         "validationThresholdOtherRejection": other_rejection,
+        "autoSpawnRule": {
+            "scoreThreshold": auto_score_threshold,
+            "marginThreshold": auto_margin_threshold,
+            "validationAccepted": auto_count,
+            "validationCorrect": auto_correct,
+            "validationPrecision": auto_precision,
+            "validationSupportedCoverage": auto_coverage,
+            "selectedOn": "validation only; maximize supported coverage subject to >=95% precision",
+        },
         "perLabel": per_label,
         "unsupportedHeldOut": source_results,
         "confusionMatrix": matrix.tolist(),
@@ -294,6 +324,9 @@ def main():
         "preprocessing": "Official centered 28x28 numpy_bitmap raster, uint8 divided by 255; black background and white strokes.",
         "confidence": "softmax score; uncalibrated",
         "unsupportedScoreThreshold": report["unsupportedScoreThreshold"],
+        "autoSpawnScoreThreshold": report["autoSpawnRule"]["scoreThreshold"],
+        "autoSpawnMarginThreshold": report["autoSpawnRule"]["marginThreshold"],
+        "autoSpawnRule": "Supported top label must meet validation-selected score and lead-margin thresholds; raw scores are uncalibrated.",
         "thresholdMethod": "Select the score threshold maximizing balanced accuracy on the separate validation windows for supported vs aggregated Other; tie favors higher rejection.",
     }, indent=2) + "\n", encoding="utf-8")
     REPORT.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
