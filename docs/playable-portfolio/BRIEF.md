@@ -62,22 +62,21 @@ Dragging over the trash highlights it; release deletes the object.
 Keep objects inside usable bounds after viewport resize.
 Give new visitors one concise instruction, not a tutorial wall.
 
-## Word resolution
+## Catalog naming compatibility
 
-Use a static catalog, not a network database.
+The former typed-word resolution helpers remain covered by tests for catalog naming compatibility; they are not exposed as a visible input or click-to-type interaction. Use a static catalog, not a network database.
 Resolution order: normalize -> exact name -> alias -> conservative typo match.
 Examples: Cat/cat, kitty/kitten -> cat, and a clear typo -> cat.
 Do not force an unrelated word to the nearest object.
-For unknown or ambiguous words show useful suggestions and preserve input.
-Bound input length. Render user text as text, never executable HTML.
 
-The current 12-object set remains the interaction verification milestone.
-Expand to 24, evaluate and review per-class quality, then continue toward 60;
-the proposed exact-label roadmap is in `CATALOG_ROADMAP.md`. Do not describe a
+The original 12-object set remains the completed interaction verification milestone.
+The integrated catalog now contains the evaluated 24-label batch. Review its
+per-class quality before selecting the remaining roadmap candidates toward 60;
+see `CATALOG_ROADMAP.md`. Do not describe a
 label as recognition-supported until it appears in training, exported labels,
 the catalog, original artwork, and browser inference.
 
-Each entry has a stable ID, label, aliases, asset, dimensions, and animation key.
+Each entry has a stable ID, display label, model recognition label, aliases, asset, dimensions, and animation key.
 Spawn uses prebuilt local art. No image-generation API in the visitor interaction.
 
 ## Portfolio

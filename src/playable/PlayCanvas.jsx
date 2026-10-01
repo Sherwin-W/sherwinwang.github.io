@@ -273,11 +273,15 @@ export default function PlayCanvas() {
       } else if (message.type === 'result') {
         const ranked = message.ranked || []
         const bestSupported = ranked.find((item) => item.label !== 'other')
-        if (message.autoSpawnAccepted && bestSupported && (explicit || !suppressAutoRef.current)) {
-          performTransformation(catalog.find((entry) => entry.id === bestSupported.label), 'automatic', requestId, {
+        const bestEntry = bestSupported && catalog.find((entry) => (entry.recognitionLabel || entry.id) === bestSupported.label)
+        if (message.autoSpawnAccepted && bestEntry && (explicit || !suppressAutoRef.current)) {
+          performTransformation(bestEntry, 'automatic', requestId, {
             elapsedMs: performance.now() - startedAt,
             inferenceMs: message.inferenceMs,
             modelBytes: message.modelBytes,
+            ranked: message.ranked,
+            autoSpawnAccepted: message.autoSpawnAccepted,
+            autoSpawnMargin: message.autoSpawnMargin,
           })
           return
         }
@@ -466,6 +470,7 @@ export default function PlayCanvas() {
 
       {recognition.status !== 'idle' && !pickerOpen && <fieldset className="recognition-panel"
         data-model-bytes={recognition.modelBytes} data-inference-ms={recognition.inferenceMs} data-worker-roundtrip-ms={recognition.elapsedMs}
+        data-ranked-labels={recognition.ranked?.map((item) => item.label).join(',')}
         aria-live="polite" onPointerDown={(event) => event.stopPropagation()}>
         <legend>{recognition.status === 'transformed' ? 'Sketch transformed' : recognition.status === 'restored' ? 'Sketch restored' : 'Drawing recognition'}</legend>
         {recognition.status === 'loading' && <p role="status">Your drawing is paused. Recognizing it on this device…</p>}
@@ -478,7 +483,7 @@ export default function PlayCanvas() {
         {(recognition.status === 'uncertain' || recognition.status === 'unsupported') && <>
           <div className="recognition-suggestions" role="group" aria-label="Ranked drawing suggestions">
             {recognition.ranked?.filter((item) => item.label !== 'other').slice(0, 3).map((item, index) => {
-              const entry = catalog.find((candidate) => candidate.id === item.label)
+              const entry = catalog.find((candidate) => (candidate.recognitionLabel || candidate.id) === item.label)
               return entry && <button type="button" key={entry.id} onClick={() => acceptSuggestion(entry.id)}>
                 <span>{index + 1}. {entry.label}</span><small>{formatModelScore(item.score)} model score</small>
               </button>

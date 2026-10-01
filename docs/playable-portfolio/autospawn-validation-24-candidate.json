@@ -1,0 +1,181 @@
+{
+  "method": "Thresholds selected on validation rows only using candidate committed weights; no test rows or labels loaded.",
+  "modelSha256": "fb4b154d7f998001021145a4c9e1537244436e1a6bb8c26afa23fd291491f04e",
+  "validationRows": 21600,
+  "validationSupportedRows": 14400,
+  "validationOtherRows": 7200,
+  "selectedAutoSpawnRule": {
+    "criterion": "maximize supported coverage subject to precision >= 95%",
+    "decision": "25-output winner is supported AND top score >= scoreThreshold AND margin over runner-up >= marginThreshold",
+    "scoreThreshold": 0.94,
+    "marginThreshold": 0.7,
+    "accepted": 2432,
+    "correct": 2320,
+    "precision": 0.9539473684210527,
+    "supportedCoverage": 0.16680555555555557,
+    "perClass": {
+      "cat": {
+        "samples": 600,
+        "accepted": 34,
+        "coverage": 0.056666666666666664,
+        "precisionAmongAcceptedForClass": 0.8823529411764706
+      },
+      "dog": {
+        "samples": 600,
+        "accepted": 8,
+        "coverage": 0.013333333333333334,
+        "precisionAmongAcceptedForClass": 0.125
+      },
+      "rabbit": {
+        "samples": 600,
+        "accepted": 12,
+        "coverage": 0.02,
+        "precisionAmongAcceptedForClass": 0.6666666666666666
+      },
+      "bird": {
+        "samples": 600,
+        "accepted": 5,
+        "coverage": 0.008333333333333333,
+        "precisionAmongAcceptedForClass": 0.4
+      },
+      "fish": {
+        "samples": 600,
+        "accepted": 154,
+        "coverage": 0.25666666666666665,
+        "precisionAmongAcceptedForClass": 0.987012987012987
+      },
+      "butterfly": {
+        "samples": 600,
+        "accepted": 180,
+        "coverage": 0.3,
+        "precisionAmongAcceptedForClass": 0.9666666666666667
+      },
+      "tree": {
+        "samples": 600,
+        "accepted": 140,
+        "coverage": 0.23333333333333334,
+        "precisionAmongAcceptedForClass": 0.9428571428571428
+      },
+      "flower": {
+        "samples": 600,
+        "accepted": 55,
+        "coverage": 0.09166666666666666,
+        "precisionAmongAcceptedForClass": 0.9454545454545454
+      },
+      "mushroom": {
+        "samples": 600,
+        "accepted": 200,
+        "coverage": 0.3333333333333333,
+        "precisionAmongAcceptedForClass": 0.98
+      },
+      "cactus": {
+        "samples": 600,
+        "accepted": 43,
+        "coverage": 0.07166666666666667,
+        "precisionAmongAcceptedForClass": 0.9302325581395349
+      },
+      "sun": {
+        "samples": 600,
+        "accepted": 112,
+        "coverage": 0.18666666666666668,
+        "precisionAmongAcceptedForClass": 0.9821428571428571
+      },
+      "moon": {
+        "samples": 600,
+        "accepted": 90,
+        "coverage": 0.15,
+        "precisionAmongAcceptedForClass": 0.9222222222222223
+      },
+      "cow": {
+        "samples": 600,
+        "accepted": 20,
+        "coverage": 0.03333333333333333,
+        "precisionAmongAcceptedForClass": 0.95
+      },
+      "duck": {
+        "samples": 600,
+        "accepted": 7,
+        "coverage": 0.011666666666666667,
+        "precisionAmongAcceptedForClass": 0.8571428571428571
+      },
+      "elephant": {
+        "samples": 600,
+        "accepted": 7,
+        "coverage": 0.011666666666666667,
+        "precisionAmongAcceptedForClass": 0.0
+      },
+      "frog": {
+        "samples": 600,
+        "accepted": 7,
+        "coverage": 0.011666666666666667,
+        "precisionAmongAcceptedForClass": 0.2857142857142857
+      },
+      "leaf": {
+        "samples": 600,
+        "accepted": 51,
+        "coverage": 0.085,
+        "precisionAmongAcceptedForClass": 0.9019607843137255
+      },
+      "house plant": {
+        "samples": 600,
+        "accepted": 155,
+        "coverage": 0.25833333333333336,
+        "precisionAmongAcceptedForClass": 0.9806451612903225
+      },
+      "apple": {
+        "samples": 600,
+        "accepted": 403,
+        "coverage": 0.6716666666666666,
+        "precisionAmongAcceptedForClass": 1.0
+      },
+      "banana": {
+        "samples": 600,
+        "accepted": 84,
+        "coverage": 0.14,
+        "precisionAmongAcceptedForClass": 0.9523809523809523
+      },
+      "pizza": {
+        "samples": 600,
+        "accepted": 112,
+        "coverage": 0.18666666666666668,
+        "precisionAmongAcceptedForClass": 0.9821428571428571
+      },
+      "chair": {
+        "samples": 600,
+        "accepted": 220,
+        "coverage": 0.36666666666666664,
+        "precisionAmongAcceptedForClass": 1.0
+      },
+      "airplane": {
+        "samples": 600,
+        "accepted": 61,
+        "coverage": 0.10166666666666667,
+        "precisionAmongAcceptedForClass": 0.9836065573770492
+      },
+      "bicycle": {
+        "samples": 600,
+        "accepted": 242,
+        "coverage": 0.4033333333333333,
+        "precisionAmongAcceptedForClass": 1.0
+      }
+    }
+  },
+  "selectedUnknownRejectThreshold": {
+    "scoreThreshold": 0.21,
+    "validationSupportedAcceptance": 0.9038194444444444,
+    "validationOtherRejection": 0.7423611111111111,
+    "decision": "winner is other OR maximum supported-label score is below threshold",
+    "selection": "balanced accuracy on validation supported-versus-Other, within 0.5 points of maximum; highest threshold wins ties"
+  },
+  "uncalibratedScoreCaveat": "Softmax outputs are uncalibrated model scores, not probabilities of correctness. Validation precision and coverage describe this sampled Quick, Draw! split and may not transfer to visitor sketches.",
+  "validationOtherSourceCounts": {
+    "car": 900,
+    "clock": 900,
+    "cloud": 900,
+    "house": 900,
+    "mountain": 900,
+    "star": 900,
+    "toothbrush": 900,
+    "violin": 900
+  }
+}

@@ -23,7 +23,7 @@ test('starts in Select mode, offers the accessible catalog, supports dragging an
   await page.getByRole('button', { name: 'Objects', exact: true }).click();
   const picker = page.getByRole('group', { name: 'Choose an object' });
   await expect(picker).toBeVisible();
-  await expect(picker.locator('.drawing-picker__objects button')).toHaveCount(12);
+  await expect(picker.locator('.drawing-picker__objects button')).toHaveCount(24);
   await picker.getByRole('button', { name: 'Dog' }).click();
   await expect(page.locator('.play-object')).toHaveCount(2);
   const dog = page.getByRole('button', { name: /Dog, use arrow keys/ });
@@ -51,7 +51,7 @@ test('mobile Brush draws with glow, manual picker replaces a sketch, and reduced
   await page.setViewportSize({ width: 390, height: 844 });
   await page.emulateMedia({ reducedMotion: 'reduce' });
   const modelRequests = [];
-  page.on('request', request => { if (request.url().includes('/models/drawing-recognizer/')) modelRequests.push(request.url()); });
+  page.on('request', request => { if (request.url().includes('/models/drawing-recognizer-24-candidate/')) modelRequests.push(request.url()); });
   await page.goto('/');
   const starterSprite = page.locator('.play-object img');
   await expect.poll(() => starterSprite.evaluate(image => image.naturalWidth)).toBeGreaterThan(0);
@@ -80,6 +80,7 @@ test('mobile Brush draws with glow, manual picker replaces a sketch, and reduced
   await expect(picker).toBeVisible();
   await expect(picker.locator('.drawing-picker__objects button')).toHaveText([
     'Cat', 'Dog', 'Rabbit', 'Bird', 'Fish', 'Butterfly', 'Tree', 'Flower', 'Mushroom', 'Cactus', 'Sun', 'Moon',
+    'Cow', 'Duck', 'Elephant', 'Frog', 'Leaf', 'Potted plant', 'Apple', 'Banana', 'Pizza', 'Chair', 'Airplane', 'Bicycle',
   ]);
   await expect(page.locator('.draw-toolbar')).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'Type', exact: true })).toHaveCount(0);
@@ -87,11 +88,11 @@ test('mobile Brush draws with glow, manual picker replaces a sketch, and reduced
   const dockBounds = await page.locator('.portfolio-dock').boundingBox();
   expect(pickerBounds.y + pickerBounds.height).toBeLessThan(dockBounds.y);
   await page.screenshot({ path: 'docs/playable-portfolio/screenshots/mobile.png' });
-  await picker.getByRole('button', { name: 'Fish' }).click();
-  await expect(page.locator('.play-object img[src$="/fish.svg"]')).toHaveCount(1);
+  await picker.getByRole('button', { name: 'Bicycle' }).click();
+  await expect(page.locator('.play-object img[src$="/bicycle.svg"]')).toHaveCount(1);
   await expect(page.getByRole('button', { name: /Undo transformation/ })).toBeVisible();
   await page.getByRole('button', { name: 'Undo transformation' }).last().click();
-  await expect(page.locator('.play-object img[src$="/fish.svg"]')).toHaveCount(0);
+  await expect(page.locator('.play-object img[src$="/bicycle.svg"]')).toHaveCount(0);
   await expect(page.locator('.draw-stroke-core')).toHaveCount(1);
   await expect(page.getByRole('status')).toContainText('will not be checked again');
 });

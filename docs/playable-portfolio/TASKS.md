@@ -1,21 +1,21 @@
 # Tasks
 
-- P0 preserved implementation: baseline checkpoint `5bcf157` - preserved.
-- I1 current-12 interaction: Select-first navigation, Brush, picker, pause timer,
-  validation-gated automatic transformation, stale-result cancellation, Undo
-  transformation, glow/cursor, touch and reduced motion - implementation in
-  progress; complete browser verification before catalog integration.
-- I2 interaction evidence: desktop/mobile screenshots, full browser flow,
-  activation/debounce/inference timing, no-train acceptance measurements - in
-  progress.
-- M1 conservative automatic-creation rule: validation-only score+margin search;
-  0.91 / 0.50 selected for 95.41% validation precision and 26.88% supported
-  coverage - research/report complete; worker wiring in progress.
-- A1 category/art roadmap: 60 exact Quick, Draw! labels in proposed batches;
-  next target 24 - complete as a plan, not yet wired.
-- C1 24-object batch: revise Other labels, train/export/evaluate, add 12 catalog
-  entries and 12 original SVGs, browser inference evidence - not started until
-  I1 verifies on the current 12.
-- C2 expand from 24 toward 60 - blocked on completing/reviewing C1 metrics.
-- Previous review items (pointer deletion, portfolio sheets, content gaps,
-  artwork fixes, reduced motion) remain covered by the `5bcf157` checkpoint.
+- P0 checkpoint: preserved existing work; revised interaction checkpoint
+  `924aba8` is committed on `feature/playable-portfolio`.
+- I1 current-12 interaction: complete and verified before catalog expansion.
+  Select-first, Brush, accessible picker, pause/cancellation, auto-transform,
+  Undo/retry, cursor, glow, touch and reduced motion are in the checkpoint.
+- M1 validation-gated creation: complete. The 24-label model uses a 0.94 score
+  / 0.70 margin threshold selected on validation; validation precision/coverage
+  95.39% / 16.68%, test 95.26% / 16.56%.
+- C1 batch 24: integrated and evaluated. Twelve additional exact labels,
+  original art, adjusted Other classes, 24 model outputs, JavaScript parity,
+  held-out metrics, and browser-preprocessing fixtures are present.
+- I2 verification: complete after the 24-class integration; unit, browser,
+  build, lint, desktop/mobile screenshot, and model-parity checks are recorded
+  in `VALIDATION.md`.
+- C2 expansion from 24 toward 60: intentionally not started. Review class
+  quality and choose the next batch before changing the model again.
+
+Claude's untracked review file is excluded from the checkpoint and must remain
+untouched. Do not push or deploy.

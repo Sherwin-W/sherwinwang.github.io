@@ -55,20 +55,22 @@ failure before returning a concise blocker.
 
 Claude budget: one direction pass, one final review. No perpetual review loop.
 
-## Work queue
+## Current revised work queue
 
-P0: Audit, baseline checks, contracts, task ownership.
-P1: Complete typed-cat flow: input, resolve, spawn, drag, trash.
-P2A: Catalog and matching edge cases; owns catalog/matching module.
-P2B: Tactile visual system and original object art; owns scoped assets/styles.
-P2C: Drawing capture and bounded recognition feasibility spike.
-P3: Project sheets and accurate content; lead assigns separate ownership.
-P4: Integrate drawing result selection, error states and mobile interaction.
-P5: Focused browser validation, performance evidence, repair and handoff.
+The revised drawing-first direction supersedes the original typing-first task
+sequence above this point. Select is the initial canvas mode; creation is by
+Brush or the accessible object picker. The 1,500 ms post-pointer-up recognizer,
+score+margin auto-creation, cancellation, reversible transformation, local
+model worker, and manual fallback are implemented.
 
-P1 precedes parallel integration. Drawing research may run independently.
-Target first unattended session: a working canvas, 12 objects, portfolio sheets,
-drawing capture, and an honest recognition result or documented blocker.
+Interaction checkpoint: `924aba8`. The batch-24 stage is now integrated and
+evaluated, including 24 labels, original artwork, adjusted Other training
+classes, model/runtime parity, per-class holdout evidence, and browser
+preprocessing fixtures. See `STATUS.md` and `VALIDATION.md`.
+
+Do not continue toward 60 until the current 24-class results are reviewed and
+a new batch is explicitly selected. Preserve user work, commit only locally,
+and do not push or deploy.
 
 ## Unattended policy
 

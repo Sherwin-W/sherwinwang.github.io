@@ -6,7 +6,7 @@ let modelPromise
 async function loadModel() {
   if (!modelPromise) {
     modelPromise = (async () => {
-      const root = `${BASE_URL}models/drawing-recognizer/`
+      const root = `${BASE_URL}models/drawing-recognizer-24-candidate/`
       const manifestResponse = await fetch(`${root}manifest.json`)
       if (!manifestResponse.ok) throw new Error(`Model manifest request failed (${manifestResponse.status})`)
       const manifest = await manifestResponse.json()

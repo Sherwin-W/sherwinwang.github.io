@@ -1,7 +1,8 @@
-﻿const makeEntry = (id, label, aliases = [], animation = id) => ({
+const makeEntry = (id, label, aliases = [], animation = id, recognitionLabel = id) => ({
   id,
   label,
   aliases,
+  recognitionLabel,
   asset: `/objects/${id}.svg`,
   width: 96,
   height: 96,
@@ -21,6 +22,18 @@ export const catalog = [
   makeEntry('cactus', 'Cactus', ['succulent']),
   makeEntry('sun', 'Sun', ['sunshine']),
   makeEntry('moon', 'Moon', ['luna']),
+  makeEntry('cow', 'Cow', ['cattle']),
+  makeEntry('duck', 'Duck', ['duckling']),
+  makeEntry('elephant', 'Elephant'),
+  makeEntry('frog', 'Frog', ['toad']),
+  makeEntry('leaf', 'Leaf', ['leaves']),
+  makeEntry('house-plant', 'Potted plant', ['house plant', 'plant'], 'house-plant', 'house plant'),
+  makeEntry('apple', 'Apple'),
+  makeEntry('banana', 'Banana'),
+  makeEntry('pizza', 'Pizza'),
+  makeEntry('chair', 'Chair'),
+  makeEntry('airplane', 'Airplane', ['plane']),
+  makeEntry('bicycle', 'Bicycle', ['bike']),
 ];
 
 export const MAX_WORD_LENGTH = 48;

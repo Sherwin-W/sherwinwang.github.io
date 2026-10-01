@@ -1,10 +1,11 @@
 # Playable portfolio catalog roadmap
 
 This is a proposed content and recognition plan, not a claim that all listed
-objects are currently recognized. The current supported milestone is the twelve
-labels in `scripts/drawing-recognition/train.py` and the twelve entries in
-`src/playable/catalog.js`. The next stop is a fully evaluated 24-label model.
-Only after that review should work continue toward 60.
+objects are currently recognized. The interaction milestone was verified with the original twelve labels. The
+active supported collection is now 24 labels in the batch-24 training/export
+contract and `src/playable/catalog.js`. This 24-class batch has held-out and
+browser-preprocessing evidence; review the weak classes in `RECOGNITION.md`
+before continuing toward 60.
 
 ## Source labels and artwork policy
 
@@ -55,30 +56,31 @@ and browser model. Artwork is present under `public/objects/`.
 | Sky | `sun` | Supported now |
 | Sky | `moon` | Supported now |
 
-## Milestone 24: next 12 labels to add and evaluate
+## Milestone 24: completed 12-label expansion
 
 All exact labels below appear in the official listing. This batch adds breadth
 to every planned category except sky, which already has Sun and Moon. Use exact
 training labels in exports; human-friendly labels appear in parentheses.
 
-| # | Category | Exact training label | Display label | Availability |
+| # | Category | Exact training label | Display label | Status |
 | ---: | --- | --- | --- | --- |
-| 13 | Animals | `cow` | Cow | Available, exact |
-| 14 | Animals | `duck` | Duck | Available, exact |
-| 15 | Animals | `elephant` | Elephant | Available, exact |
-| 16 | Animals | `frog` | Frog | Available, exact |
-| 17 | Plants | `leaf` | Leaf | Available, exact |
-| 18 | Plants | `house plant` | Potted plant | Available, exact; display mapping only |
-| 19 | Food | `apple` | Apple | Available, exact |
-| 20 | Food | `banana` | Banana | Available, exact |
-| 21 | Food | `pizza` | Pizza | Available, exact |
-| 22 | Household | `chair` | Chair | Available, exact |
-| 23 | Transport | `airplane` | Airplane | Available, exact |
-| 24 | Transport | `bicycle` | Bicycle | Available, exact |
+| 13 | Animals | `cow` | Cow | Integrated and evaluated |
+| 14 | Animals | `duck` | Duck | Integrated; weak auto coverage |
+| 15 | Animals | `elephant` | Elephant | Integrated; weak recognition |
+| 16 | Animals | `frog` | Frog | Integrated; weak recognition |
+| 17 | Plants | `leaf` | Leaf | Integrated and evaluated |
+| 18 | Plants | `house plant` | Potted plant | Integrated; exact-label display mapping |
+| 19 | Food | `apple` | Apple | Integrated and evaluated |
+| 20 | Food | `banana` | Banana | Integrated and evaluated |
+| 21 | Food | `pizza` | Pizza | Integrated and evaluated |
+| 22 | Household | `chair` | Chair | Integrated and evaluated |
+| 23 | Transport | `airplane` | Airplane | Integrated and evaluated |
+| 24 | Transport | `bicycle` | Bicycle | Integrated and evaluated |
 
-Complete and evaluate this 24-label model before selecting or integrating more
-classes. Review per-class top-1 and top-3 results, confusions, unsupported
-rejection, and auto-spawn precision and coverage separately. Choose any
+The 24-label model, artwork, picker, and browser inference are integrated. Its
+per-class top-1/top-3, confusions, unknown rejection, and auto-spawn
+precision/coverage are reported in `RECOGNITION.md` and the JSON metrics. Review
+that evidence before selecting or integrating more classes. Choose any
 auto-spawn score-and-margin rule on validation data only; do not call raw
 softmax scores calibrated confidence or tune the rule on test data. If a label
 or group performs weakly, report that limitation and keep it picker-only or
