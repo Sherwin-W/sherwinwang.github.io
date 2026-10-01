@@ -38,16 +38,17 @@ Do not run Claude and Codex as competing source writers in one checkout.
 
 ## Model and usage policy
 
-Use one strong Codex coordinator and initially two small coding workers.
+Use one strong Codex coordinator and at most two small coding workers.
 Use fresh bounded worker prompts instead of copying the whole conversation.
 Ask workers to read only the relevant brief, contracts and owned files.
 Maximum three concurrent implementation workers.
 No recursive delegation by workers.
 
-Verify model availability and per-agent selection in the installed client.
-Select the smallest suitable available model for mechanical coding/art tasks.
-Do not silently fall back to multiple expensive models if routing is unavailable:
-use one coding session and document the limitation instead.
+Verify the models actually available through the installed collaboration
+client and record the selected model for each worker. Select the smallest
+suitable available model for mechanical coding/art tasks. If the client does
+not expose the requested model selection, do not claim it was routed; record
+the limitation and use the available default.
 
 Escalate recognition design, architecture, and unresolved correctness bugs
 to the stronger lead. A worker gets at most two repair attempts on the same
@@ -68,28 +69,43 @@ evaluated, including 24 labels, original artwork, adjusted Other training
 classes, model/runtime parity, per-class holdout evidence, and browser
 preprocessing fixtures. See `STATUS.md` and `VALIDATION.md`.
 
-Do not continue toward 60 until the current 24-class results are reviewed and
-a new batch is explicitly selected. Preserve user work, commit only locally,
-and do not push or deploy.
+The 24-object recognizer remains the active supported catalog unless measured
+validation evidence shows that expansion preserves its per-class quality and
+auto-creation reliability. The remaining 36 illustrations and metadata may
+be prepared separately, but asset-only entries must not be presented as
+recognition-supported. Preserve user work, commit only locally, and do not
+push or deploy.
 
 ## Unattended policy
 
-This is a bounded run, not an infinite automation loop.
-Continue through ready tasks without routine clarification.
+This is an authorized overnight run, bounded by the explicit end time below,
+completion of useful authorized backlog, or account usage exhaustion.
+Continue through ready tasks without routine clarification. Do not stop just
+because a milestone completes.
 Resolve reversible implementation choices using the brief.
 If a task needs unavailable credentials, spending, permissions or assets,
 record it as blocked and proceed with independent tasks.
 Never bypass permission prompts or disable sandbox protections.
 
-Maximum run: four hours if the client can track elapsed time reliably,
-or six implementation/review cycles, whichever comes first.
-Stop earlier when acceptance criteria are met.
+The user-authorized limit is 07:00 America/Los_Angeles on 2026-10-01. This
+overrides the earlier four-hour/six-cycle cap. After the deadline, stop new
+work and leave a recoverable checkpoint. At each milestone, inspect
+`docs/playable-portfolio/claude-reviews/`; ignore `.draft.md` files, read and
+triage completed reviews, and record resolved, obsolete, and deferred items
+in our status notes. Do not wait for reviews; continue independent work.
 Do not sleep or poll continuously waiting for Claude or a missing resource.
 Usage exhaustion is a stop condition, not a reason to start extra sessions.
 
 Keep status current at milestone boundaries so work can resume after interruption.
 At a stop boundary, finish or clearly mark the current patch; leave the last
 working state recoverable and describe uncommitted work.
+
+Use up to six planned model validation experiments, each with an explicit
+wall-clock timeout. Select models and thresholds using validation data only;
+keep the held-out test set untouched until final evaluation. Training
+experiments may run longer than the former single short training run, within
+the overall deadline and account limits. Preserve the current model until a
+measured replacement is independently reviewed and integrated.
 
 ## Verification
 

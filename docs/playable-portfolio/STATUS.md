@@ -30,3 +30,15 @@ roadmap. Do not add them until these results are reviewed. Missing project
 architecture diagrams, verified project links, and LinkedIn-profile
 confirmation remain tracked in `CONTENT_GAPS.md`. Claude's review file remains
 untracked and untouched. No push or deployment occurred.
+
+Overnight continuation began from checkpoint `51f33c7`. `RUNBOOK.md` now
+authorizes work until 07:00 America/Los_Angeles on 2026-10-01 (or useful
+backlog completion / usage exhaustion) and allows six bounded validation
+experiments. The current full lint baseline has ten errors in seven legacy
+React components; these are queued for minimal cleanup. Next: validate model
+alternatives using train/validation only, audit the browser interaction, and
+prepare the remaining 36 asset-only objects without changing active labels.
+At milestone boundaries, check `claude-reviews/`, ignore drafts, and triage
+completed reviews in this status file. Current Claude review directory had
+no completed files at the first check; the existing root Claude review result
+remains untracked and untouched.
