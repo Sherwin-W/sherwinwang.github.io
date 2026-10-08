@@ -1,0 +1,7 @@
+# Task 02A correction round 2 (tiny)
+
+Follow `/AGENTS.md`. Do not run npm install, do not commit. Scope: `src/components/bento/Tile.jsx` (and `motion.js` if needed) only.
+
+Browser measurement after round 1: tab order, tabindex, ring, and hover shadow are now correct. One defect: while the primary pointer is held down on a link tile (Playwright `page.mouse.down()` after hovering it), the computed transform stays `matrix(1.015, 0, 0, 1.015, 0, -3)` (hover pose) instead of the press pose `scale(0.985)`. Cause is most likely that `whileHover` takes precedence over the `animate` variant, so the pressed state never shows while hovering. Fix so that pressed overrides hover: for example drive the whole thing from one `animate={state}` where `state` is `'pressed' | 'hover' | 'rest'` computed from `pressed`, `hovered` (via `onHoverStart`/`onHoverEnd` or pointer enter/leave on fine pointers), and `keyboardFocused`, and remove `whileHover`. Requirements: pressed compresses to about 0.985 with y 0; releasing inside returns to the hover pose via the same spring; releasing or leaving outside returns to rest (this already works: after drag-off release the transform is `none`); no tabindex may be reintroduced; reduced motion unchanged (no scale or lift); touch devices unchanged (no sticky hover).
+
+Report the files changed and lint/test/build results honestly.

@@ -1,0 +1,61 @@
+.sketchbook-page { position: relative; min-height: 100svh; isolation: isolate; overflow: hidden; background: var(--paper); }
+.sketchbook-page__theme { position:fixed; top:24px; right:24px; z-index:9; }
+.sketchbook-page::after { content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 0; background: radial-gradient(ellipse at center, transparent 45%, rgba(120,100,70,.06)); }
+.sketchbook-page__header { position: absolute; top: 9%; left: 7%; z-index: 2; max-width: 440px; pointer-events: none; }
+.sketchbook-page__header h1 { margin: 0 0 10px; font: 400 clamp(2rem, 3vw, 2.8rem)/1.05 Georgia, serif; letter-spacing: -.04em; }
+.sketchbook-page__header p { margin: 0; color: var(--graphite-soft); font: italic 1rem/1.5 Georgia, serif; }
+.hint-after-spawn { display: none; }
+.sketchbook-page:has(.play-canvas--spawned) .hint-initial { display: none; }
+.sketchbook-page:has(.play-canvas--spawned) .hint-after-spawn { display: inline; }
+.sketchbook-page__back { display: inline-block; margin-top: 12px; color: var(--graphite); font: 600 .9rem/1.4 system-ui, sans-serif; pointer-events: auto; }
+.sketchbook-page__canvas { position: absolute; inset: 0; z-index: 1; animation: canvas-arrive 250ms ease-out both; }
+.sketchbook-page__dock { position: absolute; z-index: 6; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 12px; padding: 6px 10px; }
+.sketchbook-page__dock > div { display: flex; align-items: center; gap: 10px; }
+.sketchbook-loading { position: fixed; inset: 0; z-index: 10; display: grid; place-content: center; justify-items: center; gap: 8px; color: var(--graphite-soft); font: 14px/1.4 Georgia, serif; opacity: 0; animation: loading-reveal 200ms ease-out 300ms forwards; }
+.sketchbook-loading img { width: 56px; height: 56px; animation: cat-rock 1.4s ease-in-out infinite; }
+@keyframes loading-reveal { to { opacity: 1; } }
+@keyframes cat-rock { 0%,100% { transform: rotate(-4deg); } 50% { transform: rotate(4deg); } }
+@keyframes canvas-arrive { from { opacity: 0; } to { opacity: 1; } }
+@media (max-width: 599px) {
+  .sketchbook-page__header { top: 24px; left: 20px; right: 20px; }
+  .sketchbook-page__header h1 { font-size: 2rem; }
+  .sketchbook-page__header p { max-width: 34ch; font-size: .88rem; }
+  .sketchbook-page__dock { bottom: 12px; left: 12px; right: 12px; transform: none; justify-content: center; padding: 0; background: var(--paper-raised); border: 1px solid #d7cdbc; border-radius: 14px; box-shadow: 0 2px 6px #3c2d1922; }
+  .sketchbook-page__dock > div { min-height: 54px; justify-content: space-between; width: 100%; padding: 4px 8px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sketchbook-loading img { animation: none; }
+  .sketchbook-page__canvas { animation-duration: 1ms; }
+}
+
+/* The playable canvas owns the light palette. These scoped overrides supply its dark mirror. */
+:root[data-theme="dark"] .sketchbook-page { --paper:#1a1917; --paper-raised:#262421; --graphite:#ece7dc; --graphite-soft:#a39d90; --line:#cfc8b8; --focus:#8db8ff; color:#ece7dc; background:#1a1917; }
+:root[data-theme="dark"] .sketchbook-page .theme-toggle { color:#ece7dc; background:#262421; border-color:#514d45; --edge:#514d45; --text:#ece7dc; --glass:#262421; --glass-strong:#302d28; --shadow:rgba(0,0,0,.35); --accent:#8db8ff; }
+:root[data-theme="dark"] .play-canvas { --paper:#1a1917; --paper-raised:#262421; --graphite:#ece7dc; --graphite-soft:#a39d90; --line:#cfc8b8; --focus:#8db8ff; }
+:root[data-theme="dark"] .draw-stroke-core { stroke:#ece7dc; }
+:root[data-theme="dark"] .draw-toolbar,:root[data-theme="dark"] .sketchbook-page__dock { border-color:#514d45; }
+:root[data-theme="dark"] .drawing-picker,:root[data-theme="dark"] .recognition-panel { box-shadow:0 8px 22px rgba(0,0,0,.48); }
+:root[data-theme="dark"] .drawing-picker__actions { border-color:#514d45; }
+:root[data-theme="dark"] .drawing-picker__objects button:hover { background:#3a352d; }
+:root[data-theme="dark"] .play-canvas--brush .draw-board { cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='32' viewBox='0 0 28 32'%3E%3Cpath d='M2 28 7 16 20 3l5 5L12 21 2 28Z' fill='%23262421' stroke='%23ece7dc' stroke-width='2' stroke-linejoin='round'/%3E%3Cpath d='m7 16 5 5M2 28l8-4-5-5-3 9Z' fill='%2378b8a2' stroke='%23ece7dc' stroke-width='1.5'/%3E%3C/svg%3E") 2 28,crosshair; }
+@media (prefers-color-scheme:dark) {
+  :root:not([data-theme="light"]) .sketchbook-page { --paper:#1a1917; --paper-raised:#262421; --graphite:#ece7dc; --graphite-soft:#a39d90; --line:#cfc8b8; --focus:#8db8ff; color:#ece7dc; background:#1a1917; }
+  :root:not([data-theme="light"]) .sketchbook-page .theme-toggle { color:#ece7dc; background:#262421; border-color:#514d45; --edge:#514d45; --text:#ece7dc; --glass:#262421; --glass-strong:#302d28; --shadow:rgba(0,0,0,.35); --accent:#8db8ff; }
+  :root:not([data-theme="light"]) .play-canvas { --paper:#1a1917; --paper-raised:#262421; --graphite:#ece7dc; --graphite-soft:#a39d90; --line:#cfc8b8; --focus:#8db8ff; }
+  :root:not([data-theme="light"]) .draw-stroke-core { stroke:#ece7dc; }
+  :root:not([data-theme="light"]) .draw-toolbar,:root:not([data-theme="light"]) .sketchbook-page__dock { border-color:#514d45; }
+  :root:not([data-theme="light"]) .drawing-picker,:root:not([data-theme="light"]) .recognition-panel { box-shadow:0 8px 22px rgba(0,0,0,.48); }
+  :root:not([data-theme="light"]) .drawing-picker__actions { border-color:#514d45; }
+  :root:not([data-theme="light"]) .drawing-picker__objects button:hover { background:#3a352d; }
+  :root:not([data-theme="light"]) .play-canvas--brush .draw-board { cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='32' viewBox='0 0 28 32'%3E%3Cpath d='M2 28 7 16 20 3l5 5L12 21 2 28Z' fill='%23262421' stroke='%23ece7dc' stroke-width='2' stroke-linejoin='round'/%3E%3Cpath d='m7 16 5 5M2 28l8-4-5-5-3 9Z' fill='%2378b8a2' stroke='%23ece7dc' stroke-width='1.5'/%3E%3C/svg%3E") 2 28,crosshair; }
+}
+@media (prefers-reduced-transparency:reduce) {
+  .sketchbook-page .theme-toggle { background:var(--paper-raised); border:1px solid #d7cdbc; -webkit-backdrop-filter:none; backdrop-filter:none; }
+  .sketchbook-page .theme-toggle:hover { background:var(--paper-raised); }
+  :root[data-theme="dark"] .sketchbook-page .theme-toggle,:root:not([data-theme="light"]) .sketchbook-page .theme-toggle { border-color:#514d45; }
+}
+@supports not (backdrop-filter:blur(1px)) {
+  .sketchbook-page .theme-toggle { background:var(--paper-raised); border:1px solid #d7cdbc; -webkit-backdrop-filter:none; backdrop-filter:none; }
+  .sketchbook-page .theme-toggle:hover { background:var(--paper-raised); }
+  :root[data-theme="dark"] .sketchbook-page .theme-toggle,:root:not([data-theme="light"]) .sketchbook-page .theme-toggle { border-color:#514d45; }
+}

@@ -46,7 +46,7 @@ test('a multi-stroke pause restarts 1,500 ms debounce; the accepted Sun transfor
   await page.setViewportSize({ width: 390, height: 844 });
   const modelRequests = [];
   page.on('request', request => { if (request.url().includes('/models/drawing-recognizer-cnn/')) modelRequests.push(request.url()); });
-  await page.goto('/');
+  await page.goto('/sketchbook/');
   await page.getByRole('button', { name: 'Brush', exact: true }).click();
   await page.locator('.draw-board').evaluate(board => board.addEventListener('pointerup', () => performance.mark('last-stroke-pointerup'), { capture: true }));
   const sunStrokes = sun();
@@ -82,7 +82,7 @@ test('a validation-accepted Chair auto-transforms, and Undo restores ink without
   await page.setViewportSize({ width: 390, height: 844 });
   const modelRequests = [];
   page.on('request', request => { if (request.url().includes('/models/drawing-recognizer-cnn/')) modelRequests.push(request.url()); });
-  await page.goto('/');
+  await page.goto('/sketchbook/');
   await page.getByRole('button', { name: 'Brush', exact: true }).click();
   await page.locator('.draw-board').evaluate(board => board.addEventListener('pointerup', () => performance.mark('chair-last-pointerup'), { capture: true }));
   const fixture = JSON.parse(readFileSync('tests/fixtures/batch24-drawings.json', 'utf8')).drawings.find(drawing => drawing.label === 'chair');
@@ -108,7 +108,7 @@ test('a slow uninterrupted pointer gesture is never recognized until pointer-up'
   await page.setViewportSize({ width: 390, height: 844 });
   const modelRequests = [];
   page.on('request', request => { if (request.url().includes('/models/drawing-recognizer-cnn/')) modelRequests.push(request.url()); });
-  await page.goto('/');
+  await page.goto('/sketchbook/');
   await page.getByRole('button', { name: 'Brush', exact: true }).click();
   const board = page.locator('.draw-board');
   const rect = await board.boundingBox();
@@ -127,7 +127,7 @@ test('a slow uninterrupted pointer gesture is never recognized until pointer-up'
 
 test('uncertain and unsupported drawings stay visible and provide three suggestions plus the manual picker', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto('/');
+  await page.goto('/sketchbook/');
   await page.getByRole('button', { name: 'Brush', exact: true }).click();
   const house = [
     [[85, 270], [180, 190], [275, 270], [85, 270]],
@@ -159,7 +159,7 @@ test('new strokes, clear, mode changes, portfolio sheets and unmount cancel stal
   await page.setViewportSize({ width: 390, height: 844 });
   const modelRequests = [];
   page.on('request', request => { if (request.url().includes('/models/drawing-recognizer-cnn/')) modelRequests.push(request.url()); });
-  await page.goto('/');
+  await page.goto('/sketchbook/');
   await page.getByRole('button', { name: 'Brush', exact: true }).click();
   await drawStrokes(page, [[[80, 250], [180, 300], [260, 350]]]);
   await page.waitForTimeout(900);
@@ -183,12 +183,10 @@ test('new strokes, clear, mode changes, portfolio sheets and unmount cancel stal
 
   await page.getByRole('button', { name: 'Brush', exact: true }).click();
   await drawStrokes(page, [[[80, 250], [180, 300], [260, 350]]]);
-  await page.getByRole('button', { name: 'About', exact: true }).click();
-  await expect(page.getByRole('dialog')).toBeVisible();
+  // This event is the contract the former portfolio sheet used to cancel recognition.
+  await page.evaluate(() => window.dispatchEvent(new Event('portfolio:sheet-open')));
   await page.waitForTimeout(1600);
   expect(modelRequests).toEqual([]);
-  await page.keyboard.press('Escape');
-
   await page.route('**/models/drawing-recognizer-cnn/weights.f32', async route => {
     await new Promise(resolve => setTimeout(resolve, 2200));
     await route.continue();
@@ -215,7 +213,7 @@ test('new strokes, clear, mode changes, portfolio sheets and unmount cancel stal
 test('model-load failure preserves the sketch and accessible manual picker', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.route('**/models/drawing-recognizer-cnn/manifest.json', route => route.fulfill({ status: 503, body: 'offline fixture' }));
-  await page.goto('/');
+  await page.goto('/sketchbook/');
   await page.getByRole('button', { name: 'Brush', exact: true }).click();
   await drawStrokes(page, [[[90, 220], [210, 330], [280, 260]]]);
   const panel = await waitForRecognition(page);
@@ -229,7 +227,7 @@ test('starting a new stroke after an accepted transformation keeps the new ink i
   await page.setViewportSize({ width: 390, height: 844 });
   const requests = [];
   page.on('request', request => { if (request.url().includes('/models/drawing-recognizer-cnn/')) requests.push(request.url()); });
-  await page.goto('/');
+  await page.goto('/sketchbook/');
   await page.getByRole('button', { name: 'Brush', exact: true }).click();
   const fixture = JSON.parse(readFileSync('tests/fixtures/batch24-drawings.json', 'utf8')).drawings.find(drawing => drawing.label === 'chair');
   const rect = await page.locator('.draw-board').boundingBox();
@@ -252,7 +250,7 @@ test('starting a new stroke after an accepted transformation keeps the new ink i
 test('selected CNN runs all authored browser-rasterizer fixtures in its lazy Worker', async ({ page }) => {
   test.setTimeout(90000);
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto('/');
+  await page.goto('/sketchbook/');
   const fixtures = JSON.parse(readFileSync('tests/fixtures/batch24-drawings.json', 'utf8')).drawings;
   const results = await page.evaluate(async drawings => {
     const { rasterizeStrokes } = await import('/src/playable/recognitionMath.js');
@@ -331,7 +329,7 @@ test('selected CNN runs all authored browser-rasterizer fixtures in its lazy Wor
 test('selected CNN drawings pass through browser rasterization and record suggestions honestly', async ({ page }) => {
   test.setTimeout(90000);
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto('/');
+  await page.goto('/sketchbook/');
   await page.getByRole('button', { name: 'Brush', exact: true }).click();
   const manifest = await page.evaluate(async () => fetch('/models/drawing-recognizer-cnn/manifest.json').then(response => response.json()));
   const fixtures = JSON.parse(readFileSync('tests/fixtures/batch24-drawings.json', 'utf8'));

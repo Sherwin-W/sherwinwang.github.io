@@ -3,18 +3,17 @@ import fs from 'node:fs';
 
 test.beforeAll(() => fs.mkdirSync('docs/playable-portfolio/screenshots', { recursive: true }));
 
-test('starts in Select mode, offers the accessible catalog, supports dragging and portfolio access', async ({ page }) => {
+test('starts in Select mode and offers the accessible catalog', async ({ page }) => {
   const errors = [];
   page.on('pageerror', error => errors.push(error.message));
   await page.setViewportSize({ width: 1440, height: 900 });
-  await page.goto('/');
-  await expect(page.getByRole('heading', { name: "Hello, I'm Sherwin" })).toBeVisible();
+  await page.goto('/sketchbook/');
+  await expect(page.getByRole('heading', { name: 'Sketchbook' })).toBeVisible();
   await expect(page.getByRole('button', { name: /Cat, use arrow keys/ })).toHaveCount(1);
   await expect(page.getByRole('button', { name: 'Select', exact: true })).toHaveAttribute('aria-pressed', 'true');
   await expect(page.getByRole('button', { name: 'Brush', exact: true })).toHaveAttribute('aria-pressed', 'false');
   await expect(page.getByRole('button', { name: /Cat, use arrow keys/ })).toHaveCSS('cursor', 'grab');
   await expect(page.getByRole('button', { name: 'Objects' })).toHaveCSS('cursor', 'pointer');
-  await expect(page.getByRole('button', { name: 'Projects' })).toBeVisible();
   await page.locator('.play-canvas').click({ position: { x: 740, y: 430 } });
   await expect(page.locator('.play-object')).toHaveCount(1);
   await expect(page.getByRole('textbox')).toHaveCount(0);
@@ -48,14 +47,6 @@ test('starts in Select mode, offers the accessible catalog, supports dragging an
   await page.mouse.up();
   await expect(dog).toHaveCount(0);
 
-  const projectButton = page.getByRole('button', { name: 'Projects' }).first();
-  await projectButton.click();
-  const dialog = page.getByRole('dialog');
-  await expect(dialog).toBeVisible();
-  await expect(dialog.getByText('Privacy Preserving Visualization Tool')).toBeVisible();
-  await page.keyboard.press('Escape');
-  await expect(dialog).not.toBeVisible();
-  await expect(projectButton).toBeFocused();
   expect(errors).toEqual([]);
 });
 
@@ -64,7 +55,7 @@ test('mobile Brush draws with glow, manual picker replaces a sketch, and reduced
   await page.emulateMedia({ reducedMotion: 'reduce' });
   const modelRequests = [];
   page.on('request', request => { if (request.url().includes('/models/drawing-recognizer-cnn/')) modelRequests.push(request.url()); });
-  await page.goto('/');
+  await page.goto('/sketchbook/');
   await page.screenshot({ path: 'docs/playable-portfolio/screenshots/mobile-select.png' });
   const starterSprite = page.locator('.play-object img');
   await expect.poll(() => starterSprite.evaluate(image => image.naturalWidth)).toBeGreaterThan(0);
@@ -98,7 +89,7 @@ test('mobile Brush draws with glow, manual picker replaces a sketch, and reduced
   await expect(page.locator('.draw-toolbar')).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'Type', exact: true })).toHaveCount(0);
   const pickerBounds = await picker.boundingBox();
-  const dockBounds = await page.locator('.portfolio-dock').boundingBox();
+  const dockBounds = await page.locator('.sketchbook-page__dock').boundingBox();
   expect(pickerBounds.y + pickerBounds.height).toBeLessThan(dockBounds.y);
   await page.screenshot({ path: 'docs/playable-portfolio/screenshots/mobile.png' });
   await picker.getByRole('button', { name: 'Bicycle' }).click();
@@ -112,7 +103,7 @@ test('mobile Brush draws with glow, manual picker replaces a sketch, and reduced
 
 test('mobile picker object thumbnails and repeated manual additions stay dispersed', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto('/');
+  await page.goto('/sketchbook/');
   for (const label of ['Cat', 'Dog', 'Rabbit', 'Bird', 'Fish', 'Butterfly', 'Tree', 'Flower', 'Mushroom', 'Cactus', 'Sun', 'Moon', 'Cow', 'Duck', 'Elephant', 'Frog', 'Leaf', 'Potted plant', 'Apple', 'Banana', 'Pizza', 'Chair', 'Airplane', 'Bicycle']) {
     await page.getByRole('button', { name: 'Objects', exact: true }).click();
     const picker = page.getByRole('group', { name: 'Choose an object' });
@@ -139,7 +130,7 @@ test('mobile picker object thumbnails and repeated manual additions stay dispers
   await page.getByRole('button', { name: 'Objects', exact: true }).click();
   const picker = page.getByRole('group', { name: 'Choose an object' });
   const pickerBounds = await picker.boundingBox();
-  const dockBounds = await page.locator('.portfolio-dock').boundingBox();
+  const dockBounds = await page.locator('.sketchbook-page__dock').boundingBox();
   expect(pickerBounds.y + pickerBounds.height).toBeLessThan(dockBounds.y);
   await picker.getByRole('button', { name: 'Bicycle' }).scrollIntoViewIfNeeded();
   await expect(picker.getByRole('button', { name: 'Bicycle' })).toBeInViewport();
@@ -148,7 +139,7 @@ test('mobile picker object thumbnails and repeated manual additions stay dispers
 test('touch pointer input draws without depending on the custom cursor', async ({ browser }) => {
   const context = await browser.newContext({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
   const page = await context.newPage();
-  await page.goto('http://127.0.0.1:4173/');
+  await page.goto('http://127.0.0.1:4173/sketchbook/');
   const brush = await page.getByRole('button', { name: 'Brush', exact: true }).boundingBox();
   await page.touchscreen.tap(brush.x + brush.width / 2, brush.y + brush.height / 2);
   const board = await page.locator('.draw-board').boundingBox();
@@ -164,7 +155,7 @@ test('touch pointer input draws without depending on the custom cursor', async (
 
 test('pointer cancellation restores placement, outside release clamps, and Delete is accessible', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
-  await page.goto('/');
+  await page.goto('/sketchbook/');
   await page.getByRole('button', { name: 'Objects', exact: true }).click();
   await page.getByRole('group', { name: 'Choose an object' }).getByRole('button', { name: 'Dog' }).click();
   const dog = page.getByRole('button', { name: /Dog, use arrow keys/ });

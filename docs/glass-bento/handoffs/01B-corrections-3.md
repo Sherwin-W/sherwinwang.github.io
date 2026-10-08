@@ -1,0 +1,9 @@
+# Task 01B correction round 3 (small)
+
+Follow `/AGENTS.md`. Do not run npm install, do not commit. Scope: `src/components/bento/bento.css`, `src/components/bento/visuals/visuals.css`, `src/components/bento/Tile.jsx` only if unavoidable. DESIGN.md now allows four backdrop-filter elements (Identity + three Quest panels); do not change blur usage. Keep everything else. Findings from Playwright inspection:
+
+1. **Caption collision.** The "Illustration" caption (`.visual-caption`) in the Quest media overlaps the Interviews panel (desktop: panel bottom edge touches it; mobile 390: it covers the panel's bar). Move the Quest caption to the bottom-LEFT of the media (the cascade leaves that corner empty at every size), clear of all panels. Leave Privacy's caption where it is.
+2. **Truncated copy.** On the wide HTML Transformer and Flutter tiles at 1440 the Flutter summary is cut with an ellipsis ("...plan and organize even..."). Do not truncate. Remove the one-line clamp and any narrow max-width on the summary in those tiles and let the text use the available width; if it still needs more room it may wrap to a second line (keep the title/summary block vertically centered and the tag on the right). Verify that both summaries show their full text at 1440 and 820, and that below 640px the tag stacks under the text as before.
+3. **Identity chip spacing.** The interest chips sit tight under the GitHub pill. Add about 16px of space above the chip row and about 8px row gap between chip rows; keep the chips small and quiet. Identity content should stay vertically balanced inside the 296px tile at 1440 (no clipping).
+
+Report files changed and honest lint/test/build results.

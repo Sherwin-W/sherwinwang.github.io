@@ -1,0 +1,45 @@
+﻿.sketchbook { position: relative; min-height: 100svh; isolation: isolate; background: var(--paper); }
+.sketchbook::before { content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 0; background: url('/paper-fibers.svg'); opacity: .07; }
+.sketchbook::after { content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 0; background: radial-gradient(ellipse at center, transparent 45%, rgba(120,100,70,.06)); }
+.sketchbook-title { position: absolute; top: 28%; left: 12%; pointer-events: none; z-index: 2; }
+.folio-number { font: 600 .7rem system-ui; letter-spacing: .15em; text-transform: uppercase; color: var(--graphite-soft); }
+.sketchbook-title h1 { font-size: clamp(2.25rem, 4.5vw, 4rem); line-height: 1.05; margin: 20px 0; font-weight: 400; letter-spacing: -.045em; }
+.sketchbook-title p { font-size: 1.125rem; line-height: 1.6; margin: 0; }
+.sketchbook-title .sketchbook-hint { margin-top: 24px; color: var(--graphite-soft); font-size: 1rem; font-style: italic; }
+.hint-after-spawn { display:none; }
+.play-canvas--spawned ~ .sketchbook-title .hint-initial { display:none; }
+.play-canvas--spawned ~ .sketchbook-title .hint-after-spawn { display:inline; }
+.portfolio-dock { position:absolute;z-index:6;bottom:20px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:12px;padding:6px 10px; }
+.portfolio-links { display:flex;align-items:center;gap:8px; }
+.portfolio-links button { min-height:44px;padding:8px 10px; }
+.dock-control-host { display:flex;align-items:center;gap:10px;padding-left:12px;border-left:1px solid #bcb2a2; }
+.portfolio-sheet { color: var(--graphite); background: var(--paper-raised); border: 1px solid #d7cdbc; border-radius: 3px; padding: 40px; width: min(620px, calc(100vw - 112px)); max-height: 80svh; overflow-y: auto; box-shadow: 0 18px 40px rgba(60,45,25,.25); transform: rotate(-.6deg); }
+.portfolio-sheet::backdrop { background: rgba(43,42,40,.35); }
+.portfolio-sheet::before,.portfolio-sheet::after { content: ''; position: absolute; top: 0; height: 16px; width: 64px; background: #e8c76899; }
+.portfolio-sheet::before { left: 32px; transform: rotate(-8deg); }
+.portfolio-sheet::after { right: 32px; transform: rotate(8deg); }
+.portfolio-sheet h2 { font-size: 2rem; line-height: 1.2; font-weight: 400; max-width: 90%; margin: 24px 0; }
+.portfolio-sheet p { font-size: 1.125rem; line-height: 1.6; }
+.sheet-close { float: right; margin: -16px -16px 20px 12px; }
+.sheet-eyebrow { display: block; font: .75rem system-ui; color: var(--graphite-soft); padding-top: 12px; }
+.project-index { display: grid; }
+.project-index button { border:0;border-top:1px solid #d7cdbc;border-radius:0;padding:20px 0;background:transparent;display:flex;text-align:left;gap:16px;align-items:baseline; }
+.project-index strong { display: block; font: 1.2rem Georgia; }
+.project-index small { display: block; font: .9rem/1.6 system-ui; margin-top: 8px; color: var(--graphite-soft); }
+.project-number { font: .75rem system-ui; color: var(--graphite-soft); }
+.tech-chips { margin: 24px 0; }
+.tech-chips span { font: .8rem system-ui; background: var(--paper); padding: 8px 12px; border: 1px solid #d7cdbc; border-radius: 24px; }
+.sheet-footer { border-top: 1px solid #d7cdbc; margin-top: 32px; padding-top: 16px; display: flex; flex-wrap: wrap; gap: 8px; }
+@media (max-width: 599px) {
+ .sketchbook-title { top: 64px; left: 24px; right: 24px; }
+ .sketchbook-title h1 { font-size: 2.25rem; margin: 16px 0; }
+ .sketchbook-title p { font-size: 1rem; }
+ .desktop-break { display: none; }
+ .portfolio-dock { bottom:12px;left:12px;right:12px;width:auto;transform:none;display:grid;grid-template-columns:1fr;gap:6px;padding:0;background:var(--paper-raised);border:1px solid #d7cdbc;border-radius:14px;box-shadow:0 2px 6px #3c2d1922; }
+ .portfolio-links { justify-content:space-between;gap:2px;padding:4px 6px 0; }
+ .portfolio-links button { flex:1;min-height:44px;padding:7px 3px;font-size:.85rem; }
+ .dock-control-host { min-height:48px;justify-content:space-between;padding:0 8px 4px;border-left:0;border-top:1px solid #d7cdbc; }
+ .portfolio-sheet { width: calc(100vw - 64px); padding: 24px; max-height: 84svh; transform: none; }
+ .sheet-close { margin: 0 0 16px 8px; }
+}
+@media (prefers-reduced-motion: reduce) { .portfolio-sheet { transform: none; } .sketchbook-hint { transition: none !important; } }

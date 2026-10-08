@@ -1,0 +1,37 @@
+.quest-preview { position:relative; width:100%; height:100%; min-height:0; overflow:hidden; border-radius:20px; background:var(--wash); }
+.quest-preview::before,.quest-preview::after { content:""; position:absolute; width:48%; aspect-ratio:1; border-radius:50%; filter:blur(22px); opacity:.26; background:rgba(228,240,255,.62); }
+.quest-preview::before { top:-45%; left:12%; }.quest-preview::after { right:-9%; bottom:-58%; }
+.quest-panel { position:absolute; z-index:1; width:clamp(150px,30%,290px); min-height:116px; padding:15px; border:1px solid var(--edge); border-radius:18px; background:var(--glass); box-shadow:inset 0 1px var(--edge-top),0 18px 50px rgba(5,18,54,.22); -webkit-backdrop-filter:blur(20px) saturate(140%); backdrop-filter:blur(20px) saturate(140%); color:var(--text); transition:transform .2s ease-out; }
+.bento-tile--quest:hover .quest-panel--applications { transform:translateY(-4px); }.bento-tile--quest:hover .quest-panel--practice { transform:translateY(-6px); }.bento-tile--quest:hover .quest-panel--interviews { transform:translateY(-3px); }
+.quest-panel--applications { left:5%; top:7%; }.quest-panel--practice { left:35%; top:34%; }.quest-panel--interviews { right:5%; bottom:7%; }
+.quest-panel__heading { display:flex; align-items:center; gap:9px; margin-bottom:13px; font-size:.82rem; font-weight:550; }
+.quest-skeleton { display:block; height:6px; margin-top:8px; border-radius:9px; background:rgba(255,255,255,.38); }.quest-skeleton--long { width:83%; }.quest-skeleton--short { width:58%; }.quest-skeleton--bar { width:100%; height:20px; margin-top:13px; background:rgba(255,255,255,.2); }
+.visual-caption { position:absolute; z-index:3; right:12px; bottom:10px; padding:4px 9px; border:1px solid rgba(255,255,255,.25); border-radius:999px; background:rgba(13,26,60,.22); color:#fff; font-size:.68rem; line-height:1.2; }
+.quest-preview > .visual-caption { right:auto; left:12px; }
+.sketchbook-stage { position:absolute; inset:0; overflow:clip; background:var(--sketch-paper); }
+.sketch-object { position:absolute; z-index:1; width:clamp(40px,17%,96px); height:auto; aspect-ratio:1; object-fit:contain; filter:drop-shadow(0 4px 5px rgba(48,38,18,.12)); }
+.sketch-object--sun,.sketch-object--moon { width:clamp(40px,14%,96px); }.sketch-object--butterfly { width:clamp(40px,15%,96px); }.sketch-object--flower,.sketch-object--bird { width:clamp(40px,17%,96px); }.sketch-object--fish { width:clamp(40px,19%,96px); }.sketch-object--cat { width:clamp(40px,20%,96px); }
+.sketch-object--cat { left:8%; top:9%; transform:rotate(-8deg); }.sketch-object--sun { left:41%; top:4%; transform:rotate(7deg); }.sketch-object--fish { right:8%; top:15%; transform:rotate(8deg); }.sketch-object--flower { left:19%; top:39%; transform:rotate(5deg); }.sketch-object--bird { left:51%; top:33%; transform:rotate(-6deg); }.sketch-object--butterfly { right:17%; top:41%; transform:rotate(10deg); }.sketch-object--moon { left:4%; top:42%; transform:rotate(-9deg); }
+.sketch-stroke { position:absolute; z-index:0; inset:0; width:100%; height:100%; color:rgba(118,91,48,.7); }
+.privacy-visual { position:relative; min-height:0; flex:1; overflow:hidden; border-radius:18px; background:linear-gradient(145deg,color-mix(in srgb,var(--accent) 8%,var(--surface)),var(--surface)); }
+.privacy-visual svg { width:100%; height:100%; }.privacy-visual circle { fill:var(--accent); opacity:.68; }.privacy-visual .privacy-curve { opacity:.9; }
+.privacy-visual .visual-caption { color:var(--text); border-color:var(--edge); background:var(--surface); }
+@media (prefers-reduced-motion:reduce) { .quest-panel { transition:none; }.bento-tile--quest:hover .quest-panel { transform:none; } }
+@media (max-width:639px) {
+ .quest-panel { width:clamp(104px,30%,146px); min-height:0; padding:10px; border-radius:16px; }
+ .quest-panel__heading { gap:6px; margin-bottom:7px; font-size:.7rem; }
+ .quest-panel__heading svg { width:14px; height:14px; flex:none; }
+ .quest-skeleton { height:4px; margin-top:6px; }.quest-skeleton--bar { height:13px; margin-top:9px; }
+ .quest-panel--applications { left:3%; top:5%; }.quest-panel--practice { left:35%; top:34%; }.quest-panel--interviews { right:3%; bottom:5%; }
+}
+@media (min-width:640px) and (max-width:1023px) {
+ .sketch-object,.sketch-object--sun,.sketch-object--moon,.sketch-object--butterfly,.sketch-object--flower,.sketch-object--bird,.sketch-object--fish,.sketch-object--cat { width:auto; height:clamp(56px,32%,72px); aspect-ratio:1 / 1; }
+}
+@media (prefers-reduced-transparency:reduce) {
+ .quest-preview::before,.quest-preview::after { background:#87a7f4; opacity:1; }
+ .bento-tile__scrim { background:var(--opaque-scrim,var(--paper)); }
+}
+@supports not (backdrop-filter:blur(1px)) {
+ .quest-preview::before,.quest-preview::after { background:#87a7f4; opacity:1; }
+ .bento-tile__scrim { background:var(--opaque-scrim,var(--paper)); }
+}

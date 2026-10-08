@@ -25,3 +25,5 @@ playwright-report/
 *.njsproj
 *.sln
 *.sw?
+# Playwright CLI output (may contain credentials)
+.playwright-cli/

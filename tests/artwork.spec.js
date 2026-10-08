@@ -13,7 +13,7 @@ const roadmap = [
 
 test('active art and roadmap-only art all render in one visual review sheet', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 1600 });
-  await page.goto('/');
+  await page.goto('/sketchbook/');
   const errors = await page.evaluate(async ({ activeIds, roadmapIds }) => {
     document.body.innerHTML = '';
     document.body.style.cssText = 'margin:0;background:#f4efe4;color:#2b2a28;font:14px system-ui,sans-serif';
@@ -42,8 +42,8 @@ test('active art and roadmap-only art all render in one visual review sheet', as
       group.append(grid);
       document.body.append(group);
     };
-    section('Active 24 — current recognition set', activeIds, '/objects');
-    section('Roadmap 36 — illustration-only, not recognized', roadmapIds, '/objects/roadmap');
+    section('Active 24 â€” current recognition set', activeIds, '/objects');
+    section('Roadmap 36 â€” illustration-only, not recognized', roadmapIds, '/objects/roadmap');
     const images = [...document.images];
     await Promise.all(images.map(image => image.decode().catch(() => null)));
     return images.filter(image => !image.naturalWidth || !image.naturalHeight).map(image => image.src);
