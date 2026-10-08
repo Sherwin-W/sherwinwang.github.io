@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="t d">
+ <title id="t">Little tree</title><desc id="d">A small leafy tree with a rounded green canopy and a short brown trunk.</desc>
+ <path d="M51 106V77H45v29h38V77h-6v29Z" fill="#fbf8f1" stroke="#fbf8f1" stroke-width="11" stroke-linejoin="round"/>
+ <path d="M51 106V77H45v29h38V77h-6v29Z" fill="#79563e" stroke="#3a3631" stroke-width="3" stroke-linejoin="round"/>
+ <path d="M64 22C54 13 39 19 37 31 23 30 16 42 20 53 9 64 17 80 31 80c4 13 20 16 30 8 11 9 27 5 30-8 15 0 21-17 11-27 6-14-4-26-17-24-3-13-16-17-26-7Z" fill="#fbf8f1" stroke="#fbf8f1" stroke-width="11" stroke-linejoin="round"/>
+ <path d="M64 22C54 13 39 19 37 31 23 30 16 42 20 53 9 64 17 80 31 80c4 13 20 16 30 8 11 9 27 5 30-8 15 0 21-17 11-27 6-14-4-26-17-24-3-13-16-17-26-7Z" fill="#7fa37a" stroke="#3a3631" stroke-width="3" stroke-linejoin="round"/>
+ <path d="M28 51q5-18 24-19 12 0 17 8-10-4-19 3-8 8-7 20-10-1-15-12Z" fill="#a3bd8e"/><path d="M83 56q16 9 11 23-4 8-15 8 8-12 4-31Z" fill="#587650" opacity=".25"/>
+</svg>

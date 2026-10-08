@@ -1,0 +1,445 @@
+{
+  "labels": [
+    "cat",
+    "dog",
+    "rabbit",
+    "bird",
+    "fish",
+    "butterfly",
+    "tree",
+    "flower",
+    "mushroom",
+    "cactus",
+    "sun",
+    "moon",
+    "cow",
+    "duck",
+    "elephant",
+    "frog",
+    "leaf",
+    "house plant",
+    "apple",
+    "banana",
+    "pizza",
+    "chair",
+    "airplane",
+    "bicycle",
+    "other"
+  ],
+  "supportedLabels": [
+    "cat",
+    "dog",
+    "rabbit",
+    "bird",
+    "fish",
+    "butterfly",
+    "tree",
+    "flower",
+    "mushroom",
+    "cactus",
+    "sun",
+    "moon",
+    "cow",
+    "duck",
+    "elephant",
+    "frog",
+    "leaf",
+    "house plant",
+    "apple",
+    "banana",
+    "pizza",
+    "chair",
+    "airplane",
+    "bicycle"
+  ],
+  "otherLabel": "other",
+  "inputSize": 784,
+  "weightFile": "weights.f32",
+  "weightBytes": 212452,
+  "sha256": "6d8541e7267799d43dea6f092a2506c9b70babd30e42ecd1e75693b828703426",
+  "architecture": "28x28 -> conv(1,8,3,same)/ReLU/maxpool2 -> conv(8,16,3,same)/ReLU/maxpool2 -> dense(784,64)/ReLU -> dense(64,25)/softmax",
+  "packing": {
+    "conv1Weights": {
+      "offsetFloats": 0,
+      "lengthFloats": 72,
+      "shape": [
+        8,
+        1,
+        3,
+        3
+      ]
+    },
+    "conv1Bias": {
+      "offsetFloats": 72,
+      "lengthFloats": 8,
+      "shape": [
+        8
+      ]
+    },
+    "conv2Weights": {
+      "offsetFloats": 80,
+      "lengthFloats": 1152,
+      "shape": [
+        16,
+        8,
+        3,
+        3
+      ]
+    },
+    "conv2Bias": {
+      "offsetFloats": 1232,
+      "lengthFloats": 16,
+      "shape": [
+        16
+      ]
+    },
+    "dense1Weights": {
+      "offsetFloats": 1248,
+      "lengthFloats": 50176,
+      "shape": [
+        784,
+        64
+      ]
+    },
+    "dense1Bias": {
+      "offsetFloats": 51424,
+      "lengthFloats": 64,
+      "shape": [
+        64
+      ]
+    },
+    "dense2Weights": {
+      "offsetFloats": 51488,
+      "lengthFloats": 1600,
+      "shape": [
+        64,
+        25
+      ]
+    },
+    "dense2Bias": {
+      "offsetFloats": 53088,
+      "lengthFloats": 25,
+      "shape": [
+        25
+      ]
+    }
+  },
+  "dataset": "Google Quick, Draw! bitmap subset, CC BY 4.0",
+  "autoSpawnScoreThreshold": 0.75,
+  "autoSpawnMarginThreshold": 0.66,
+  "autoSpawnLabels": [
+    "cat",
+    "rabbit",
+    "fish",
+    "butterfly",
+    "tree",
+    "flower",
+    "mushroom",
+    "cactus",
+    "sun",
+    "duck",
+    "leaf",
+    "house plant",
+    "apple",
+    "banana",
+    "pizza",
+    "chair",
+    "airplane",
+    "bicycle"
+  ],
+  "unsupportedScoreThreshold": 0.23,
+  "thresholdMethod": "Joint score/margin rule and predicted-label allowlist selected using validation only; >=95% aggregate precision, with >=90% precision and >=20 predicted accepts per enabled label.",
+  "preprocessing": "Official centered 28x28 bitmap normalized to [0,1]; no augmentation or visitor upload.",
+  "training": {
+    "trainingRows": 33600,
+    "validationRows": 21600,
+    "epochs": 12,
+    "trainingSeconds": 53.055,
+    "pytorch": "2.12.0+cpu",
+    "seed": 20260930,
+    "cpuThreads": 4
+  },
+  "validation": {
+    "overallTop1": 0.7368055555555556,
+    "overallTop3": 0.8892592592592593,
+    "supportedRows": 14400,
+    "uiFilteredTop1": 0.7147222222222223,
+    "uiFilteredTop3": 0.875625,
+    "unknownRows": 7200,
+    "otherWinnerRejection": 0.8416666666666667,
+    "unknownRejectThreshold": 0.23,
+    "validationSupportedAcceptance": 0.8978472222222222,
+    "validationOtherRejection": 0.8525,
+    "autoSpawnRule": {
+      "scoreThreshold": 0.75,
+      "marginThreshold": 0.66,
+      "allowedLabels": [
+        "cat",
+        "rabbit",
+        "fish",
+        "butterfly",
+        "tree",
+        "flower",
+        "mushroom",
+        "cactus",
+        "sun",
+        "duck",
+        "leaf",
+        "house plant",
+        "apple",
+        "banana",
+        "pizza",
+        "chair",
+        "airplane",
+        "bicycle"
+      ],
+      "accepted": 6008,
+      "correct": 5710,
+      "precision": 0.9503994673768309,
+      "supportedCoverage": 0.4125
+    },
+    "perClass": {
+      "cat": {
+        "samples": 600,
+        "uiFilteredTop1": 0.58,
+        "uiFilteredTop3": 0.8,
+        "autoSpawnCorrectForClass": 168,
+        "autoSpawnCoverage": 0.28,
+        "predictedAccepted": 185,
+        "precisionAmongPredictedAccepts": 0.9081081081081082,
+        "enabledForAutoSpawn": true
+      },
+      "dog": {
+        "samples": 600,
+        "uiFilteredTop1": 0.29833333333333334,
+        "uiFilteredTop3": 0.7366666666666667,
+        "autoSpawnCorrectForClass": 0,
+        "autoSpawnCoverage": 0.0,
+        "predictedAccepted": 0,
+        "precisionAmongPredictedAccepts": null,
+        "enabledForAutoSpawn": false
+      },
+      "rabbit": {
+        "samples": 600,
+        "uiFilteredTop1": 0.5633333333333334,
+        "uiFilteredTop3": 0.82,
+        "autoSpawnCorrectForClass": 121,
+        "autoSpawnCoverage": 0.20166666666666666,
+        "predictedAccepted": 131,
+        "precisionAmongPredictedAccepts": 0.9236641221374046,
+        "enabledForAutoSpawn": true
+      },
+      "bird": {
+        "samples": 600,
+        "uiFilteredTop1": 0.38166666666666665,
+        "uiFilteredTop3": 0.77,
+        "autoSpawnCorrectForClass": 0,
+        "autoSpawnCoverage": 0.0,
+        "predictedAccepted": 0,
+        "precisionAmongPredictedAccepts": null,
+        "enabledForAutoSpawn": false
+      },
+      "fish": {
+        "samples": 600,
+        "uiFilteredTop1": 0.8233333333333334,
+        "uiFilteredTop3": 0.8933333333333333,
+        "autoSpawnCorrectForClass": 317,
+        "autoSpawnCoverage": 0.5283333333333333,
+        "predictedAccepted": 331,
+        "precisionAmongPredictedAccepts": 0.9577039274924471,
+        "enabledForAutoSpawn": true
+      },
+      "butterfly": {
+        "samples": 600,
+        "uiFilteredTop1": 0.8883333333333333,
+        "uiFilteredTop3": 0.95,
+        "autoSpawnCorrectForClass": 429,
+        "autoSpawnCoverage": 0.715,
+        "predictedAccepted": 449,
+        "precisionAmongPredictedAccepts": 0.955456570155902,
+        "enabledForAutoSpawn": true
+      },
+      "tree": {
+        "samples": 600,
+        "uiFilteredTop1": 0.7666666666666667,
+        "uiFilteredTop3": 0.9183333333333333,
+        "autoSpawnCorrectForClass": 302,
+        "autoSpawnCoverage": 0.5033333333333333,
+        "predictedAccepted": 311,
+        "precisionAmongPredictedAccepts": 0.9710610932475884,
+        "enabledForAutoSpawn": true
+      },
+      "flower": {
+        "samples": 600,
+        "uiFilteredTop1": 0.785,
+        "uiFilteredTop3": 0.915,
+        "autoSpawnCorrectForClass": 311,
+        "autoSpawnCoverage": 0.5183333333333333,
+        "predictedAccepted": 338,
+        "precisionAmongPredictedAccepts": 0.9201183431952663,
+        "enabledForAutoSpawn": true
+      },
+      "mushroom": {
+        "samples": 600,
+        "uiFilteredTop1": 0.885,
+        "uiFilteredTop3": 0.9483333333333334,
+        "autoSpawnCorrectForClass": 423,
+        "autoSpawnCoverage": 0.705,
+        "predictedAccepted": 447,
+        "precisionAmongPredictedAccepts": 0.9463087248322147,
+        "enabledForAutoSpawn": true
+      },
+      "cactus": {
+        "samples": 600,
+        "uiFilteredTop1": 0.765,
+        "uiFilteredTop3": 0.9116666666666666,
+        "autoSpawnCorrectForClass": 302,
+        "autoSpawnCoverage": 0.5033333333333333,
+        "predictedAccepted": 321,
+        "precisionAmongPredictedAccepts": 0.940809968847352,
+        "enabledForAutoSpawn": true
+      },
+      "sun": {
+        "samples": 600,
+        "uiFilteredTop1": 0.875,
+        "uiFilteredTop3": 0.93,
+        "autoSpawnCorrectForClass": 404,
+        "autoSpawnCoverage": 0.6733333333333333,
+        "predictedAccepted": 425,
+        "precisionAmongPredictedAccepts": 0.9505882352941176,
+        "enabledForAutoSpawn": true
+      },
+      "moon": {
+        "samples": 600,
+        "uiFilteredTop1": 0.7633333333333333,
+        "uiFilteredTop3": 0.895,
+        "autoSpawnCorrectForClass": 0,
+        "autoSpawnCoverage": 0.0,
+        "predictedAccepted": 0,
+        "precisionAmongPredictedAccepts": null,
+        "enabledForAutoSpawn": false
+      },
+      "cow": {
+        "samples": 600,
+        "uiFilteredTop1": 0.6783333333333333,
+        "uiFilteredTop3": 0.8733333333333333,
+        "autoSpawnCorrectForClass": 0,
+        "autoSpawnCoverage": 0.0,
+        "predictedAccepted": 0,
+        "precisionAmongPredictedAccepts": null,
+        "enabledForAutoSpawn": false
+      },
+      "duck": {
+        "samples": 600,
+        "uiFilteredTop1": 0.525,
+        "uiFilteredTop3": 0.7583333333333333,
+        "autoSpawnCorrectForClass": 54,
+        "autoSpawnCoverage": 0.09,
+        "predictedAccepted": 60,
+        "precisionAmongPredictedAccepts": 0.9,
+        "enabledForAutoSpawn": true
+      },
+      "elephant": {
+        "samples": 600,
+        "uiFilteredTop1": 0.5666666666666667,
+        "uiFilteredTop3": 0.8516666666666667,
+        "autoSpawnCorrectForClass": 0,
+        "autoSpawnCoverage": 0.0,
+        "predictedAccepted": 0,
+        "precisionAmongPredictedAccepts": null,
+        "enabledForAutoSpawn": false
+      },
+      "frog": {
+        "samples": 600,
+        "uiFilteredTop1": 0.34833333333333333,
+        "uiFilteredTop3": 0.6916666666666667,
+        "autoSpawnCorrectForClass": 0,
+        "autoSpawnCoverage": 0.0,
+        "predictedAccepted": 0,
+        "precisionAmongPredictedAccepts": null,
+        "enabledForAutoSpawn": false
+      },
+      "leaf": {
+        "samples": 600,
+        "uiFilteredTop1": 0.7116666666666667,
+        "uiFilteredTop3": 0.85,
+        "autoSpawnCorrectForClass": 261,
+        "autoSpawnCoverage": 0.435,
+        "predictedAccepted": 272,
+        "precisionAmongPredictedAccepts": 0.9595588235294118,
+        "enabledForAutoSpawn": true
+      },
+      "house plant": {
+        "samples": 600,
+        "uiFilteredTop1": 0.835,
+        "uiFilteredTop3": 0.9183333333333333,
+        "autoSpawnCorrectForClass": 378,
+        "autoSpawnCoverage": 0.63,
+        "predictedAccepted": 395,
+        "precisionAmongPredictedAccepts": 0.9569620253164557,
+        "enabledForAutoSpawn": true
+      },
+      "apple": {
+        "samples": 600,
+        "uiFilteredTop1": 0.955,
+        "uiFilteredTop3": 0.9683333333333334,
+        "autoSpawnCorrectForClass": 499,
+        "autoSpawnCoverage": 0.8316666666666667,
+        "predictedAccepted": 509,
+        "precisionAmongPredictedAccepts": 0.9803536345776032,
+        "enabledForAutoSpawn": true
+      },
+      "banana": {
+        "samples": 600,
+        "uiFilteredTop1": 0.735,
+        "uiFilteredTop3": 0.9216666666666666,
+        "autoSpawnCorrectForClass": 310,
+        "autoSpawnCoverage": 0.5166666666666667,
+        "predictedAccepted": 327,
+        "precisionAmongPredictedAccepts": 0.9480122324159022,
+        "enabledForAutoSpawn": true
+      },
+      "pizza": {
+        "samples": 600,
+        "uiFilteredTop1": 0.84,
+        "uiFilteredTop3": 0.9266666666666666,
+        "autoSpawnCorrectForClass": 318,
+        "autoSpawnCoverage": 0.53,
+        "predictedAccepted": 352,
+        "precisionAmongPredictedAccepts": 0.9034090909090909,
+        "enabledForAutoSpawn": true
+      },
+      "chair": {
+        "samples": 600,
+        "uiFilteredTop1": 0.8833333333333333,
+        "uiFilteredTop3": 0.9283333333333333,
+        "autoSpawnCorrectForClass": 424,
+        "autoSpawnCoverage": 0.7066666666666667,
+        "predictedAccepted": 429,
+        "precisionAmongPredictedAccepts": 0.9883449883449883,
+        "enabledForAutoSpawn": true
+      },
+      "airplane": {
+        "samples": 600,
+        "uiFilteredTop1": 0.7666666666666667,
+        "uiFilteredTop3": 0.8616666666666667,
+        "autoSpawnCorrectForClass": 214,
+        "autoSpawnCoverage": 0.3566666666666667,
+        "predictedAccepted": 224,
+        "precisionAmongPredictedAccepts": 0.9553571428571429,
+        "enabledForAutoSpawn": true
+      },
+      "bicycle": {
+        "samples": 600,
+        "uiFilteredTop1": 0.9333333333333333,
+        "uiFilteredTop3": 0.9766666666666667,
+        "autoSpawnCorrectForClass": 475,
+        "autoSpawnCoverage": 0.7916666666666666,
+        "predictedAccepted": 502,
+        "precisionAmongPredictedAccepts": 0.9462151394422311,
+        "enabledForAutoSpawn": true
+      }
+    },
+    "confidenceCaveat": "Softmax scores are uncalibrated. Validation precision/coverage are sampled-set measurements, not guarantees for visitor strokes."
+  }
+}

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="t d">
+ <title id="t">Potted cactus</title><desc id="d">A friendly green cactus with two short arms and a clean paper sticker edge.</desc>
+ <path d="M52 108V82H42q-17 0-17-17V49h16v16h11V32q0-16 16-16t16 16v29h12V49h16v17q0 17-18 17h-10v25Z" fill="#fbf8f1" stroke="#fbf8f1" stroke-width="11" stroke-linejoin="round"/>
+ <path d="M52 108V82H42q-17 0-17-17V49h16v16h11V32q0-16 16-16t16 16v29h12V49h16v17q0 17-18 17h-10v25Z" fill="#7fa37a" stroke="#3a3631" stroke-width="3" stroke-linejoin="round"/>
+ <path d="M59 35q0-12 9-13v30q-9-4-9-17Z" fill="#a9c490"/><path d="M77 67h16q7 0 10-4-2 13-14 13H77Z" fill="#52704d" opacity=".25"/>
+ <ellipse cx="61" cy="65" rx="2.5" ry="4" fill="#2b2a28"/><ellipse cx="75" cy="65" rx="2.5" ry="4" fill="#2b2a28"/>
+ <circle cx="53" cy="72" r="2.5" fill="#d9785c" opacity=".4"/><circle cx="83" cy="72" r="2.5" fill="#d9785c" opacity=".4"/>
+</svg>

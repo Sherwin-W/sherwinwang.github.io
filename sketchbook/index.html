@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#f4efe4" />
+    <script>try{var t=localStorage.getItem('theme');if(t==='light'||t==='dark'){document.documentElement.dataset.theme=t;document.querySelector('meta[name="theme-color"]').content=t==='light'?'#f4efe4':'#1a1917'}}catch{}</script>
+    <meta name="description" content="A small interactive sketchbook by Sherwin Wang." />
+    <title>Sketchbook - Sherwin Wang</title>
+    <style>
+      html, body { margin: 0; min-height: 100%; background: #f4efe4; }
+      html[data-theme="dark"],html[data-theme="dark"] body { background:#1a1917; }
+      html[data-theme="dark"] .boot-shell { color:#a39d90; }
+      @media (prefers-color-scheme:dark) { html:not([data-theme="light"]),html:not([data-theme="light"]) body { background:#1a1917; } html:not([data-theme="light"]) .boot-shell { color:#a39d90; } }
+      .boot-shell { position: fixed; inset: 0; display: grid; place-content: center; justify-items: center; gap: 8px; color: #6b675f; font: 14px/1.4 Georgia, serif; opacity: 0; animation: boot-reveal 200ms ease-out 300ms forwards; }
+      .boot-shell img { width: 56px; height: 56px; animation: cat-rock 1.4s ease-in-out infinite; }
+      @keyframes boot-reveal { to { opacity: 1; } }
+      @keyframes cat-rock { 0%,100% { transform: rotate(-4deg); } 50% { transform: rotate(4deg); } }
+      @media (prefers-reduced-motion: reduce) { .boot-shell img { animation: none; } }
+    </style>
+    <script type="module" crossorigin src="/assets/sketchbook-CvQRisP2.js"></script>
+    <link rel="modulepreload" crossorigin href="/assets/App-DOlf9U17.js">
+    <link rel="stylesheet" crossorigin href="/assets/App-dydlVsPl.css">
+    <link rel="stylesheet" crossorigin href="/assets/sketchbook-Bh-DGNgJ.css">
+  </head>
+  <body>
+    <div id="root"><div class="boot-shell" role="status" aria-live="polite"><img src="/objects/cat.svg" alt="" /><span>Opening sketchbook…</span></div></div>
+  </body>
+</html>

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="t d">
+ <title id="t">Crescent moon</title><desc id="d">A simple cream crescent moon with one small dot eye.</desc>
+ <path d="M91 20C57 14 30 37 29 66c-1 27 19 46 44 43-17-10-26-27-23-46 3-20 18-36 41-43Z" fill="#fbf8f1" stroke="#fbf8f1" stroke-width="11" stroke-linejoin="round"/>
+ <path d="M91 20C57 14 30 37 29 66c-1 27 19 46 44 43-17-10-26-27-23-46 3-20 18-36 41-43Z" fill="#f2e5c7" stroke="#3a3631" stroke-width="3" stroke-linejoin="round"/>
+ <path d="M78 40q-13 7-17 20" fill="none" stroke="#d9caa8" stroke-width="3" stroke-linecap="round" opacity=".55"/><path d="M73 83q10 4 16 14-8 12-20 12 10-11 4-26Z" fill="#b9aa89" opacity=".25"/><circle cx="61" cy="66" r="3.2" fill="#2b2a28"/>
+</svg>

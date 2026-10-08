@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="t d">
+ <title id="t">Puppy</title><desc id="d">A cream puppy with long floppy clay-colored ears, a broad muzzle, and a small nose.</desc>
+ <path d="M43 49Q24 32 19 49q-5 24 12 34 9 4 13-7Zm42 0q19-17 24 0 5 24-12 34-9 4-13-7Z" fill="#fbf8f1" stroke="#fbf8f1" stroke-width="11" stroke-linejoin="round"/>
+ <path d="M43 49Q24 32 19 49q-5 24 12 34 9 4 13-7Zm42 0q19-17 24 0 5 24-12 34-9 4-13-7Z" fill="#d9785c" stroke="#3a3631" stroke-width="3" stroke-linejoin="round"/>
+ <path d="M31 69Q28 46 43 41q21-13 42 0 15 5 12 28l-2 28q-4 18-31 18t-31-18Z" fill="#fbf8f1" stroke="#fbf8f1" stroke-width="11" stroke-linejoin="round"/>
+ <path d="M31 69Q28 46 43 41q21-13 42 0 15 5 12 28l-2 28q-4 18-31 18t-31-18Z" fill="#f1d9b9" stroke="#3a3631" stroke-width="3" stroke-linejoin="round"/>
+ <path d="M39 82q1-15 25-16t25 16q-1 19-25 21-24-2-25-21Z" fill="#fbf0db" stroke="#3a3631" stroke-width="2"/><path d="M78 83q16 11 14 22-2 7-12 11Z" fill="#a88c70" opacity=".25"/>
+ <ellipse cx="49" cy="72" rx="3.2" ry="4.2" fill="#2b2a28"/><ellipse cx="79" cy="72" rx="3.2" ry="4.2" fill="#2b2a28"/>
+ <ellipse cx="41" cy="81" rx="5" ry="2.5" fill="#d9785c" opacity=".25"/><ellipse cx="87" cy="81" rx="5" ry="2.5" fill="#d9785c" opacity=".25"/>
+ <path d="M55 78q9-7 18 0-1 10-9 10t-9-10Z" fill="#3a3631"/><path d="M64 87q-2 5-6 3m6-3q2 5 6 3" fill="none" stroke="#3a3631" stroke-width="1.5" stroke-linecap="round"/>
+</svg>

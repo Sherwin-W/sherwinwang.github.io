@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="t d">
+ <title id="t">Little fish</title><desc id="d">A clay-colored fish with a clear fan-shaped tail, cream belly, and round eye.</desc>
+ <path d="M36 64Q20 43 15 42q-4 0-3 22 0 22 3 22 5-1 21-22Z" fill="#fbf8f1" stroke="#fbf8f1" stroke-width="11" stroke-linejoin="round"/>
+ <path d="M36 64Q20 43 15 42q-4 0-3 22 0 22 3 22 5-1 21-22Z" fill="#bd624c" stroke="#3a3631" stroke-width="3" stroke-linejoin="round"/>
+ <path d="M25 64Q40 34 70 34 101 34 112 64q-11 30-42 30-30 0-45-30Z" fill="#fbf8f1" stroke="#fbf8f1" stroke-width="11" stroke-linejoin="round"/>
+ <path d="M25 64Q40 34 70 34 101 34 112 64q-11 30-42 30-30 0-45-30Z" fill="#d9785c" stroke="#3a3631" stroke-width="3" stroke-linejoin="round"/>
+ <path d="M55 68q28-4 48 5-7 16-27 20-17 3-29-2Z" fill="#f5dfc8"/><path d="M76 74q24 1 27 7-7 11-24 12Z" fill="#a95342" opacity=".25"/>
+ <path d="M46 47q17 8 3 22-13-7-3-22Z" fill="#f3b39c" stroke="#3a3631" stroke-width="2"/>
+ <circle cx="86" cy="54" r="5" fill="#fbf8f1"/><circle cx="87" cy="54" r="3.2" fill="#2b2a28"/><path d="M94 64q8 6 0 11" fill="none" stroke="#3a3631" stroke-width="2" stroke-linecap="round"/>
+</svg>

@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title desc">
+  <title id="title">Ginger cat</title><desc id="desc">A seated ginger kitten with cream muzzle, forehead stripes, whiskers, and a curled tail.</desc>
+  <style>
+    .tail{transform-box:fill-box;transform-origin:20% 90%;animation:tail 2.4s ease-in-out infinite alternate}
+    .eye{transform-box:fill-box;transform-origin:center;animation:blink 5.2s 1.7s infinite}
+    @keyframes tail{to{transform:rotate(8deg)}}
+    @keyframes blink{0%,95%,100%{transform:scaleY(1)}97%{transform:scaleY(.1)}}
+    @media(prefers-reduced-motion:reduce){.tail,.eye{animation:none}}
+  </style>
+  <!-- Tail is behind the body; its layered strokes join the body's sticker edge. -->
+  <path class="tail" d="M43 100C27 106 16 96 19 82c3-11 15-14 25-7" fill="none" stroke="#fbf8f1" stroke-width="15" stroke-linecap="round" stroke-linejoin="round"/>
+  <path class="tail" d="M43 100C27 106 16 96 19 82c3-11 15-14 25-7" fill="none" stroke="#3a3631" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+  <path class="tail" d="M43 100C27 106 16 96 19 82c3-11 15-14 25-7" fill="none" stroke="#dc8a43" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M32 72 28 36 51 47Q64 39 77 47l23-11-4 37q9 12 5 28-5 19-37 19T34 99q-4-15-2-27Z" fill="#fbf8f1" stroke="#fbf8f1" stroke-width="11" stroke-linejoin="round"/>
+  <path d="M32 72 28 36 51 47Q64 39 77 47l23-11-4 37q9 12 5 28-5 19-37 19T34 99q-4-15-2-27Z" fill="#dc8a43" stroke="#3a3631" stroke-width="3" stroke-linejoin="round"/>
+  <path d="m36 47-2-5 13 7-8 9Zm52 0 2-5-13 7 8 9Z" fill="#d9785c" stroke="#3a3631" stroke-width="1.5"/>
+  <path d="M39 93q25 8 51 0l4 12q-28 17-58 0Z" fill="#f5dfbc"/><path d="M83 84q13 11 10 22-3 7-12 11Z" fill="#9e592f" opacity=".25"/>
+  <path d="M52 49l4 10m8-12v10m8-8 4 9" fill="none" stroke="#9e592f" stroke-width="3" stroke-linecap="round"/>
+  <ellipse class="eye" cx="48" cy="77" rx="3.2" ry="4.2" fill="#2b2a28"/><ellipse class="eye" cx="80" cy="77" rx="3.2" ry="4.2" fill="#2b2a28"/>
+  <ellipse cx="39" cy="85" rx="5" ry="2.5" fill="#d9785c" opacity=".25"/><ellipse cx="89" cy="85" rx="5" ry="2.5" fill="#d9785c" opacity=".25"/>
+  <path d="m62 85 4 0-2 3Z" fill="#d9785c" stroke="#3a3631" stroke-width="1"/><path d="M64 88q-4 5-8 2m8-2q4 5 8 2" fill="none" stroke="#3a3631" stroke-width="1.5" stroke-linecap="round"/>
+  <path d="M43 87 24 84m19 7-19 2m42-6 19-3m-19 7 19 2" fill="none" stroke="#3a3631" stroke-width="1.5" stroke-linecap="round"/>
+</svg>
