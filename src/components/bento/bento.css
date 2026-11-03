@@ -8,6 +8,9 @@
 .bento-slot--privacy { grid-column:1 / span 6; grid-row:5 / span 2; }
 .bento-slot--html { grid-column:7 / span 6; grid-row:5; }
 .bento-slot--flutter { grid-column:7 / span 6; grid-row:6; }
+.bento-slot--spotify { grid-column:1 / span 4; grid-row:7 / span 2; }
+.bento-slot--mpti { grid-column:5 / span 4; grid-row:7 / span 2; }
+.bento-slot--blackjack { grid-column:9 / span 4; grid-row:7 / span 2; }
 
 .bento-tile { position:relative; display:flex; flex-direction:column; width:100%; height:auto; min-width:0; min-height:100%; overflow:visible; gap:var(--space-block); padding:var(--tile-pad); border:1px solid var(--edge); border-radius:28px; background:var(--surface); color:var(--text); box-shadow:inset 0 1px var(--edge-top),var(--shadow-tile); }
 .bento-tile > *,.bento-tile__content,.bento-quest__intro { min-width:0; }
@@ -93,6 +96,7 @@
  .bento-grid { grid-template-columns:repeat(6,minmax(0,1fr)); grid-auto-rows:auto; }
  .bento-slot--identity,.bento-slot--quest,.bento-slot--sketchbook,.bento-slot--privacy { grid-column:1 / -1; grid-row:auto; }
  .bento-slot--html,.bento-slot--flutter { grid-column:span 3; grid-row:auto; }
+ .bento-slot--spotify,.bento-slot--mpti,.bento-slot--blackjack { grid-column:span 3; grid-row:auto; }
  .bento-slot--identity .bento-tile { min-height:220px; }
  .bento-slot > .bento-tile { height:auto; }
  .bento-slot--quest .bento-tile { min-height:0; }

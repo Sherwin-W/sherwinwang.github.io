@@ -1,0 +1,63 @@
+/* Training and Manual tabs, restyled on the pixel tokens in ../game/game.css. */
+.bj h3 { font-family:var(--px-hud); font-size:16px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; }
+.bj h4 { margin:14px 0 4px; font-family:var(--px-hud); font-size:13px; text-transform:uppercase; }
+.bj p, .bj li { max-width:72ch; }
+.bj ul, .bj ol { line-height:1.5; }
+.bj-training { display:flex; flex-direction:column; gap:14px; }
+
+.bj-rules { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px; margin:var(--px-u); padding:14px; border:0; background:var(--px-panel); box-shadow:0 0 0 var(--px-u) var(--px-line); }
+.bj-rules legend { padding:0 6px; font-family:var(--px-hud); font-size:12px; text-transform:uppercase; color:var(--px-dim); }
+.bj-rules label, .bj-range { display:flex; flex-direction:column; gap:4px; font-size:14px; color:var(--px-dim); }
+.bj-rules__check { flex-direction:row!important; align-items:center; gap:8px!important; min-height:44px; color:var(--px-ink)!important; }
+.bj-rules input[type="range"] { accent-color:var(--px-gold); min-height:32px; }
+
+/* Cards in drills */
+.bj-hand { display:flex; flex-wrap:wrap; gap:8px; min-height:calc(33px * var(--px-s) + 22px); align-items:flex-start; }
+.bj-pcard { display:inline-flex; flex-direction:column; align-items:center; gap:4px; }
+.bj-pcard.is-small { --px-s:2; }
+.bj-pcard__tag { padding:0 6px; font-family:var(--px-hud); font-size:12px; color:var(--px-void); }
+.bj-pcard.is-low .bj-pcard__tag { background:var(--px-good); } .bj-pcard.is-neutral .bj-pcard__tag { background:var(--px-gold); } .bj-pcard.is-high .bj-pcard__tag { background:var(--px-bad); }
+.bj-pcard.is-low .px-card { filter:drop-shadow(0 0 0 var(--px-good)) drop-shadow(var(--px-u) var(--px-u) 0 var(--px-good)); }
+.bj-pcard.is-neutral .px-card { filter:drop-shadow(var(--px-u) var(--px-u) 0 var(--px-gold)); }
+.bj-pcard.is-high .px-card { filter:drop-shadow(var(--px-u) var(--px-u) 0 var(--px-bad)); }
+
+.bj-label { margin:0 0 6px; font-family:var(--px-hud); font-size:12px; letter-spacing:.06em; text-transform:uppercase; color:var(--px-dim); }
+.bj-big { font-size:20px; }
+.bj-note, .bj-stats { font-size:14px; color:var(--px-dim); }
+.bj-feedback { min-height:1.4em; font-size:16px; }
+.bj-ok { color:var(--px-good); font-weight:600; } .bj-bad { color:var(--px-bad); font-weight:600; }
+.bj-empty { color:var(--px-dim); font-size:14px; }
+
+.bj-drill { display:flex; flex-direction:column; gap:14px; }
+.bj-drill__stage { display:flex; flex-direction:column; gap:10px; align-items:flex-start; margin:var(--px-u); padding:14px; background:var(--px-panel); box-shadow:0 0 0 var(--px-u) var(--px-line); }
+.bj-quiz__table { display:flex; flex-wrap:wrap; gap:28px; padding:16px; background:repeating-conic-gradient(var(--px-field) 0 25%, var(--px-field-2) 0 50%) 0 0/8px 8px; box-shadow:0 0 0 var(--px-u) var(--px-line); }
+.bj-actions { display:flex; flex-wrap:wrap; gap:4px; }
+
+.bj-legend { background:var(--px-panel); border-collapse:collapse; font-size:15px; } .bj-legend caption { text-align:left; padding-bottom:6px; color:var(--px-dim); }
+.bj-legend th, .bj-legend td { padding:6px 12px; text-align:left; box-shadow:0 1px 0 0 var(--px-line); }
+.bj-legend__low td:last-child { color:var(--px-good); } .bj-legend__neutral td:last-child { color:var(--px-gold); } .bj-legend__high td:last-child { color:var(--px-bad); }
+
+/* Strategy chart */
+.bj-chart__scroll { position:relative; overflow-x:auto; margin:10px 0; max-width:100%; }
+.bj-chart__table { background:var(--px-panel); border-collapse:collapse; font-family:var(--px-hud); font-size:12px; min-width:440px; width:100%; }
+.bj-chart__table caption { text-align:left; padding-bottom:4px; font-family:var(--px-font); font-size:14px; color:var(--px-dim); }
+.bj-chart__table th, .bj-chart__table td { padding:5px 4px; text-align:center; box-shadow:inset 0 0 0 1px var(--px-line); }
+.bj-chart__table tbody th { text-align:left; white-space:nowrap; padding-left:8px; }
+.bj-chart__cell { font-weight:700; color:var(--px-ink); }
+.bj-chart__cell--hit { background:color-mix(in srgb,var(--px-cyan) 28%,transparent); } .bj-chart__cell--stand { background:color-mix(in srgb,var(--px-bad) 30%,transparent); }
+.bj-chart__cell--double { background:color-mix(in srgb,var(--px-gold) 38%,transparent); } .bj-chart__cell--split { background:color-mix(in srgb,var(--px-good) 32%,transparent); }
+.bj-chart__cell--surr { background:color-mix(in srgb,var(--px-magenta) 30%,transparent); }
+.bj-chart__legend { display:flex; flex-wrap:wrap; gap:6px 10px; font-size:13px; }
+.bj-chart__key { padding:3px 8px; }
+.bj-chart__rules { font-size:14px; }
+
+.bj-tray { position:relative; height:14px; background:var(--px-void); box-shadow:0 0 0 2px var(--px-line); overflow:hidden; }
+.bj-tray__dealt { position:absolute; inset:2px auto 2px 2px; background:var(--px-gold); }
+.bj-tray__cut { position:absolute; top:0; bottom:0; width:3px; background:var(--px-bad); } .bj-tray__ticks i { position:absolute; top:0; bottom:0; width:1px; background:var(--px-dim); }
+.bj-progress { display:flex; flex-direction:column; gap:6px; } .bj-progress p { font-size:14px; }
+.bj-learn { display:flex; flex-direction:column; gap:22px; min-width:0; } .bj-learn section { display:flex; flex-direction:column; gap:10px; align-items:flex-start; min-width:0; }
+/* Flex children sized to content must not grow past the screen: the chart scrolls inside its own box. */
+.bj-learn section > *, .bj-chart, .bj-drill > *, .bj-drill__stage > * { max-width:100%; min-width:0; }
+.bj-chart { width:100%; }
+.bj-chart__rules { overflow-wrap:anywhere; }
+@media (max-width:639px) { .bj-actions .px-btn { flex:1 1 calc(50% - 8px); } }

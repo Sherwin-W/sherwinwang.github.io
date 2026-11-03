@@ -68,6 +68,16 @@ export default function Tile({ item, onExpand, expanded = false }) {
     </TileTag>;
   }
 
+  if (isLinkTile) {
+    return <TileTag className={tileClass} {...articleProps}>
+      {Visual && <Visual />}
+      <div className="bento-tile__content">
+        <h2>{link}</h2><p>{item.summary}</p>
+        {item.tags?.length > 0 && <ul className="bento-tags" aria-label="Technologies">{item.tags.map((tag) => <li key={tag}>{tag}</li>)}</ul>}
+      </div>
+    </TileTag>;
+  }
+
   if (isExpandable) {
     return <TileTag className={tileClass} layoutId={reduceMotion ? undefined : `project-surface-${item.id}`} {...articleProps}>
       {item.area === 'privacy' && (item.image ? <img className="bento-image" src={item.image.src} alt={item.image.alt} /> : Visual && <Visual />)}

@@ -55,6 +55,27 @@ const projects = [
     area: 'flutter',
     expand: true,
   },
+  {
+    id: 'mpti',
+    title: 'MPTI',
+    summary: 'A short, voice-first conversation that gives an MBTI-inspired reading and shows the evidence behind it.',
+    tags: ['Voice', 'Exploratory'],
+    size: 'standard',
+    area: 'mpti',
+    href: import.meta.env.BASE_URL + 'mpti/',
+    newTab: true,
+  },
+  {
+    id: 'blackjack',
+    title: 'Blackjack Trainer',
+    summary: 'Practice basic strategy and Hi-Lo counting against a real finite shoe. Virtual units only.',
+    tags: ['Practice Blackjack'],
+    size: 'standard',
+    area: 'blackjack',
+    href: import.meta.env.BASE_URL + 'blackjack/',
+    newTab: true,
+    visual: 'blackjack',
+  },
 ];
 
 export default projects;

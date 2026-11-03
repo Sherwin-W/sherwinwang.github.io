@@ -37,3 +37,7 @@ Design skills (read and apply when relevant): `.claude/skills/design-taste-front
 ## Handoff checklist (each Codex task)
 
 Objective, relevant files, design decisions, preserved work, acceptance criteria, required checks. See `.claude/skills/codex-implement/SKILL.md`.
+
+## Branch override: `feature/mini-apps`
+
+On this branch the owner has made Claude the primary code writer (Spotify, MPTI, Blackjack) and Codex the independent reviewer, so the conductor restrictions above do not apply here. See `docs/mini-apps/PLAN.md`. New code is TypeScript; the server API lives in `server/`.

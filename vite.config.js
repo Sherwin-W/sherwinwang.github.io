@@ -10,6 +10,8 @@ export default defineConfig({
       input: {
         main: 'index.html',
         sketchbook: 'sketchbook/index.html',
+        mpti: 'mpti/index.html',
+        blackjack: 'blackjack/index.html',
       },
     },
   },

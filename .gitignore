@@ -27,3 +27,8 @@ playwright-report/
 *.sw?
 # Playwright CLI output (may contain credentials)
 .playwright-cli/
+
+.env
+.env.*
+!.env.example
+.vercel/

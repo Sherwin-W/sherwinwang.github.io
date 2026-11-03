@@ -35,3 +35,11 @@
  .quest-preview::before,.quest-preview::after { background:#87a7f4; opacity:1; }
  .bento-tile__scrim { background:var(--opaque-scrim,var(--paper)); }
 }
+.bj-preview { display:flex; flex:1 1 auto; align-items:flex-end; justify-content:center; min-height:96px; }
+.bj-preview__table { display:flex; align-items:flex-end; gap:14px; padding:10px 14px; background:repeating-conic-gradient(#10261f 0 25%, #0c1e18 0 50%) 0 0/6px 6px; box-shadow:0 0 0 2px #3b4170, 0 0 0 4px #0b0c16, 0 0 18px 2px rgba(62,240,222,.18); image-rendering:pixelated; }
+.bj-preview__hand { display:flex; }
+.bj-preview__hand--dealer { align-self:flex-start; }
+.bj-preview__hand--player { margin-top:18px; }
+.bj-preview .px-card { display:block; flex:0 0 auto; width:46px; height:66px; filter:drop-shadow(2px 2px 0 rgba(0,0,0,.45)); }
+.bj-preview .px-card + .px-card { margin-left:-14px; }
+.bj-preview .px-card.is-golden { filter:drop-shadow(2px 2px 0 rgba(0,0,0,.45)) drop-shadow(0 0 5px rgba(242,193,78,.8)); }

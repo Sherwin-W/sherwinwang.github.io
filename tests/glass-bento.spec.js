@@ -220,6 +220,9 @@ test('expanding project panels trap focus, lock scroll, and return focus', async
 });
 
 test('project panel makes the portfolio inert without console errors', async ({ page }) => {
+  // The music tile calls the API; answer it so only genuine page errors reach the console.
+  await page.route('**/api/spotify/last-played', route => route.fulfill({ status: 200, json: { track: { id: '3AJwUDP919kvQ9QcozQPxg', title: 'Gravity', artists: ['John Mayer'], album: 'Continuum', albumArt: null }, isCurrentlyPlaying: false, playedAt: null, updatedAt: '' } }));
+  await page.route('https://open.spotify.com/**', route => route.fulfill({ contentType: 'text/html', body: '' }));
   const consoleErrors = [];
   page.on('console', message => {
     if (message.type() === 'error') consoleErrors.push(message.text());
@@ -235,22 +238,30 @@ test('project panel makes the portfolio inert without console errors', async ({ 
 });
 
 test('expanding projects have one tab stop each and close by button or scrim', async ({ page }) => {
+  // Give the music tile a loaded track so its tab stops are deterministic.
+  await page.route('**/api/spotify/last-played', route => route.fulfill({ status: 200, json: { track: { id: '3AJwUDP919kvQ9QcozQPxg', title: 'Gravity', artists: ['John Mayer'], album: 'Continuum', albumArt: null }, isCurrentlyPlaying: false, playedAt: null, updatedAt: '' } }));
+  await page.route('https://open.spotify.com/**', route => route.fulfill({ contentType: 'text/html', body: '' }));
   await page.goto('/');
+  await expect(page.locator('[data-spotify-tile] iframe')).toBeVisible();
   const active = [];
   await page.keyboard.press('Tab');
   await page.keyboard.press('Tab');
-  for (let index = 0; index < 6; index += 1) {
+  for (let index = 0; index < 10; index += 1) {
     active.push(await page.evaluate(() => {
       const element = document.activeElement;
       const href = element.getAttribute('href');
       if (href?.includes('github.com')) return 'GitHub';
       if (href?.includes('tracker.sherwinwang.dev')) return 'Quest Board';
       if (href?.endsWith('/sketchbook/')) return 'Sketchbook';
+      if (href?.endsWith('/mpti/')) return 'MPTI';
+      if (href?.endsWith('/blackjack/')) return 'Blackjack Trainer';
+      if (element.tagName === 'IFRAME') return 'Spotify player';
+      if (href?.includes('open.spotify.com')) return 'Spotify track';
       return element.textContent.trim();
     }));
-    if (index < 5) await page.keyboard.press('Tab');
+    if (index < 9) await page.keyboard.press('Tab');
   }
-  expect(active).toEqual(['GitHub', 'Quest Board', 'Sketchbook', 'Privacy Preserving Visualization Tool', 'HTML Transformer', 'Flutter Event Planning App']);
+  expect(active).toEqual(['GitHub', 'Quest Board', 'Sketchbook', 'Privacy Preserving Visualization Tool', 'HTML Transformer', 'Flutter Event Planning App', 'Spotify track', 'Spotify player', 'MPTI', 'Blackjack Trainer']);
   await page.getByRole('button', { name: /HTML Transformer/ }).focus();
   await page.keyboard.press('Enter');
   await expect(page.getByRole('dialog').getByRole('heading', { name: 'HTML Transformer' })).toBeVisible();

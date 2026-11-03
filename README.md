@@ -4,6 +4,7 @@ Personal portfolio: a glass bento grid built with React 18, Vite 5 and Framer Mo
 
 - **Home** (`/`): bento tiles driven by `src/data/projects.js` and `src/data/profile.js`. Quest Board and Sketchbook open in a new tab; the other projects expand in place.
 - **Sketchbook** (`/sketchbook/`): a second Vite entry (`sketchbook/index.html`) that mounts the interactive drawing canvas from `src/playable/`. It is a static page, so it works when loaded directly or refreshed.
+- **Mini-apps** (see `docs/mini-apps/`): a Spotify last-played tile (needs the `server/` API, `SETUP.md`), MPTI at `/mpti/` and Blackjack Trainer at `/blackjack/`. New code is TypeScript.
 - **Theme**: light/dark toggle. It follows the system until you choose, then remembers the choice (`localStorage` key `theme`) on both pages.
 
 Design direction lives in `DESIGN.md`. Task history and handoffs for the redesign are in `docs/glass-bento/`; the earlier playable-portfolio work is in `docs/playable-portfolio/`.
@@ -15,7 +16,8 @@ Design direction lives in `DESIGN.md`. Task history and handoffs for the redesig
 | `npm run dev` | Vite dev server |
 | `npm run build` | Production build into `dist/` |
 | `npm run lint` | ESLint |
-| `npm run test` | Unit tests (`node --test`) |
+| `npm run typecheck` | `tsc --noEmit` for the TypeScript mini-apps and `server/` |
+| `npm run test` | Unit tests (`node --test` for playable, then Vitest for TypeScript) |
 | `npm run test:browser` | Playwright tests (starts the dev server on port 4173) |
 | `npm run deploy` | Build and publish `dist/` to the `gh-pages` branch |
 

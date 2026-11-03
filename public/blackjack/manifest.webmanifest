@@ -1,0 +1,12 @@
+{
+  "name": "Blackjack Ops — Blackjack Trainer",
+  "short_name": "Blackjack Ops",
+  "start_url": "/blackjack/",
+  "scope": "/blackjack/",
+  "display": "fullscreen",
+  "display_override": ["fullscreen", "standalone"],
+  "orientation": "landscape",
+  "background_color": "#0b0c16",
+  "theme_color": "#0b0c16",
+  "icons": [{ "src": "/blackjack/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }]
+}

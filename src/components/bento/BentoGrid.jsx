@@ -21,7 +21,7 @@ export default function BentoGrid({ items }) {
           animate={{ opacity: 1, y: 0 }}
           transition={reduceMotion ? { duration: 0 } : { duration: 0.36, delay: index * 0.04, ease: 'easeOut' }}
         >
-          <Tile item={item} expanded={activeProject?.id === item.id} onExpand={(project) => { setOrigin(document.activeElement); setActiveProject(project); }} />
+          {item.render ? item.render() : <Tile item={item} expanded={activeProject?.id === item.id} onExpand={(project) => { setOrigin(document.activeElement); setActiveProject(project); }} />}
         </motion.div>
       ))}
     </section>
