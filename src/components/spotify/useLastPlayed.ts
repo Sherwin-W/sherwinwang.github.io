@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { FetchError, fetchLastPlayed, readCached, writeCached } from './api';
+import { FetchError, fetchLastPlayed, readCached, unverified, writeCached } from './api';
 import type { LastPlayedData } from './types';
 
 export type LoadState = 'loading' | 'ready' | 'error';
@@ -7,28 +7,40 @@ export type LoadState = 'loading' | 'ready' | 'error';
 const REFRESH_MS = 45_000;
 
 export function useLastPlayed(baseUrl: string) {
-  const [data, setData] = useState<LastPlayedData | null>(() => readCached());
+  // A track restored from this browser is shown as saved (never as "now listening") until the API confirms it.
+  const [data, setData] = useState<LastPlayedData | null>(() => { const c = readCached(); return c ? unverified(c) : null; });
   const [state, setState] = useState<LoadState>(data ? 'ready' : 'loading');
   const [error, setError] = useState<number | null>(null);
-  const [fromBrowserCache, setFromBrowserCache] = useState(data !== null);
+  const [waitUntil, setWaitUntil] = useState(0);
   const inflight = useRef<AbortController | null>(null);
   const visible = useRef(true);
+  /** No requests before this time: the server relayed a rate-limit wait. */
+  const pausedUntil = useRef(0);
+
+  const pause = (seconds: number | null | undefined) => {
+    if (!seconds) return;
+    pausedUntil.current = Date.now() + seconds * 1000;
+    setWaitUntil(pausedUntil.current);
+  };
 
   const load = useCallback(async () => {
+    if (Date.now() < pausedUntil.current) return;
     inflight.current?.abort();
     const ctrl = new AbortController();
     inflight.current = ctrl;
     try {
       const next = await fetchLastPlayed(baseUrl, ctrl.signal);
+      pause(next.retryAfter);
       setData(next);
-      setFromBrowserCache(false);
       setError(null);
       setState('ready');
       writeCached(next);
     } catch (err) {
       if (ctrl.signal.aborted) return;
       setError(err instanceof FetchError ? err.status : null);
-      // Keep showing whatever we last had; only show the error state when we have nothing.
+      if (err instanceof FetchError) pause(err.retryAfter);
+      // Keep the track, but a failed refresh means "now listening" can no longer be claimed.
+      setData((prev) => (prev ? unverified(prev) : prev));
       setState((prev) => (prev === 'ready' ? 'ready' : 'error'));
     }
   }, [baseUrl]);
@@ -53,5 +65,5 @@ export function useLastPlayed(baseUrl: string) {
     };
   }, [load]);
 
-  return { data, state, error, fromBrowserCache, retry: load };
+  return { data, state, error, waitUntil, retry: load };
 }

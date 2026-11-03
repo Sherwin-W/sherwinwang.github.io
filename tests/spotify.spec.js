@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 const ID = '3AJwUDP919kvQ9QcozQPxg';
 const body = (over = {}) => ({
-  track: { id: ID, title: 'Gravity', artists: ['John Mayer'], album: 'Continuum', albumArt: 'https://i.scdn.co/image/none', spotifyUrl: '', embedUrl: '' },
+  track: { id: ID, title: 'Yellow', artists: ['Coldplay'], album: 'Parachutes', albumArt: 'https://i.scdn.co/image/none', spotifyUrl: '', embedUrl: '' },
   isCurrentlyPlaying: false, playedAt: new Date(Date.now() - 3600_000).toISOString(), updatedAt: new Date().toISOString(), ...over,
 });
 const mock = (page, status, json) => page.route('**/api/spotify/last-played', route => route.fulfill({ status, json, headers: { 'access-control-allow-origin': '*' } }));
@@ -16,7 +16,7 @@ test('last played track renders with a matching embed and Spotify link', async (
   await mock(page, 200, body());
   await page.goto('/');
   const tile = page.locator('[data-spotify-tile]');
-  await expect(tile.getByRole('link', { name: /Gravity/ })).toHaveAttribute('href', `https://open.spotify.com/track/${ID}`);
+  await expect(tile.getByRole('link', { name: /Yellow/ })).toHaveAttribute('href', `https://open.spotify.com/track/${ID}`);
   await expect(tile.getByText('Last played on Spotify')).toBeVisible();
   await expect(tile.locator('iframe')).toHaveAttribute('src', new RegExp(`/embed/track/${ID}`));
   await expect(tile.getByText('1 hour ago')).toBeVisible();
@@ -37,7 +37,7 @@ test('API failure shows a retry that recovers', async ({ page }) => {
   await expect(page.getByText('Spotify is unavailable right now.')).toBeVisible();
   fail = false;
   await page.getByRole('button', { name: 'Try again' }).click();
-  await expect(page.getByRole('link', { name: /Gravity/ })).toBeVisible();
+  await expect(page.getByRole('link', { name: /Yellow/ })).toBeVisible();
 });
 
 test('tile fits at phone width and in both themes', async ({ page }) => {

@@ -22,11 +22,18 @@ export function parseLastPlayed(raw: unknown): LastPlayedData | null {
     playedAt: typeof r.playedAt === 'string' && !Number.isNaN(Date.parse(r.playedAt)) ? r.playedAt : null,
     updatedAt: typeof r.updatedAt === 'string' ? r.updatedAt : '',
     stale: r.stale === true,
+    retryAfter: waitSeconds(r.retryAfter),
   };
 }
 
+/** A positive whole number of seconds, capped at an hour; anything else means "no instruction". */
+export function waitSeconds(value: unknown): number | null {
+  const n = Number(value);
+  return Number.isFinite(n) && n > 0 ? Math.min(Math.ceil(n), 3600) : null;
+}
+
 export class FetchError extends Error {
-  constructor(public readonly status: number | null) { super(`spotify ${status ?? 'network'}`); }
+  constructor(public readonly status: number | null, public readonly retryAfter: number | null = null) { super(`spotify ${status ?? 'network'}`); }
 }
 
 export async function fetchLastPlayed(baseUrl: string, signal?: AbortSignal): Promise<LastPlayedData> {
@@ -36,7 +43,10 @@ export async function fetchLastPlayed(baseUrl: string, signal?: AbortSignal): Pr
   } catch {
     throw new FetchError(null);
   }
-  if (!res.ok) throw new FetchError(res.status);
+  if (!res.ok) {
+    const body = (await res.json().catch(() => null)) as { retryAfter?: unknown } | null;
+    throw new FetchError(res.status, waitSeconds(res.headers.get('retry-after')) ?? waitSeconds(body?.retryAfter));
+  }
   const data = parseLastPlayed(await res.json().catch(() => null));
   if (!data) throw new FetchError(502);
   return data;
@@ -52,7 +62,15 @@ export function readCached(): LastPlayedData | null {
 }
 
 export function writeCached(data: LastPlayedData): void {
-  try { localStorage.setItem(CACHE_KEY, JSON.stringify(data)); } catch { /* storage unavailable */ }
+  try { localStorage.setItem(CACHE_KEY, JSON.stringify({ ...data, retryAfter: null })); } catch { /* storage unavailable */ }
+}
+
+/**
+ * The track is kept, but "now listening" is no longer known to be true: show it as a saved track.
+ * When it was playing, the time we last saw it playing stands in for "played at".
+ */
+export function unverified(d: LastPlayedData): LastPlayedData {
+  return { ...d, isCurrentlyPlaying: false, playedAt: d.playedAt ?? (d.isCurrentlyPlaying && d.updatedAt ? d.updatedAt : null), stale: true };
 }
 
 export function relativeTime(iso: string | null, now: number = Date.now()): string {

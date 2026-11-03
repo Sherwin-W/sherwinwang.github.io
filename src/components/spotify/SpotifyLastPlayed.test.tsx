@@ -1,11 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, render, screen, waitFor } from '@testing-library/react';
+import { act, cleanup, render, screen, waitFor } from '@testing-library/react';
 import SpotifyLastPlayed from './SpotifyLastPlayed';
 import { parseLastPlayed, relativeTime } from './api';
 
 const ID = '3AJwUDP919kvQ9QcozQPxg';
 const payload = (over: object = {}) => ({
-  track: { id: ID, title: 'Gravity', artists: ['John Mayer'], album: 'Continuum', albumArt: 'https://i.scdn.co/image/a', spotifyUrl: 'x', embedUrl: 'https://evil.example/embed' },
+  track: { id: ID, title: 'Yellow', artists: ['Coldplay'], album: 'Parachutes', albumArt: 'https://i.scdn.co/image/a', spotifyUrl: 'x', embedUrl: 'https://evil.example/embed' },
   isCurrentlyPlaying: false, playedAt: '2026-11-01T18:30:00Z', updatedAt: '2026-11-01T20:16:00Z', ...over,
 });
 const ok = (body: unknown) => new Response(JSON.stringify(body), { status: 200 });
@@ -38,10 +38,10 @@ describe('<SpotifyLastPlayed>', () => {
     vi.stubGlobal('fetch', vi.fn(async () => ok(payload())));
     render(<SpotifyLastPlayed apiBaseUrl="https://api.example" />);
     expect(screen.getByRole('status', { name: /loading/i })).toBeTruthy();
-    expect(await screen.findByText('Gravity')).toBeTruthy();
+    expect(await screen.findByText('Yellow')).toBeTruthy();
     expect(screen.getByText('Last played on Spotify')).toBeTruthy();
-    expect(screen.getByTitle('Spotify player: Gravity').getAttribute('src')).toContain(`/embed/track/${ID}`);
-    expect(screen.getByRole('link', { name: /Gravity/ }).getAttribute('href')).toBe(`https://open.spotify.com/track/${ID}`);
+    expect(screen.getByTitle('Spotify player: Yellow').getAttribute('src')).toContain(`/embed/track/${ID}`);
+    expect(screen.getByRole('link', { name: /Yellow/ }).getAttribute('href')).toBe(`https://open.spotify.com/track/${ID}`);
   });
   it('shows the now listening state', async () => {
     vi.stubGlobal('fetch', vi.fn(async () => ok(payload({ isCurrentlyPlaying: true, playedAt: null }))));
@@ -58,8 +58,70 @@ describe('<SpotifyLastPlayed>', () => {
     localStorage.setItem('spotify-last-played', JSON.stringify(payload()));
     vi.stubGlobal('fetch', vi.fn(async () => { throw new TypeError('offline'); }));
     render(<SpotifyLastPlayed apiBaseUrl="https://api.example" />);
-    expect(await screen.findByText('Gravity')).toBeTruthy();
+    expect(await screen.findByText('Yellow')).toBeTruthy();
     await waitFor(() => expect(fetch).toHaveBeenCalled());
     expect(screen.queryByText('Spotify is unavailable right now.')).toBeNull();
+  });
+});
+
+describe('honest live status (Codex finding 1)', () => {
+  it('drops “Now listening” when a later refresh fails, keeping the track as a saved one', async () => {
+    let fail = false;
+    vi.stubGlobal('fetch', vi.fn(async () => (fail ? new Response('{}', { status: 503 }) : ok(payload({ isCurrentlyPlaying: true, playedAt: null, updatedAt: new Date().toISOString() })))));
+    render(<SpotifyLastPlayed apiBaseUrl="https://api.example" />);
+    expect(await screen.findByText('Now listening')).toBeTruthy();
+    fail = true;
+    act(() => { document.dispatchEvent(new Event('visibilitychange')); });
+    await waitFor(() => expect(screen.queryByText('Now listening')).toBeNull());
+    expect(screen.getByText('Last played on Spotify')).toBeTruthy();
+    expect(screen.getByText('Showing saved track')).toBeTruthy();
+    expect(screen.getByText('just now')).toBeTruthy(); // when it was last seen playing
+    expect(screen.getByText('Yellow')).toBeTruthy();
+  });
+
+  it('never shows a browser-restored track as “Now listening” before the API confirms it', async () => {
+    localStorage.setItem('spotify-last-played', JSON.stringify(payload({ isCurrentlyPlaying: true, playedAt: null })));
+    let resolve!: (r: Response) => void;
+    vi.stubGlobal('fetch', vi.fn(() => new Promise<Response>((r) => { resolve = r; })));
+    render(<SpotifyLastPlayed apiBaseUrl="https://api.example" />);
+    expect(screen.getByText('Yellow')).toBeTruthy();
+    expect(screen.queryByText('Now listening')).toBeNull();
+    expect(screen.getByText('Showing saved track')).toBeTruthy();
+    await act(async () => { resolve(ok(payload({ isCurrentlyPlaying: true, playedAt: null }))); });
+    expect(await screen.findByText('Now listening')).toBeTruthy();
+    expect(screen.queryByText('Showing saved track')).toBeNull();
+  });
+});
+
+describe('rate-limit pause (Codex finding 2)', () => {
+  afterEach(() => { vi.useRealTimers(); });
+  it('stops polling for the Retry-After wait, then resumes', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: false });
+    const f = vi.fn(async () => new Response(JSON.stringify({ error: 'rate-limited', retryAfter: 120 }), { status: 429, headers: { 'retry-after': '120' } }));
+    vi.stubGlobal('fetch', f);
+    render(<SpotifyLastPlayed apiBaseUrl="https://api.example" />);
+    await act(async () => { await vi.advanceTimersByTimeAsync(10); });
+    expect(f).toHaveBeenCalledTimes(1);
+    expect(screen.getByText('Spotify asked for a short break. Back soon.')).toBeTruthy();
+    expect(screen.queryByRole('button', { name: 'Try again' })).toBeNull();
+    // Two polling ticks and a visibility change inside the wait: no requests.
+    await act(async () => { await vi.advanceTimersByTimeAsync(91_000); document.dispatchEvent(new Event('visibilitychange')); });
+    expect(f).toHaveBeenCalledTimes(1);
+    // After the wait the next tick asks again.
+    f.mockImplementation(async () => ok(payload()));
+    await act(async () => { await vi.advanceTimersByTimeAsync(45_000); });
+    expect(f.mock.calls.length).toBeGreaterThanOrEqual(2);
+    expect(screen.getByText('Yellow')).toBeTruthy();
+  });
+
+  it('a stale answer with a wait also pauses polling', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: false });
+    const f = vi.fn(async () => ok(payload({ stale: true, retryAfter: 300 })));
+    vi.stubGlobal('fetch', f);
+    render(<SpotifyLastPlayed apiBaseUrl="https://api.example" />);
+    await act(async () => { await vi.advanceTimersByTimeAsync(10); });
+    expect(screen.getByText('Showing saved track')).toBeTruthy();
+    await act(async () => { await vi.advanceTimersByTimeAsync(200_000); });
+    expect(f).toHaveBeenCalledTimes(1);
   });
 });

@@ -221,7 +221,7 @@ test('expanding project panels trap focus, lock scroll, and return focus', async
 
 test('project panel makes the portfolio inert without console errors', async ({ page }) => {
   // The music tile calls the API; answer it so only genuine page errors reach the console.
-  await page.route('**/api/spotify/last-played', route => route.fulfill({ status: 200, json: { track: { id: '3AJwUDP919kvQ9QcozQPxg', title: 'Gravity', artists: ['John Mayer'], album: 'Continuum', albumArt: null }, isCurrentlyPlaying: false, playedAt: null, updatedAt: '' } }));
+  await page.route('**/api/spotify/last-played', route => route.fulfill({ status: 200, json: { track: { id: '3AJwUDP919kvQ9QcozQPxg', title: 'Yellow', artists: ['Coldplay'], album: 'Parachutes', albumArt: null }, isCurrentlyPlaying: false, playedAt: null, updatedAt: '' } }));
   await page.route('https://open.spotify.com/**', route => route.fulfill({ contentType: 'text/html', body: '' }));
   const consoleErrors = [];
   page.on('console', message => {
@@ -239,7 +239,7 @@ test('project panel makes the portfolio inert without console errors', async ({ 
 
 test('expanding projects have one tab stop each and close by button or scrim', async ({ page }) => {
   // Give the music tile a loaded track so its tab stops are deterministic.
-  await page.route('**/api/spotify/last-played', route => route.fulfill({ status: 200, json: { track: { id: '3AJwUDP919kvQ9QcozQPxg', title: 'Gravity', artists: ['John Mayer'], album: 'Continuum', albumArt: null }, isCurrentlyPlaying: false, playedAt: null, updatedAt: '' } }));
+  await page.route('**/api/spotify/last-played', route => route.fulfill({ status: 200, json: { track: { id: '3AJwUDP919kvQ9QcozQPxg', title: 'Yellow', artists: ['Coldplay'], album: 'Parachutes', albumArt: null }, isCurrentlyPlaying: false, playedAt: null, updatedAt: '' } }));
   await page.route('https://open.spotify.com/**', route => route.fulfill({ contentType: 'text/html', body: '' }));
   await page.goto('/');
   await expect(page.locator('[data-spotify-tile] iframe')).toBeVisible();

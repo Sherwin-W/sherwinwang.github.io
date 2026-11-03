@@ -8,6 +8,7 @@ export function corsHeaders(request: Request, allowed?: string): Record<string, 
     headers['access-control-allow-origin'] = origin;
     headers['access-control-allow-methods'] = 'GET, OPTIONS';
     headers['access-control-max-age'] = '86400';
+    headers['access-control-expose-headers'] = 'retry-after';
   }
   return headers;
 }

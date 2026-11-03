@@ -14,4 +14,6 @@ export interface LastPlayedData {
   playedAt: string | null;
   updatedAt: string;
   stale?: boolean;
+  /** Seconds the server asked us to wait before polling again (rate limit). */
+  retryAfter?: number | null;
 }
