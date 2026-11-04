@@ -15,8 +15,8 @@ const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
 const spotifyTile = apiBaseUrl ? [{ id: 'spotify', area: 'spotify', render: () => <SpotifyLastPlayed apiBaseUrl={apiBaseUrl} /> }] : [];
 
 export default function Home() {
-  // Keep DOM order equal to visual order: the music tile sits left of MPTI on the last row.
-  const mptiAt = projects.findIndex((project) => project.id === 'mpti');
-  const items = [profileTiles[0], ...projects.slice(0, mptiAt), ...spotifyTile, ...projects.slice(mptiAt)];
+  // Keep DOM order equal to visual order: the music tile sits left of the MBTI Test on the last row.
+  const mbtiAt = projects.findIndex((project) => project.id === 'mbti');
+  const items = [profileTiles[0], ...projects.slice(0, mbtiAt), ...spotifyTile, ...projects.slice(mbtiAt)];
   return <main className="home-page"><div className="home-page__toolbar"><ThemeToggle /></div><BentoGrid items={items} /></main>;
 }

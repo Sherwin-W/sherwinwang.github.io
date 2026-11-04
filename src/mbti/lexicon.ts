@@ -10,13 +10,13 @@ const c = (pole: Pole, label: string, pattern: string, weight = 1): Cue =>
 
 export const CUES: Cue[] = [
   // Extraversion
-  c('E', 'seeking people', 'meet(?:ing)? (?:new )?people|talk to (?:everyone|people|strangers)|socializ\\w*|mingl\\w*|go (?:out )?with friends|invite (?:everyone|friends)|more the merrier', 2),
+  c('E', 'seeking people', 'meet(?:ing)? (?:new )?people|talk to (?:everyone|people|strangers)|socializ\\w*|mingl\\w*|go(?:ing)? (?:out )?with (?:(?:a|my|some|big|group|of|bunch|few) ){0,5}friends|invite (?:everyone|friends)|more the merrier', 2),
   c('E', 'energized by others', 'energi[sz]ed? (?:by|from) (?:people|others|the crowd)|love (?:big |crowded )?(?:crowds|parties|groups)|thrive around|feed off', 2),
   c('E', 'thinking out loud', 'think(?:ing)? out loud|talk (?:it|things) (?:out|through)|bounce (?:ideas|it) off|throw out ideas|brainstorm\\w*', 1),
   c('E', 'outgoing', 'outgoing|extrovert\\w*|social butterfly|life of the party|jump right in', 1),
   // Introversion
   c('I', 'needing solitude', 'alone|by myself|on my own|solo|quiet (?:time|night|evening|place)|recharge|me time|time to myself', 2),
-  c('I', 'drained by crowds', 'drain\\w*|overwhelm\\w*|exhaust\\w*|too many people|crowded?|crowds?|small talk', 1),
+  c('I', 'drained by crowds', 'drain\\w*|overwhelm\\w*|exhaust\\w*|too many people|too crowded|crowds? (?:drain|tire|exhaust|overwhelm)\\w*|hate (?:crowds|parties)|small talk', 1),
   c('I', 'prefers small groups', 'one[- ]on[- ]one|close friends|small group|a few (?:people|friends)|stay (?:in|home)|at home', 1),
   c('I', 'reflects first', 'think (?:it|things) (?:over|through) (?:first|alone|on my own)|reflect\\w*|process (?:it|things) (?:internally|myself|alone)|observe first|watch first|listen first', 2),
   // Sensing

@@ -9,6 +9,8 @@ export interface PublicTrack {
   albumArt: string | null;
   spotifyUrl: string;
   embedUrl: string;
+  /** Track length in milliseconds, when Spotify reports it. */
+  durationMs: number | null;
 }
 
 export interface LastPlayed {
@@ -65,6 +67,7 @@ interface RawTrack {
   name?: unknown;
   type?: unknown;
   is_local?: unknown;
+  duration_ms?: unknown;
   artists?: unknown;
   album?: { name?: unknown; images?: unknown };
 }
@@ -91,6 +94,7 @@ export function normalizeTrack(raw: unknown): PublicTrack | null {
     albumArt: art[Math.min(1, art.length - 1)] ?? null,
     spotifyUrl: `https://open.spotify.com/track/${t.id}`,
     embedUrl: `https://open.spotify.com/embed/track/${t.id}`,
+    durationMs: typeof t.duration_ms === 'number' && Number.isFinite(t.duration_ms) && t.duration_ms > 0 ? Math.round(t.duration_ms) : null,
   };
 }
 

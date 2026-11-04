@@ -18,6 +18,7 @@
     "@fontsource-variable/geist": "^5.3.0",
     "@fontsource/pixelify-sans": "^5.3.0",
     "@fontsource/silkscreen": "^5.3.0",
+    "@fontsource/vt323": "^5.3.0",
     "@phosphor-icons/react": "^2.1.10",
     "emailjs-com": "^3.2.0",
     "framer-motion": "^11.9.0",

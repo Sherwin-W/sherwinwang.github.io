@@ -6,6 +6,8 @@ export interface Track {
   albumArt: string | null;
   spotifyUrl: string;
   embedUrl: string;
+  /** Track length in milliseconds, when known. */
+  durationMs: number | null;
 }
 
 export interface LastPlayedData {

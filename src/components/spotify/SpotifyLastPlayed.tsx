@@ -1,5 +1,5 @@
 import { useLastPlayed } from './useLastPlayed';
-import SpotifyEmbed from './SpotifyEmbed';
+import SpotifyPlayer from './SpotifyPlayer';
 import SpotifySkeleton from './SpotifySkeleton';
 import SpotifyStatus from './SpotifyStatus';
 import SpotifyTrackInfo from './SpotifyTrackInfo';
@@ -24,7 +24,7 @@ export default function SpotifyLastPlayed({ apiBaseUrl }: { apiBaseUrl: string }
         <div className="spotify__body" key={data.track.id}>
           <SpotifyStatus playing={data.isCurrentlyPlaying} playedAt={data.playedAt} stale={Boolean(data.stale)} />
           <SpotifyTrackInfo track={data.track} />
-          <SpotifyEmbed trackId={data.track.id} title={data.track.title} />
+          <SpotifyPlayer track={data.track} />
         </div>
       )}
     </section>

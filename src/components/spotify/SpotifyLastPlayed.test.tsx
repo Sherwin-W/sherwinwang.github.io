@@ -5,7 +5,7 @@ import { parseLastPlayed, relativeTime } from './api';
 
 const ID = '3AJwUDP919kvQ9QcozQPxg';
 const payload = (over: object = {}) => ({
-  track: { id: ID, title: 'Yellow', artists: ['Coldplay'], album: 'Parachutes', albumArt: 'https://i.scdn.co/image/a', spotifyUrl: 'x', embedUrl: 'https://evil.example/embed' },
+  track: { id: ID, title: 'Yellow', artists: ['Coldplay'], album: 'Parachutes', albumArt: 'https://i.scdn.co/image/a', spotifyUrl: 'x', embedUrl: 'https://evil.example/embed', durationMs: 266773 },
   isCurrentlyPlaying: false, playedAt: '2026-11-01T18:30:00Z', updatedAt: '2026-11-01T20:16:00Z', ...over,
 });
 const ok = (body: unknown) => new Response(JSON.stringify(body), { status: 200 });
@@ -40,7 +40,8 @@ describe('<SpotifyLastPlayed>', () => {
     expect(screen.getByRole('status', { name: /loading/i })).toBeTruthy();
     expect(await screen.findByText('Yellow')).toBeTruthy();
     expect(screen.getByText('Last played on Spotify')).toBeTruthy();
-    expect(screen.getByTitle('Spotify player: Yellow').getAttribute('src')).toContain(`/embed/track/${ID}`);
+    expect(document.querySelector('iframe')).toBeNull(); // no third-party player until the visitor asks
+    expect(screen.getByRole('button', { name: 'Play Yellow with Spotify' })).toBeTruthy();
     expect(screen.getByRole('link', { name: /Yellow/ }).getAttribute('href')).toBe(`https://open.spotify.com/track/${ID}`);
   });
   it('shows the now listening state', async () => {

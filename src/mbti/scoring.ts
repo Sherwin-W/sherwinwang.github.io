@@ -15,12 +15,16 @@ export function sentences(text: string): string[] {
   return text.split(/(?<=[.!?])\s+|\n+/).map((s) => s.trim()).filter(Boolean);
 }
 
-const NEGATION = /\b(?:not|never|don't|dont|do not|doesn't|didn't|no|hardly|rarely|without)\b[^.!?]{0,20}$/i;
+// A negation only reaches forward within its own clause: "not spontaneous, but I plan ahead" keeps "plan".
+const NEGATION = /\b(?:not|never|don't|dont|do not|doesn't|didn't|no|hardly|rarely|without)\b(?:(?!\bbut\b)[^.!?,;]){0,20}$/i;
+/** Sentences about someone else ("My friend is outgoing") say nothing about the person answering. */
+const ABOUT_SOMEONE_ELSE = /^(?:(?:my|his|her|their|our) (?:friend|friends|partner|mom|mum|dad|brother|sister|boss|colleague|coworker|roommate|family|kids?|wife|husband)|(?:he|she|they)) (?:is|was|are|were|loves?|likes?|hates?|always|never|tends?)\b/i;
 
 /** All cue matches in the text. A cue directly after a negation is ignored. */
 export function extractEvidence(text: string, scenarioId: string): Evidence[] {
   const found: Evidence[] = [];
   for (const sentence of sentences(text)) {
+    if (ABOUT_SOMEONE_ELSE.test(sentence) && !/\b(?:I|me|my own|myself)\b/.test(sentence.replace(/^\w+\s/, ''))) continue;
     for (const cue of CUES) {
       const m = cue.pattern.exec(sentence);
       if (!m) continue;

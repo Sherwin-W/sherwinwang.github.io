@@ -43,3 +43,15 @@
 .bj-preview .px-card { display:block; flex:0 0 auto; width:46px; height:66px; filter:drop-shadow(2px 2px 0 rgba(0,0,0,.45)); }
 .bj-preview .px-card + .px-card { margin-left:-14px; }
 .bj-preview .px-card.is-golden { filter:drop-shadow(2px 2px 0 rgba(0,0,0,.45)) drop-shadow(0 0 5px rgba(242,193,78,.8)); }
+.mb-preview { display:flex; flex:1 1 auto; align-items:flex-end; justify-content:center; min-height:96px; }
+.mb-preview__art { position:relative; width:136px; height:104px; }
+.mb-preview__face { position:absolute; left:8px; bottom:0; width:80px; height:80px; image-rendering:pixelated; }
+.mb-preview__bubble { position:absolute; right:0; top:0; width:52px; height:36px; }
+.mb-preview__fill { fill:var(--surface); }
+.mb-preview__line { fill:var(--text-dim); }
+.mb-preview__dot { fill:var(--text-dim); animation:mb-preview-dot 1.8s steps(1,end) 3; }
+/* A few cycles on load, then still; it only keeps thinking while the tile is hovered or focused. */
+.bento-slot--mbti:hover .mb-preview__dot,.bento-slot--mbti:focus-within .mb-preview__dot { animation-iteration-count:infinite; }
+.mb-preview__dot:nth-of-type(2) { animation-delay:.3s; } .mb-preview__dot:nth-of-type(3) { animation-delay:.6s; }
+@keyframes mb-preview-dot { 0%, 60%, 100% { opacity:.35; } 20% { opacity:1; } }
+@media (prefers-reduced-motion:reduce) { .mb-preview__dot { animation:none; opacity:.7; } }

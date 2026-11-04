@@ -105,7 +105,34 @@ describe('question flow', () => {
       ans('tf-friend', 'I focus on logic and analysis. I weigh the pros and cons.'),
       ans('jp-trip', 'I plan and schedule everything. I prepare a checklist well in advance.'),
     ];
+    expect(enoughEvidence(clear)).toBe(false); // Stage 1 asks at least five questions
+    clear.push(ans('ei-newgroup', 'I mingle and talk to everyone right away.'));
     expect(enoughEvidence(clear)).toBe(true);
     expect(isFinished(clear)).toBe(true);
+  });
+});
+
+describe('Codex review fixes', () => {
+  it('“I love crowded parties” is not read as introversion', () => {
+    const poles = extractEvidence('I love crowded parties.', 'x').map((e) => e.pole);
+    expect(poles).toContain('E');
+    expect(poles).not.toContain('I');
+  });
+  it('statements about someone else are not evidence about the person', () => {
+    expect(extractEvidence('My friend is outgoing.', 'x')).toEqual([]);
+    expect(extractEvidence('She loves big parties.', 'x')).toEqual([]);
+  });
+  it('a negation does not cross “but” or a comma', () => {
+    const ev = extractEvidence('I am not spontaneous, but I plan ahead.', 'x');
+    expect(ev.map((e) => e.pole)).toEqual(['J']);
+  });
+  it('an unclear dimension keeps priority after every dimension is covered once', () => {
+    const answers = [
+      ans('ei-saturday', 'I love meeting people. I talk to everyone.'),
+      ans('sn-idea', 'I care about the facts and the details.'),
+      ans('tf-friend', 'It depends.'),
+      ans('jp-trip', 'I plan everything and prepare a checklist.'),
+    ];
+    expect(nextScenario(answers)?.dimension).toBe('TF');
   });
 });

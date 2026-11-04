@@ -10,6 +10,8 @@ export default defineConfig({
       input: {
         main: 'index.html',
         sketchbook: 'sketchbook/index.html',
+        mbti: 'mbti/index.html',
+        // Old URL: a tiny redirect page to /mbti/.
         mpti: 'mpti/index.html',
         blackjack: 'blackjack/index.html',
       },

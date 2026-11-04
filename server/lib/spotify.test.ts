@@ -4,7 +4,7 @@ import { corsHeaders } from './cors';
 
 const ID = '3AJwUDP919kvQ9QcozQPxg';
 const rawTrack = {
-  id: ID, name: 'Yellow', type: 'track', is_local: false,
+  id: ID, name: 'Yellow', type: 'track', is_local: false, duration_ms: 266773,
   artists: [{ name: 'Coldplay' }],
   album: { name: 'Parachutes', images: [
     { url: 'https://i.scdn.co/image/small', width: 64 },
@@ -35,7 +35,13 @@ describe('normalizeTrack', () => {
       albumArt: 'https://i.scdn.co/image/medium',
       spotifyUrl: `https://open.spotify.com/track/${ID}`,
       embedUrl: `https://open.spotify.com/embed/track/${ID}`,
+      durationMs: 266773,
     });
+  });
+  it('drops a missing or nonsensical duration', () => {
+    expect(normalizeTrack({ ...rawTrack, duration_ms: undefined })?.durationMs).toBeNull();
+    expect(normalizeTrack({ ...rawTrack, duration_ms: -5 })?.durationMs).toBeNull();
+    expect(normalizeTrack({ ...rawTrack, duration_ms: '300' })?.durationMs).toBeNull();
   });
   it.each([
     ['episode', { ...rawTrack, type: 'episode' }],
