@@ -1,38 +1,61 @@
-/* Road to Diamond: a dark card in both themes (like the cream Sketchbook) with one luminous progress ring. */
-.rank-ring { --rr-ink:#e8edf8; --rr-dim:#93a1c2; --rr-glow:#5ee7ff; --rr-p:var(--p,0);
-  container-type:inline-size; gap:14px; padding:20px; overflow:hidden; color:var(--rr-ink); border-color:rgba(140,170,255,.18);
+/* Road to Diamond: a dark card in both themes (like the cream Sketchbook) with a luminous semicircle gauge. */
+.rank-gauge { --rr-ink:#e8edf8; --rr-dim:#93a1c2; --rr-glow:#5ee7ff; --rr-p:var(--p,0);
+  container-type:inline-size; gap:12px; padding:20px; overflow:hidden; color:var(--rr-ink); border-color:rgba(140,170,255,.18);
   background:radial-gradient(110% 60% at 50% 0%,rgba(111,155,255,.2),transparent 70%),linear-gradient(180deg,#121a32 0%,#0d1324 60%,#0a0e19 100%); }
-.rank-ring::before { opacity:.08; }
-.rank-ring .rank-ring__title { position:relative; z-index:2; margin:0; font-size:.72rem; font-weight:600; line-height:1.3; letter-spacing:.14em; text-transform:uppercase; color:#d6e3ff; }
-.rank-ring__title .bento-tile__link { display:inline-flex; align-items:center; gap:4px; }
-.rank-ring__title svg { flex:none; }
+.rank-gauge::before { opacity:.08; }
+.rank-gauge .rank-gauge__title { position:relative; z-index:2; margin:0; font-size:.72rem; font-weight:600; line-height:1.3; letter-spacing:.14em; text-transform:uppercase; color:#d6e3ff; }
+.rank-gauge__title .bento-tile__link { display:inline-flex; align-items:center; gap:4px; }
+.rank-gauge__title svg { flex:none; }
 
-/* Narrow (the desktop column, small phones): ring above the text, centred. */
-.rank-ring__main { position:relative; z-index:2; display:flex; flex:1 1 auto; flex-direction:column; align-items:center; justify-content:center; gap:14px; text-align:center; }
-.rank-ring__dial { position:relative; flex:none; width:136px; height:136px; }
-.rank-ring__svg { display:block; width:100%; height:100%; transform:rotate(-90deg); overflow:visible; }
-.rank-ring__track { fill:none; stroke:rgba(255,255,255,.09); stroke-width:6; }
-.rank-ring__fill { fill:none; stroke-width:6; stroke-linecap:round; stroke-dasharray:100; stroke-dashoffset:calc(100 - var(--rr-p) * 100);
-  filter:drop-shadow(0 0 3px rgba(94,231,255,.55)); transition:stroke-dashoffset .9s cubic-bezier(.2,.7,.2,1); }
-/* An empty ring draws no dot from the round cap. */
-.rank-ring:not(:has(.rank-ring__emblem)) .rank-ring__fill { visibility:hidden; }
-.rank-ring__tick { stroke:rgba(255,255,255,.24); stroke-width:1.5; stroke-linecap:round; }
-.rank-ring__emblem { position:absolute; inset:22%; width:56%; height:56%; object-fit:contain; pointer-events:none; user-select:none; filter:drop-shadow(0 0 8px rgba(94,231,255,.35)) drop-shadow(0 2px 3px rgba(0,0,0,.5)); }
-.rank-ring__text { display:flex; flex-direction:column; align-items:center; gap:6px; min-width:0; }
-.rank-ring .rank-ring__rank { display:flex; flex-direction:column; align-items:center; gap:2px; max-width:none; margin:0; color:var(--rr-ink); line-height:1.2; }
-.rank-ring__rank strong { font-size:1.125rem; font-weight:650; }
-.rank-ring__rank span { color:#9fd8ff; font-size:.875rem; font-variant-numeric:tabular-nums; }
-.rank-ring .rank-ring__goal { max-width:none; margin:0; color:var(--rr-dim); font-size:.68rem; font-weight:600; letter-spacing:.12em; text-transform:uppercase; }
-.rank-ring.is-done .rank-ring__goal { color:var(--rr-glow); }
-.rank-ring .rank-ring__source { max-width:none; margin:0; color:var(--rr-dim); font-size:.72rem; line-height:1.35; }
+/* Narrow (the desktop column, small phones): gauge on top, details below, centred. */
+.rank-gauge__main { position:relative; z-index:2; display:flex; flex:1 1 auto; flex-direction:column; align-items:center; justify-content:center; gap:12px; min-width:0; text-align:center; }
+.rank-gauge__meter { width:100%; max-width:220px; flex:none; }
+.rank-gauge__dial { position:relative; width:100%; aspect-ratio:200 / 112; container-type:inline-size; }
+.rank-gauge__svg { display:block; width:100%; height:100%; overflow:visible; }
+.rank-gauge__track,.rank-gauge__fill { fill:none; stroke-width:13; stroke-linecap:round; }
+.rank-gauge__track { stroke:rgba(255,255,255,.09); }
+.rank-gauge__fill { stroke-dasharray:100; stroke-dashoffset:calc(100 - var(--rr-p) * 100);
+  filter:drop-shadow(0 0 4px rgba(94,231,255,.5)); transition:stroke-dashoffset .9s cubic-bezier(.2,.7,.2,1); }
+/* At 0% the round cap would still draw a dot. */
+.rank-gauge.is-empty .rank-gauge__fill { visibility:hidden; }
+.rank-gauge__tick { stroke:rgba(255,255,255,.28); stroke-width:1.5; stroke-linecap:round; }
+.rank-gauge__center { position:absolute; left:50%; bottom:0; display:flex; flex-direction:column; align-items:center; gap:0; transform:translateX(-50%); }
+.rank-gauge__emblem { display:block; width:19cqw; height:auto; aspect-ratio:1; object-fit:contain; pointer-events:none; user-select:none; filter:drop-shadow(0 0 8px rgba(94,231,255,.35)) drop-shadow(0 2px 3px rgba(0,0,0,.5)); }
+.rank-gauge__pct { font-size:max(17px,11.5cqw); font-weight:650; line-height:1; letter-spacing:-.01em; font-variant-numeric:tabular-nums; color:#fff; text-shadow:0 0 14px rgba(94,231,255,.35); }
+.rank-gauge.is-done .rank-gauge__pct { color:var(--rr-glow); }
+/* Iron and goal emblems sit under the two ends of the arc (12% and 88% across). */
+.rank-gauge__ends { position:relative; height:42px; margin-top:4px; }
+.rank-gauge__end { position:absolute; top:0; display:flex; flex-direction:column; align-items:center; gap:2px; transform:translateX(-50%); color:var(--rr-dim); font-size:.58rem; font-weight:600; letter-spacing:.12em; text-transform:uppercase; white-space:nowrap; }
+.rank-gauge__end img { display:block; width:26px; height:26px; object-fit:contain; }
+.rank-gauge__end--start { left:12%; }
+.rank-gauge__end--start img { opacity:.85; }
+.rank-gauge__end--goal { left:88%; }
+.rank-gauge__end--goal img { filter:drop-shadow(0 0 6px rgba(94,231,255,.4)); }
 
-/* Wide (tablets, phones at 390+): ring beside the text, so the card stays short. */
+.rank-gauge__text { display:flex; flex-direction:column; align-items:center; gap:8px; width:100%; min-width:0; }
+.rank-gauge .rank-gauge__rank { display:flex; flex-wrap:wrap; align-items:baseline; justify-content:center; gap:2px 8px; max-width:none; margin:0; color:var(--rr-ink); line-height:1.2; }
+.rank-gauge__rank strong { font-size:1.0625rem; font-weight:650; }
+.rank-gauge__rank span { color:#9fd8ff; font-size:.875rem; font-variant-numeric:tabular-nums; }
+.rank-gauge .rank-gauge__goal { max-width:none; margin:0; color:var(--rr-glow); font-size:.66rem; font-weight:600; letter-spacing:.12em; text-transform:uppercase; }
+.rank-gauge .rank-gauge__source { max-width:none; margin:0; color:var(--rr-dim); font-size:.72rem; line-height:1.35; }
+
+/* Last ranked champion: a small portrait with a label and the name. */
+.rank-champ { display:flex; align-items:center; gap:10px; max-width:100%; min-width:0; padding:6px 10px 6px 6px; border:1px solid rgba(140,190,255,.16); border-radius:12px; background:rgba(255,255,255,.04); text-align:left; }
+.rank-champ__img { flex:none; width:32px; height:32px; border-radius:8px; object-fit:cover; box-shadow:0 0 0 1px rgba(140,190,255,.3); }
+.rank-gauge .rank-champ__text { display:flex; flex-direction:column; min-width:0; max-width:none; margin:0; line-height:1.2; }
+.rank-champ__label { color:var(--rr-dim); font-size:.56rem; font-weight:600; letter-spacing:.12em; text-transform:uppercase; white-space:nowrap; }
+.rank-champ__name { overflow:hidden; color:var(--rr-ink); font-size:.82rem; font-weight:600; text-overflow:ellipsis; white-space:nowrap; }
+
+/* Wide (tablets, phones at 390+): gauge beside the details, so the card stays short. */
 @container (min-width:300px) {
-  .rank-ring__main { flex-direction:row; justify-content:flex-start; gap:20px; text-align:left; }
-  .rank-ring__dial { width:112px; height:112px; }
-  .rank-ring__text,.rank-ring .rank-ring__rank { align-items:flex-start; }
+  .rank-gauge__main { flex-direction:row; justify-content:flex-start; gap:24px; text-align:left; }
+  .rank-gauge__meter { width:48%; max-width:200px; }
+  .rank-gauge__text { flex:1 1 0; align-items:flex-start; }
+  .rank-gauge .rank-gauge__rank { justify-content:flex-start; }
+  .rank-champ { align-self:stretch; }
+  .rank-champ__label { white-space:normal; }
 }
 
-@media (hover:hover) { .rank-ring:hover { border-color:rgba(140,190,255,.38); } }
-.rank-ring:has(.bento-tile__link:focus-visible) { outline:2px solid var(--accent); outline-offset:3px; }
-@media (prefers-reduced-motion:reduce) { .rank-ring__fill { transition:none; } }
+@media (hover:hover) { .rank-gauge:hover { border-color:rgba(140,190,255,.38); } }
+.rank-gauge:has(.bento-tile__link:focus-visible) { outline:2px solid var(--accent); outline-offset:3px; }
+@media (prefers-reduced-motion:reduce) { .rank-gauge__fill { transition:none; } }

@@ -20,6 +20,12 @@ export interface LeagueConfig {
   mode: 'live' | 'manual';
   /** A rank typed in by hand, with the date it was checked. null shows "rank unavailable" instead. */
   manual: { tier: Tier; division?: Division; lp: number; checkedOn: string } | null;
+  /**
+   * The last ranked Solo/Duo champion, typed in by hand, for when the API cannot read it (no Riot key, or Riot
+   * is down). Shown only when the API has no champion, and always labelled "set by hand". null shows none.
+   * `ddragonId` is the champion's Data Dragon id (Wukong is "MonkeyKing"); `version` is a Data Dragon version.
+   */
+  manualChampion: { name: string; ddragonId: string; version: string; checkedOn: string } | null;
 }
 
 const league: LeagueConfig = {
@@ -32,6 +38,8 @@ const league: LeagueConfig = {
   mode: 'live',
   // Read from the account's OP.GG profile on 2026-11-05. Update it by hand until the Riot key is set up.
   manual: { tier: 'GOLD', division: 'II', lp: 27, checkedOn: '2026-11-05' },
+  // Example: { name: 'Wukong', ddragonId: 'MonkeyKing', version: '16.22.1', checkedOn: '2026-11-05' }
+  manualChampion: null,
 };
 
 export default league;

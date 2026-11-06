@@ -14,8 +14,18 @@ export interface PublicRank {
   tier?: string;
   division?: string;
   lp?: number;
+  /** Champion from the account's most recent ranked Solo/Duo match. Missing when Riot or Data Dragon could not say. */
+  lastChampion?: LastChampion;
   /** When Riot last answered. */
   fetchedAt: string;
+}
+
+export interface LastChampion {
+  name: string;
+  /** Square portrait on Riot's Data Dragon CDN. */
+  icon: string;
+  /** When that match ended. */
+  playedAt?: string;
 }
 
 export interface LeagueEnv {
@@ -55,7 +65,7 @@ export interface Deps {
   memo?: { rank?: PublicRank; cooldownUntil?: number };
 }
 
-export interface Settings { riotId: string; gameName: string; tagLine: string; platform: string; region: string; refreshMs: number }
+export interface Settings { riotId: string; gameName: string; tagLine: string; platform: string; region: string; matchRegion: string; refreshMs: number }
 
 const PLATFORMS: Record<string, string> = {
   na1: 'americas', br1: 'americas', la1: 'americas', la2: 'americas',
@@ -64,6 +74,9 @@ const PLATFORMS: Record<string, string> = {
   // Account-V1 has no SEA cluster; any cluster can look up any account, so these use the nearest one.
   oc1: 'asia', ph2: 'asia', sg2: 'asia', th2: 'asia', tw2: 'asia', vn2: 'asia',
 };
+
+/** Match-V5 routing differs from Account-V1 only for the SEA platforms. */
+const SEA = ['oc1', 'ph2', 'sg2', 'th2', 'tw2', 'vn2'];
 
 export function settings(env: LeagueEnv): Settings | null {
   const riotId = (env.LEAGUE_RIOT_ID || DEFAULTS.riotId).trim();
@@ -76,7 +89,7 @@ export function settings(env: LeagueEnv): Settings | null {
   const minutes = Number(env.LEAGUE_REFRESH_MINUTES);
   // Never more often than every 10 minutes, whatever the setting says.
   const refreshMs = Math.max(10, Number.isFinite(minutes) && minutes > 0 ? minutes : DEFAULTS.refreshMinutes) * 60_000;
-  return { riotId: `${gameName}#${tagLine}`, gameName, tagLine, platform, region, refreshMs };
+  return { riotId: `${gameName}#${tagLine}`, gameName, tagLine, platform, region, matchRegion: SEA.includes(platform) ? 'sea' : region, refreshMs };
 }
 
 const TIERS = ['IRON', 'BRONZE', 'SILVER', 'GOLD', 'PLATINUM', 'EMERALD', 'DIAMOND', 'MASTER', 'GRANDMASTER', 'CHALLENGER'];
@@ -129,13 +142,56 @@ async function puuidFor(deps: Deps, key: string, s: Settings): Promise<string> {
   return body.puuid;
 }
 
-/** Live lookup: Account-V1 for the PUUID, then League-V4 entries by PUUID. Throws LeagueError. */
+export const DDRAGON = 'https://ddragon.leagueoflegends.com';
+
+/** Champion name and portrait from Data Dragon, Riot's public static CDN. No API key is sent there. */
+async function championArt(deps: Deps, championId: number): Promise<Omit<LastChampion, 'playedAt'> | null> {
+  const get = async (url: string) => {
+    const res = await deps.fetch(url, { signal: AbortSignal.timeout(deps.timeoutMs ?? 5000) });
+    if (!res.ok) throw new LeagueError('unavailable');
+    return res.json() as Promise<unknown>;
+  };
+  const versions = await get(`${DDRAGON}/api/versions.json`);
+  const version = Array.isArray(versions) ? versions[0] : null;
+  if (typeof version !== 'string' || !/^\d+\.\d+\.\d+$/.test(version)) return null;
+  const list = (await get(`${DDRAGON}/cdn/${version}/data/en_US/champion.json`)) as { data?: Record<string, { id?: unknown; key?: unknown; name?: unknown }> };
+  const champ = Object.values(list?.data ?? {}).find((c) => c?.key === String(championId));
+  if (!champ || typeof champ.id !== 'string' || !/^[A-Za-z0-9]+$/.test(champ.id) || typeof champ.name !== 'string') return null;
+  return { name: champ.name, icon: `${DDRAGON}/cdn/${version}/img/champion/${champ.id}.png` };
+}
+
+/** Match-V5 queue id for ranked Solo/Duo (RANKED_SOLO_5x5). */
+const SOLO_QUEUE_ID = 420;
+
+/** The champion played in the account's latest ranked Solo/Duo match (Match-V5), or null when there is none. */
+async function lastChampion(deps: Deps, key: string, s: Settings, puuid: string): Promise<LastChampion | null> {
+  const base = `https://${s.matchRegion}.api.riotgames.com/lol/match/v5/matches`;
+  const ids = await (await riotGet(deps, key, `${base}/by-puuid/${encodeURIComponent(puuid)}/ids?queue=${SOLO_QUEUE_ID}&start=0&count=1`)).json();
+  const id = Array.isArray(ids) ? ids[0] : null;
+  if (typeof id !== 'string' || !id) return null;
+  const match = (await (await riotGet(deps, key, `${base}/${encodeURIComponent(id)}`)).json()) as { info?: { queueId?: unknown; gameEndTimestamp?: unknown; participants?: { puuid?: unknown; championId?: unknown }[] } };
+  // The queue filter above should already guarantee this; a normal or ARAM game is never shown as ranked.
+  if (match?.info?.queueId !== SOLO_QUEUE_ID) return null;
+  const me = match?.info?.participants?.find((p) => p?.puuid === puuid);
+  if (!me || typeof me.championId !== 'number') return null;
+  const art = await championArt(deps, me.championId);
+  if (!art) return null;
+  const end = match.info?.gameEndTimestamp;
+  return { ...art, ...(typeof end === 'number' && end > 0 ? { playedAt: new Date(end).toISOString() } : {}) };
+}
+
+/**
+ * Live lookup: Account-V1 for the PUUID, then League-V4 entries by PUUID, then the last Solo/Duo match's champion.
+ * Throws LeagueError when the rank cannot be read; the champion is optional and never fails the lookup.
+ */
 export async function fetchRank(deps: Deps, s: Settings): Promise<PublicRank> {
   const key = deps.env.RIOT_API_KEY?.trim();
   if (!key) throw new LeagueError('not-configured');
   const puuid = await puuidFor(deps, key, s);
   const res = await riotGet(deps, key, `https://${s.platform}.api.riotgames.com/lol/league/v4/entries/by-puuid/${encodeURIComponent(puuid)}`);
-  return normalizeEntries(await res.json(), s.riotId, deps.now().toISOString());
+  const rank = normalizeEntries(await res.json(), s.riotId, deps.now().toISOString());
+  const champ = await lastChampion(deps, key, s, puuid).catch(() => null);
+  return champ ? { ...rank, lastChampion: champ } : rank;
 }
 
 export interface Resolved {
@@ -167,7 +223,10 @@ export async function resolveRank(deps: Deps): Promise<Resolved> {
   if (until > nowMs) return { data: cached, stale: Boolean(cached), error: 'rate-limited', retryAfter: Math.ceil((until - nowMs) / 1000) };
 
   try {
-    const data = await fetchRank(deps, s);
+    let data = await fetchRank(deps, s);
+    // Keep the last known champion when only the match lookup failed this time.
+    const prior = (cached as PublicRank | null)?.lastChampion;
+    if (!data.lastChampion && prior) data = { ...data, lastChampion: prior };
     if (deps.memo) deps.memo.rank = data;
     await deps.store?.write('league-rank', data).catch(() => undefined);
     return { data, stale: false, error: null };

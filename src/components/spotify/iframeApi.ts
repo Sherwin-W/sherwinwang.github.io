@@ -7,6 +7,8 @@ export interface EmbedController {
   play(): void;
   pause(): void;
   togglePlay(): void;
+  /** Jumps to a position, in seconds. */
+  seek(seconds: number): void;
   destroy(): void;
   addListener(event: 'ready', cb: () => void): void;
   addListener(event: 'playback_update', cb: (e: { data: PlaybackUpdate }) => void): void;

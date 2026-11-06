@@ -11,16 +11,35 @@ function memoryStore(rows: Partial<Record<RowId, unknown>> = {}) {
   return { data, read: async (id: RowId) => data.get(id) ?? null, write: async (id: RowId, v: unknown) => { data.set(id, v); } };
 }
 
-/** A fake Riot API that records every call. */
-function riot(entries: unknown = [SOLO, FLEX], opts: { account?: number; league?: number; retryAfter?: string } = {}) {
+const MATCH = { info: { queueId: 420, gameEndTimestamp: Date.parse('2026-11-05T11:30:00Z'), participants: [{ puuid: 'someone', championId: 1 }, { puuid: PUUID, championId: 62 }] } };
+const CHAMPIONS = { data: { Annie: { id: 'Annie', key: '1', name: 'Annie' }, MonkeyKing: { id: 'MonkeyKing', key: '62', name: 'Wukong' } } };
+const WUKONG = { name: 'Wukong', icon: 'https://ddragon.leagueoflegends.com/cdn/16.22.1/img/champion/MonkeyKing.png', playedAt: '2026-11-05T11:30:00.000Z' };
+const RIOT_CALLS = [
+  'https://americas.api.riotgames.com/riot/account/v1/accounts/by-riot-id/DippoBippo/cccc',
+  `https://na1.api.riotgames.com/lol/league/v4/entries/by-puuid/${PUUID}`,
+  `https://americas.api.riotgames.com/lol/match/v5/matches/by-puuid/${PUUID}/ids?queue=420&start=0&count=1`,
+  'https://americas.api.riotgames.com/lol/match/v5/matches/NA1_5000',
+];
+
+/** A fake Riot API and Data Dragon that record every call. */
+function riot(entries: unknown = [SOLO, FLEX], opts: { account?: number; league?: number; match?: number; retryAfter?: string; ids?: unknown; detail?: unknown } = {}) {
   const calls: string[] = [];
   const fetch = vi.fn(async (url: string, init?: RequestInit) => {
     calls.push(url);
-    expect((init?.headers as Record<string, string>)['X-Riot-Token']).toBe('RGAPI-test');
-    const status = url.includes('/riot/account/') ? opts.account ?? 200 : opts.league ?? 200;
+    const token = (init?.headers as Record<string, string> | undefined)?.['X-Riot-Token'];
+    if (url.startsWith('https://ddragon.leagueoflegends.com/')) {
+      // The key only ever goes to Riot's API hosts.
+      expect(token).toBeUndefined();
+      return Response.json(url.endsWith('/versions.json') ? ['16.22.1', '16.21.1'] : CHAMPIONS);
+    }
+    expect(token).toBe('RGAPI-test');
+    const status = url.includes('/riot/account/') ? opts.account ?? 200 : url.includes('/match/') ? opts.match ?? 200 : opts.league ?? 200;
     const headers = opts.retryAfter ? { 'retry-after': opts.retryAfter } : undefined;
     if (status !== 200) return new Response('{}', { status, headers });
-    return new Response(JSON.stringify(url.includes('/riot/account/') ? { puuid: PUUID, gameName: 'DippoBippo', tagLine: 'cccc' } : entries), { status: 200 });
+    if (url.includes('/riot/account/')) return Response.json({ puuid: PUUID, gameName: 'DippoBippo', tagLine: 'cccc' });
+    if (url.includes('/ids?')) return Response.json(opts.ids ?? ['NA1_5000']);
+    if (url.includes('/match/')) return Response.json(opts.detail ?? MATCH);
+    return Response.json(entries);
   });
   return { fetch: fetch as unknown as typeof globalThis.fetch, calls };
 }
@@ -32,6 +51,7 @@ describe('settings', () => {
   it('defaults to DippoBippo#cccc on NA1 and maps the platform to its Account-V1 region', () => {
     expect(settings({})).toMatchObject({ riotId: 'DippoBippo#cccc', gameName: 'DippoBippo', tagLine: 'cccc', platform: 'na1', region: 'americas', refreshMs: 45 * 60_000 });
     expect(settings({ LEAGUE_RIOT_ID: 'Some One#EUW', LEAGUE_PLATFORM: 'EUW1' })).toMatchObject({ gameName: 'Some One', tagLine: 'EUW', platform: 'euw1', region: 'europe' });
+    expect(settings({ LEAGUE_PLATFORM: 'OC1' })).toMatchObject({ region: 'asia', matchRegion: 'sea' });
     expect(settings({ LEAGUE_PLATFORM: 'mars1' })).toBeNull();
     expect(settings({ LEAGUE_RIOT_ID: 'no-tag' })).toBeNull();
     // Refresh can be changed, but never below 10 minutes.
@@ -59,11 +79,8 @@ describe('rank lookup and cache', () => {
     const r = riot();
     const store = memoryStore();
     const out = await resolveRank(deps({ fetch: r.fetch, store }));
-    expect(out).toEqual({ data: expect.objectContaining({ ranked: true, tier: 'GOLD', division: 'II', lp: 27, fetchedAt: '2026-11-05T12:00:00.000Z' }), stale: false, error: null });
-    expect(r.calls).toEqual([
-      'https://americas.api.riotgames.com/riot/account/v1/accounts/by-riot-id/DippoBippo/cccc',
-      `https://na1.api.riotgames.com/lol/league/v4/entries/by-puuid/${PUUID}`,
-    ]);
+    expect(out).toEqual({ data: expect.objectContaining({ ranked: true, tier: 'GOLD', division: 'II', lp: 27, lastChampion: WUKONG, fetchedAt: '2026-11-05T12:00:00.000Z' }), stale: false, error: null });
+    expect(r.calls.filter((u) => u.includes('api.riotgames.com'))).toEqual(RIOT_CALLS);
     expect(store.data.get('league-account')).toEqual({ riotId: 'DippoBippo#cccc', puuid: PUUID });
     // The public row never holds the PUUID or win/loss record.
     expect(JSON.stringify(store.data.get('league-rank'))).not.toMatch(/puuid|wins|losses/);
@@ -77,7 +94,33 @@ describe('rank lookup and cache', () => {
     for (const t of ['2026-11-05T12:10:00Z', '2026-11-05T12:44:00Z']) expect((await resolveRank(deps({ fetch: r.fetch, store, now: at(t) }))).stale).toBe(false);
     expect(r.calls).toEqual([]);
     await resolveRank(deps({ fetch: r.fetch, store, now: at('2026-11-05T12:46:00Z') }));
-    expect(r.calls).toEqual([`https://na1.api.riotgames.com/lol/league/v4/entries/by-puuid/${PUUID}`]);
+    expect(r.calls.filter((u) => u.includes('api.riotgames.com'))).toEqual(RIOT_CALLS.slice(1));
+  });
+
+  it('looks up the champion by id in Data Dragon (Wukong is "MonkeyKing" there)', async () => {
+    const r = riot();
+    await resolveRank(deps({ fetch: r.fetch }));
+    expect(r.calls.filter((u) => u.includes('ddragon'))).toEqual([
+      'https://ddragon.leagueoflegends.com/api/versions.json',
+      'https://ddragon.leagueoflegends.com/cdn/16.22.1/data/en_US/champion.json',
+    ]);
+  });
+
+  it('still returns the rank when the match lookup fails, keeping the last known champion', async () => {
+    const out = await resolveRank(deps({ fetch: riot(undefined, { match: 500 }).fetch }));
+    expect(out).toMatchObject({ stale: false, error: null, data: { tier: 'GOLD', lp: 27 } });
+    expect(out.data).not.toHaveProperty('lastChampion');
+    const saved = { riotId: 'DippoBippo#cccc', queue: 'RANKED_SOLO_5x5', ranked: true, tier: 'GOLD', division: 'II', lp: 10, lastChampion: WUKONG, fetchedAt: '2026-11-05T09:00:00.000Z' };
+    const again = await resolveRank(deps({ fetch: riot(undefined, { match: 429 }).fetch, store: memoryStore({ 'league-rank': saved }) }));
+    expect(again).toMatchObject({ stale: false, error: null, data: { lp: 27, lastChampion: WUKONG } });
+    // A match that is not ranked Solo/Duo, or that does not include the account, is never used.
+    for (const detail of [{ info: { ...MATCH.info, queueId: 400 } }, { info: { ...MATCH.info, participants: [{ puuid: 'someone', championId: 1 }] } }]) {
+      const out = await resolveRank(deps({ fetch: riot(undefined, { detail }).fetch }));
+      expect(out.data).not.toHaveProperty('lastChampion');
+    }
+    // No matches at all: nothing is shown rather than a guess.
+    const none = await resolveRank(deps({ fetch: riot(undefined, { ids: [] }).fetch }));
+    expect(none.data).not.toHaveProperty('lastChampion');
   });
 
   it('serves the last cached rank, marked stale, when Riot fails or the key has expired', async () => {
@@ -126,7 +169,8 @@ describe('GET /api/league/rank', () => {
     expect(res.headers.get('cache-control')).toBe('public, s-maxage=300, stale-while-revalidate=600');
     const body = await res.json();
     expect(body).toMatchObject({ riotId: 'DippoBippo#cccc', ranked: true, tier: 'GOLD', division: 'II', lp: 27, stale: false });
-    expect(JSON.stringify(body)).not.toMatch(/RGAPI|puuid/i);
+    expect(body.lastChampion).toEqual(WUKONG);
+    expect(JSON.stringify(body)).not.toMatch(/RGAPI|puuid|NA1_5000/i);
   });
 
   it('rejects other methods and lets no one pick another account', async () => {

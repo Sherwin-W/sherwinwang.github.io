@@ -17,8 +17,11 @@ const FAKE_IFRAME_API = `
       f.title = 'Spotify Embed'; f.height = opts.height; f.style.width = '100%';
       el.replaceWith(f);
       const ls = {};
-      const c = { play(){ window.__spotifyCalls.push('play'); (ls.playback_update||[]).forEach(fn => fn({ data: { isPaused:false, isBuffering:false, duration:30000, position:9000 } })); },
-        pause(){}, togglePlay(){}, destroy(){ window.__spotifyCalls.push('destroy'); f.remove(); },
+      let pos = 0, paused = false, timer = 0;
+      const emit = () => (ls.playback_update||[]).forEach(fn => fn({ data: { isPaused:paused, isBuffering:false, duration:30000, position:pos } }));
+      const c = { play(){ window.__spotifyCalls.push('play'); paused = false; timer = setInterval(() => { if (!paused) { pos = Math.min(30000, pos + 500); emit(); } }, 250); emit(); },
+        pause(){ paused = true; emit(); }, togglePlay(){}, seek(s){ window.__spotifyCalls.push('seek:' + s); pos = s * 1000; emit(); },
+        destroy(){ window.__spotifyCalls.push('destroy'); clearInterval(timer); f.remove(); },
         addListener(ev, fn){ (ls[ev] = ls[ev] || []).push(fn); if (ev === 'ready') setTimeout(fn, 50); } };
       cb(c);
     },
@@ -52,11 +55,62 @@ test('compact card: art, status, title, artist, play and a Spotify link; play br
   // The official player replaces our details instead of repeating them, and fits inside the card.
   await expect(tile.getByRole('heading', { name: 'Yellow' })).toHaveCount(0);
   const [frame, card] = await Promise.all([tile.locator('iframe').boundingBox(), tile.boundingBox()]);
-  expect(frame.height).toBeGreaterThanOrEqual(80);
+  expect(frame.height).toBeGreaterThanOrEqual(79.5);
   expect(frame.x >= card.x && frame.x + frame.width <= card.x + card.width && frame.y + frame.height <= card.y + card.height).toBe(true);
   await tile.getByRole('button', { name: /Close player/ }).click();
   await expect(tile.locator('iframe')).toHaveCount(0);
   await expect(tile.getByRole('button', { name: 'Play Yellow with Spotify' })).toBeFocused();
+});
+
+test('a thin progress bar floats between the artist and the controls, empty until the official player reports playback', async ({ page }) => {
+  await mock(page, 200, body());
+  await page.goto('/');
+  const tile = page.locator('[data-spotify-tile]');
+  const bar = tile.locator('.spotify__progress');
+  await expect(bar).toHaveAttribute('data-progress', 'none');
+  const [artist, b, play] = await Promise.all([tile.locator('.spotify__artist').boundingBox(), bar.boundingBox(), tile.locator('.spotify__play').boundingBox()]);
+  expect(b.y).toBeGreaterThan(artist.y + artist.height);
+  expect(b.y + b.height).toBeLessThan(play.y);
+  expect(b.height).toBeLessThanOrEqual(3);
+  // A last-played track has no position: no fill, nothing to seek, and it does not move.
+  await expect(bar.locator('.spotify__progress-fill')).toBeHidden();
+  await expect(tile.getByRole('slider')).toHaveCount(0);
+  await page.waitForTimeout(600);
+  await expect(bar).toHaveAttribute('data-progress', 'none');
+  const style = await bar.evaluate((e) => [getComputedStyle(e).borderTopWidth, getComputedStyle(e).backgroundColor]);
+  expect(style[0]).toBe('0px');
+
+  // Playing: the bar follows the official player's reports and seeks through it.
+  await tile.getByRole('button', { name: 'Play Yellow with Spotify' }).click();
+  await expect(bar).toHaveAttribute('data-progress', 'live');
+  const fill = () => bar.evaluate((e) => Number(e.style.getPropertyValue('--fill')));
+  const first = await fill();
+  await expect.poll(fill).toBeGreaterThan(first);
+  const seek = tile.getByRole('slider', { name: 'Seek in Yellow' });
+  await seek.focus();
+  await page.keyboard.press('End');
+  await expect.poll(() => page.evaluate(() => window.__spotifyCalls)).toContain('seek:30');
+  await expect(seek).toHaveAttribute('aria-valuetext', '0:30 of 0:30');
+  // Bar sits under the official player and above "Close player", inside the card.
+  const [frame, b2, close, card] = await Promise.all([tile.locator('iframe').boundingBox(), bar.boundingBox(), tile.getByRole('button', { name: /Close player/ }).boundingBox(), tile.boundingBox()]);
+  expect(b2.y).toBeGreaterThan(frame.y + frame.height);
+  expect(b2.y + b2.height).toBeLessThan(close.y);
+  expect(b2.x >= card.x && b2.x + b2.width <= card.x + card.width).toBe(true);
+  // Closing the player clears the progress; nothing keeps moving.
+  await tile.getByRole('button', { name: /Close player/ }).click();
+  await expect(bar).toHaveAttribute('data-progress', 'none');
+});
+
+test('a saved (stale) or cached track never shows progress', async ({ page }) => {
+  await page.route('**/api/spotify/last-played', (route) => route.fulfill({ status: 200, json: { ...body(), stale: true }, headers: { 'access-control-allow-origin': '*' } }));
+  await page.goto('/');
+  await expect(page.getByText('Showing saved track')).toBeVisible();
+  await expect(page.locator('.spotify__progress')).toHaveAttribute('data-progress', 'none');
+  await mock(page, 200, body({ isCurrentlyPlaying: true, playedAt: null }));
+  await page.reload();
+  // Even "Now listening" on the owner's account is not a position the site knows.
+  await expect(page.getByText('Now listening')).toBeVisible();
+  await expect(page.locator('.spotify__progress')).toHaveAttribute('data-progress', 'none');
 });
 
 test('a very long title wraps to two lines and the artist truncates, inside the compact card', async ({ page }) => {

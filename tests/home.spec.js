@@ -114,11 +114,15 @@ test('the résumé downloads, opens in a new tab, and has a fallback where PDFs 
   for (const b of await dialog.locator('.resume-viewer__btn').all()) expect((await b.boundingBox()).height).toBeGreaterThanOrEqual(44);
 });
 
+const WUKONG = { name: 'Wukong', icon: 'https://ddragon.leagueoflegends.com/cdn/16.22.1/img/champion/MonkeyKing.png', playedAt: new Date().toISOString() };
+const champArt = (page) => page.route('https://ddragon.leagueoflegends.com/**', (r) => r.fulfill({ path: 'public/league/emblems/gold.webp', contentType: 'image/webp' }));
+const withRank = async (page, json) => { await page.unroute('**/api/league/rank'); await page.route('**/api/league/rank', (r) => r.fulfill({ status: 200, json, headers: cors })); };
+
 test.describe('Road to Diamond', () => {
-  test('shows the live rank in a compact ring card under Spotify that opens OP.GG', async ({ page }) => {
+  test('shows the live rank on a semicircle gauge under Spotify that opens OP.GG', async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto('/');
-    const card = page.locator('.rank-ring');
+    const card = page.locator('.rank-gauge');
     await expect(card.getByText('Platinum III')).toBeVisible();
     await expect(card.getByText('41 LP')).toBeVisible();
     await expect(card.getByText(/^Live from Riot/)).toBeVisible();
@@ -137,49 +141,93 @@ test.describe('Road to Diamond', () => {
     expect(Math.abs(league.y - resume.y)).toBeLessThanOrEqual(1);
     expect(Math.abs(league.bottom - resume.bottom)).toBeLessThanOrEqual(1);
     for (const r of [spotify, league]) expect(r.h).toBeLessThan(460);
-    // The ring is filled to the overall ladder position: Platinum III 41 LP is (4*4 + 1 + .41) / 24 = 73%.
+    // Platinum III 41 LP is (4*4 + 1 + .41) / 24 = 73% of the whole climb; the label and the arc fill agree.
     await expect(card.getByRole('progressbar', { name: 'Progress to Diamond IV' })).toHaveAttribute('aria-valuenow', '73');
-    await expect(card.getByText('73% to Diamond IV')).toBeVisible();
-    const offset = await page.locator('.rank-ring__fill').evaluate((e) => parseFloat(getComputedStyle(e).strokeDashoffset.replace(/^calc\(/, '')));
-    expect(Math.abs(offset - (100 - (17.41 / 24) * 100))).toBeLessThan(0.5);
-    // No tall Iron-to-Diamond track any more, and no champion portrait.
-    await expect(page.locator('.rank-rail, .rank-rail__track')).toHaveCount(0);
-    await expect(card.locator('img')).toHaveCount(1);
-    expect(await card.locator('img').evaluate((e) => e.complete && e.naturalWidth >= 96)).toBe(true);
+    await expect(card.locator('.rank-gauge__pct')).toHaveText('73%');
+    const offset = await page.locator('.rank-gauge__fill').evaluate((e) => parseFloat(getComputedStyle(e).strokeDashoffset.replace(/^calc\(/, '')));
+    expect(Math.abs(offset - (100 - 73))).toBeLessThan(0.5);
+    // A half circle: as wide as about twice its height, ends on the same baseline.
+    const dial = await box(page, '.rank-gauge__dial');
+    expect(Math.abs(dial.w / dial.h - 200 / 112)).toBeLessThan(0.05);
+    // Iron and Diamond emblems sit under the left and right ends of the arc, sharp and inside the card.
+    const [start, goal, cardBox] = await Promise.all([box(page, '.rank-gauge__end--start'), box(page, '.rank-gauge__end--goal'), box(page, '.rank-gauge')]);
+    expect(Math.abs(start.x + start.w / 2 - (dial.x + dial.w * 0.12))).toBeLessThan(2);
+    expect(Math.abs(goal.x + goal.w / 2 - (dial.x + dial.w * 0.88))).toBeLessThan(2);
+    expect(start.y).toBeGreaterThanOrEqual(dial.bottom - 1);
+    expect(start.x).toBeGreaterThan(cardBox.x);
+    expect(goal.right).toBeLessThan(cardBox.right);
+    await expect(card.locator('.rank-gauge__end--start')).toHaveText('Iron');
+    await expect(card.locator('.rank-gauge__end--goal')).toHaveText('Diamond');
+    for (const img of await card.locator('.rank-gauge__end img, .rank-gauge__emblem').all()) {
+      expect(await img.evaluate((e) => e.complete && e.naturalWidth >= 96 && e.naturalWidth >= e.getBoundingClientRect().width * 2)).toBe(true);
+    }
+    // No champion without one from Riot.
+    await expect(card.locator('.rank-champ')).toHaveCount(0);
   });
 
-  test('falls back to the labelled manual rank when the API is unavailable', async ({ page }) => {
+  test("shows the last ranked champion from Riot's answer with its Data Dragon portrait", async ({ page }) => {
+    await champArt(page);
+    await withRank(page, { ...RANK, lastChampion: WUKONG, fetchedAt: new Date().toISOString() });
+    for (const width of [1440, 390]) {
+      await page.setViewportSize({ width, height: 900 });
+      await page.goto('/');
+      const champ = page.locator('.rank-champ');
+      await expect(champ.getByText('Last ranked champion')).toBeVisible();
+      await expect(champ.getByText('Wukong')).toBeVisible();
+      await expect(champ.locator('img')).toHaveAttribute('src', WUKONG.icon);
+      expect(await champ.locator('img').evaluate((e) => e.complete && e.naturalWidth > 0)).toBe(true);
+      const [c, card] = await Promise.all([box(page, '.rank-champ'), box(page, '.rank-gauge')]);
+      expect(c.x).toBeGreaterThan(card.x);
+      expect(c.right).toBeLessThan(card.right);
+      expect(c.bottom).toBeLessThan(card.bottom);
+    }
+  });
+
+  test('a portrait URL that is not Data Dragon is ignored', async ({ page }) => {
+    await withRank(page, { ...RANK, lastChampion: { name: 'Fake', icon: 'https://example.com/fake.png' }, fetchedAt: new Date().toISOString() });
+    await page.goto('/');
+    await expect(page.locator('.rank-gauge')).toHaveAttribute('data-source', 'live');
+    await expect(page.locator('.rank-champ')).toHaveCount(0);
+  });
+
+  test('falls back to the labelled manual rank, with no champion, when the API is unavailable', async ({ page }) => {
     await page.unroute('**/api/league/rank');
     await page.route('**/api/league/rank', (r) => r.fulfill({ status: 503, json: { error: 'not-configured' }, headers: cors }));
     await page.goto('/');
-    await expect(page.locator('.rank-ring')).toHaveAttribute('data-source', 'manual');
-    await expect(page.locator('.rank-ring').getByText(/^Updated by hand · /)).toBeVisible();
+    await expect(page.locator('.rank-gauge')).toHaveAttribute('data-source', 'manual');
+    await expect(page.locator('.rank-gauge').getByText(/^Updated by hand · /)).toBeVisible();
+    await expect(page.locator('.rank-champ')).toHaveCount(0);
   });
 
-  test('shows unranked with an empty ring, and a saved rank as saved', async ({ page }) => {
-    await page.unroute('**/api/league/rank');
-    await page.route('**/api/league/rank', (r) => r.fulfill({ status: 200, json: { riotId: 'DippoBippo#cccc', queue: 'RANKED_SOLO_5x5', ranked: false, fetchedAt: new Date().toISOString(), stale: false }, headers: cors }));
+  test('shows unranked with an empty gauge, and a saved rank as saved', async ({ page }) => {
+    await withRank(page, { riotId: 'DippoBippo#cccc', queue: 'RANKED_SOLO_5x5', ranked: false, fetchedAt: new Date().toISOString(), stale: false });
     await page.goto('/');
-    await expect(page.locator('.rank-ring').getByText('Unranked')).toBeVisible();
-    await expect(page.locator('.rank-ring__emblem')).toHaveCount(0);
-    await expect(page.locator('.rank-ring').getByRole('progressbar')).toHaveCount(0);
-    await page.unroute('**/api/league/rank');
-    await page.route('**/api/league/rank', (r) => r.fulfill({ status: 200, json: { ...RANK, fetchedAt: new Date(Date.now() - 3 * 3600e3).toISOString(), stale: true }, headers: cors }));
+    await expect(page.locator('.rank-gauge').getByText('Unranked')).toBeVisible();
+    await expect(page.locator('.rank-gauge__emblem')).toHaveCount(0);
+    await expect(page.locator('.rank-gauge').getByRole('progressbar')).toHaveCount(0);
+    await expect(page.locator('.rank-gauge__fill')).toBeHidden();
+    await withRank(page, { ...RANK, fetchedAt: new Date(Date.now() - 3 * 3600e3).toISOString(), stale: true });
     await page.reload();
-    await expect(page.locator('.rank-ring').getByText('Saved rank · Riot last answered 3 hours ago')).toBeVisible();
+    await expect(page.locator('.rank-gauge').getByText('Saved rank · Riot last answered 3 hours ago')).toBeVisible();
   });
 
-  test('on phones, Spotify and the rank card follow "Who am I?" and stay short', async ({ page }) => {
+  test('on phones, Spotify and the rank card follow "Who am I?" and stay short, with the gauge centred in its column', async ({ page }) => {
+    await champArt(page);
+    await withRank(page, { ...RANK, lastChampion: WUKONG, fetchedAt: new Date().toISOString() });
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto('/');
+    await expect(page.locator('.rank-champ')).toBeVisible();
     const [about, spotify, league] = await Promise.all(['about', 'spotify', 'league'].map((k) => box(page, `.bento-slot--${k}`)));
     expect(spotify.y).toBeGreaterThan(about.bottom);
     expect(league.y).toBeGreaterThan(spotify.bottom);
     expect(spotify.h).toBeLessThan(240);
     expect(league.h).toBeLessThan(240);
-    // Ring beside the text.
-    const [dial, text] = await Promise.all([box(page, '.rank-ring__dial'), box(page, '.rank-ring__text')]);
+    // Gauge beside the text; percentage centred under the arc; nothing crosses into the text column.
+    const [dial, text, pct, goal] = await Promise.all([box(page, '.rank-gauge__dial'), box(page, '.rank-gauge__text'), box(page, '.rank-gauge__pct'), box(page, '.rank-gauge__end--goal')]);
     expect(text.x).toBeGreaterThan(dial.right);
+    expect(goal.right).toBeLessThan(text.x);
+    expect(Math.abs(pct.x + pct.w / 2 - (dial.x + dial.w / 2))).toBeLessThan(1.5);
+    expect(pct.bottom).toBeLessThanOrEqual(dial.bottom + 1);
   });
 });
 
@@ -196,7 +244,7 @@ test('After Hours: three apps with equal height and aligned titles; Blackjack is
     const bj = await page.locator('.bento-tile--blackjack').evaluate((e) => [getComputedStyle(e).backgroundImage, getComputedStyle(e.querySelector('h2')).color]);
     expect(bj[0]).toContain('rgb(31, 92, 66)');
     expect(bj[1]).toBe('rgb(238, 247, 241)');
-    const ring = await page.locator('.rank-ring').evaluate((e) => getComputedStyle(e).backgroundImage);
+    const ring = await page.locator('.rank-gauge').evaluate((e) => getComputedStyle(e).backgroundImage);
     expect(ring).toContain('rgb(18, 26, 50)');
     await expect(page.getByRole('link', { name: /Blackjack Trainer/ })).toHaveAttribute('href', '/blackjack/');
   }
@@ -232,7 +280,7 @@ for (const [width, height] of [[1440, 900], [1024, 768], [768, 1024], [390, 844]
       }
       for (const tile of document.querySelectorAll('.bento-tile')) {
         const t = tile.getBoundingClientRect();
-        for (const el of tile.querySelectorAll('h1,h2,h3,p,dt,dd,strong,.rank-ring__rank span')) {
+        for (const el of tile.querySelectorAll('h1,h2,h3,p,dt,dd,strong,.rank-gauge__rank span,.rank-champ__label')) {
           if (getComputedStyle(el).display === 'none' || el.closest('.visually-hidden')) continue;
           const r = el.getBoundingClientRect();
           if (el.scrollWidth > el.clientWidth + 1 && getComputedStyle(el).display !== 'inline') out.push(`clipped text: ${el.textContent.slice(0, 30)}`);

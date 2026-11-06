@@ -1,6 +1,6 @@
 # Road to Diamond
 
-A compact card in the homepage's right column (below Spotify) that shows the ranked Solo/Duo progress of `DippoBippo#cccc` (NA) from Iron to Diamond IV. The whole card links to the account's OP.GG profile: https://op.gg/lol/summoners/na/DippoBippo-cccc (checked on 2026-11-05; the profile exists on NA).
+A compact card in the homepage's right column (below Spotify) that shows the ranked Solo/Duo progress of `DippoBippo#cccc` (NA) from Iron to Diamond IV on a semicircle gauge, with the Iron and Diamond emblems under its two ends and the last ranked champion played. The whole card links to the account's OP.GG profile: https://op.gg/lol/summoners/na/DippoBippo-cccc (checked on 2026-11-05; the profile exists on NA).
 
 ## Where the rank comes from
 
@@ -11,10 +11,21 @@ The card always says which of these it is showing:
 | `Live from Riot · 12 minutes ago` | The API asked Riot within the refresh window. |
 | `Saved rank · Riot last answered 3 hours ago` | Riot could not be reached (or the key expired), so the API served its last good answer. |
 | `Updated by hand · Nov 5, 2026` | The API is not set up or failed, so the card shows the rank typed into `src/data/league.ts`. |
-| `No ranked games this season yet` | Riot returned no Solo/Duo entry (unranked, placements, or just after a season reset). No marker is drawn. |
+| `No ranked games this season yet` | Riot returned no Solo/Duo entry (unranked, placements, or just after a season reset). The gauge is left empty. |
 | `Rank unavailable right now` | No answer and no manual rank. Nothing is guessed. |
 
 **Status today:** live. A Personal API Key is set in Vercel as `RIOT_API_KEY`, and on 2026-11-05 the API returned **Gold II, 63 LP**. The manual rank in `src/data/league.ts` (Gold II, 27 LP from OP.GG) is only the fallback.
+
+## Last ranked champion
+
+A small square portrait, the label "Last ranked champion" and the name show the champion from the account's most recent **ranked Solo/Duo** match (queue 420). ARAM, normals and Flex are never used: the match list is filtered by queue, and the match itself must report `queueId` 420.
+
+- Match-V5 `GET americas.api.riotgames.com/lol/match/v5/matches/by-puuid/{puuid}/ids?queue=420&start=0&count=1`, then `GET …/lol/match/v5/matches/{matchId}`. The participant whose `puuid` matches the account gives the `championId`. This adds 2 requests per refresh (every 45 minutes), never per visitor.
+- Data Dragon (`ddragon.leagueoflegends.com`, Riot's public static CDN; no key is sent there) supplies the name and the portrait: `api/versions.json` for the current version, then `cdn/{version}/data/en_US/champion.json` to map the id. The id is used because some champions have a different internal name, such as Wukong, which is `MonkeyKing`.
+- The champion is saved with the rank in the same cache row, so visitors get it from the cache like the rank.
+- If the match lookup fails, the rank still updates and the last known champion is kept. If there has never been one (no key, no ranked match, a match without the account), the card shows no champion. The site accepts only portrait URLs on Data Dragon, and hides the portrait if it fails to load.
+
+**Manual fallback (optional, off by default):** set `manualChampion` in `src/data/league.ts`, for example `{ name: 'Wukong', ddragonId: 'MonkeyKing', version: '16.22.1', checkedOn: '2026-11-05' }`. It is shown only when the API has no champion, labelled "Last ranked · set by hand". Leave it `null` while the API works.
 
 ## Settings
 
@@ -43,7 +54,7 @@ progress = steps / steps(Diamond IV)                           Diamond IV = 24 s
 Riot's rules (developer.riotgames.com, checked 2026-11-05):
 
 - **Development keys** expire every 24 hours, and Riot says they must not run a public product. Don't use one here.
-- **Personal API keys** are for "products that are intended for just the developer or a small private community". Riot's own list of acceptable uses includes "to display your own personal stats for your personal website", which is exactly this. Limits are 20 requests per second and 100 per 2 minutes. This setup uses about 1 request every 45 minutes.
+- **Personal API keys** are for "products that are intended for just the developer or a small private community". Riot's own list of acceptable uses includes "to display your own personal stats for your personal website", which is exactly this. Limits are 20 requests per second and 100 per 2 minutes. This setup uses about 3 requests every 45 minutes.
 - **Production keys** are for public apps used by many players. One is not needed here.
 
 Steps:
@@ -70,9 +81,10 @@ Steps:
 3. The function serves the cached rank while it is younger than the refresh window. After that it asks Riot once:
    - Account-V1 `GET americas.api.riotgames.com/riot/account/v1/accounts/by-riot-id/{gameName}/{tagLine}` returns the PUUID. This is cached for good, because it never changes.
    - League-V4 `GET na1.api.riotgames.com/lol/league/v4/entries/by-puuid/{puuid}` returns the entries. The API keeps the `RANKED_SOLO_5x5` one, and returns only tier, division, LP, Riot ID and time.
+   - Match-V5 and Data Dragon supply the last ranked champion (see above).
 4. If Riot fails or rejects the key, the API serves the last cached rank marked `stale`. A Riot 429 starts a cooldown for its `Retry-After`, and Riot is not called again until it ends.
 
-The key is sent only from the server, in the `X-Riot-Token` header. It is never in the browser bundle or in git. The public answer contains no key, PUUID or win/loss record. Nothing scrapes OP.GG; the card only links to it.
+The key is sent only from the server, in the `X-Riot-Token` header. It is never in the browser bundle or in git. The public answer contains no key, PUUID, match ID or win/loss record. Nothing scrapes OP.GG; the card only links to it.
 
 ## Assets and legal
 
