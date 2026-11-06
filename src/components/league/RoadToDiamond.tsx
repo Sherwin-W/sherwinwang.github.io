@@ -1,10 +1,10 @@
-import type { CSSProperties } from 'react';
+import { useState, type CSSProperties } from 'react';
 import { ArrowUpRight } from '@phosphor-icons/react';
 import { motion } from 'framer-motion';
 import { useTileMotion } from '../bento/useTileMotion';
 import defaultConfig, { type LeagueConfig } from '../../data/league';
 import { relativeTime } from '../spotify/api';
-import type { RankView } from '../../league/api';
+import type { Champion, RankView } from '../../league/api';
 import { emblemSrc, lpText, progress, rankName, reached, tierMarks, tierName, type Rank } from '../../league/rank';
 import { useRank } from '../../league/useRank';
 import './league.css';
@@ -30,6 +30,26 @@ export function sourceText(view: RankView): string {
   }
 }
 
+/** A small round portrait of the last champion played, beside the LP on the rank label. Hidden if it fails to load. */
+function ChampionBubble({ champion }: { champion: Champion }) {
+  const [failed, setFailed] = useState<string | null>(null);
+  if (failed === champion.icon) return null;
+  const when = relativeTime(champion.playedAt);
+  return (
+    <img
+      className="rank-rail__champ"
+      src={champion.icon}
+      alt={`Last played: ${champion.name}${when ? `, ${when}` : ''}`}
+      width="18"
+      height="18"
+      loading="lazy"
+      decoding="async"
+      referrerPolicy="no-referrer"
+      onError={() => setFailed(champion.icon)}
+    />
+  );
+}
+
 /**
  * Road to Diamond: a slim ladder from Iron to the goal tier, filled up to the current rank. The whole card
  * links to the account's OP.GG profile. Narrow screens lay the same ladder out horizontally (CSS only).
@@ -46,6 +66,8 @@ export default function RoadToDiamond({ apiBaseUrl, config = defaultConfig, view
   const marks = tierMarks(goal).filter((m) => m.at > 0 && m.at < 1);
   const style = { '--p': p } as CSSProperties;
   const pct = Math.round(p * 100);
+  // Only Riot's answer carries a champion; a hand-entered rank never shows one.
+  const champion = view.source === 'live' || view.source === 'cached' ? view.champion : null;
 
   return (
     <motion.article {...tileMotion} className={`bento-tile bento-tile--interactive rank-rail${done ? ' is-done' : ''}`} data-source={view.source} style={style} aria-busy={view.source === 'loading'}>
@@ -73,7 +95,7 @@ export default function RoadToDiamond({ apiBaseUrl, config = defaultConfig, view
         {rank ? (
           <div className="rank-rail__marker">
             <img className="rank-rail__emblem rank-rail__emblem--now" src={emblemSrc(rank.tier)} alt="" width="96" height="96" />
-            <p className="rank-rail__now"><strong>{rankName(rank)}</strong><span>{lpText(rank)}</span></p>
+            <p className="rank-rail__now"><strong>{rankName(rank)}</strong><span className="rank-rail__sub"><span>{lpText(rank)}</span>{champion && <ChampionBubble champion={champion} />}</span></p>
           </div>
         ) : (
           <p className="rank-rail__empty">{view.source === 'loading' ? 'Loading…' : view.source === 'unranked' ? 'Unranked' : 'No rank to show'}</p>

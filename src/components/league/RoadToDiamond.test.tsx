@@ -47,6 +47,21 @@ describe('Road to Diamond', () => {
     expect((tile().querySelector('.rank-rail__emblem--now') as HTMLImageElement).src).toMatch(/league\/emblems\/master\.webp$/);
   });
 
+  it('shows the last champion played as a small portrait on live or saved data only', () => {
+    const champion = { name: 'Wukong', icon: 'https://ddragon.leagueoflegends.com/cdn/16.22.1/img/champion/MonkeyKing.png', playedAt: new Date(Date.now() - 2 * 3600_000).toISOString() };
+    const rank = { tier: 'GOLD', division: 'II', lp: 63 } as const;
+    show({ source: 'live', rank, asOf: new Date().toISOString(), champion });
+    const img = screen.getByRole('img', { name: 'Last played: Wukong, 2 hours ago' }) as HTMLImageElement;
+    expect(img.src).toBe(champion.icon);
+    expect(img.closest('.rank-rail__now')).toBeTruthy();
+    cleanup();
+    show({ source: 'cached', rank, asOf: '2026-11-05T10:00:00Z', champion: { ...champion, playedAt: null } });
+    expect(screen.getByRole('img', { name: 'Last played: Wukong' })).toBeTruthy();
+    cleanup();
+    show({ source: 'manual', rank, asOf: '2026-11-05', champion });
+    expect(screen.queryByRole('img', { name: /Last played/ })).toBeNull();
+  });
+
   it('shows no rank, marker or progress when unranked or unavailable', () => {
     show({ source: 'unranked', rank: null, asOf: '2026-11-05T10:00:00Z' });
     expect(screen.getByText('Unranked')).toBeTruthy();

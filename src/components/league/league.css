@@ -28,6 +28,8 @@
 .rank-rail .rank-rail__now { position:absolute; top:50%; left:calc(100% + 4px); display:flex; flex-direction:column; align-items:flex-start; gap:1px; max-width:none; margin:0; padding:4px 7px; transform:translateY(-50%); border:1px solid rgba(140,190,255,.28); border-radius:9px; background:rgba(12,18,36,.9); box-shadow:0 4px 14px rgba(0,0,0,.35); color:var(--rr-ink); font-size:.66rem; line-height:1.25; text-align:left; white-space:nowrap; }
 .rank-rail__now strong { font-size:.78rem; font-weight:650; }
 .rank-rail__now span { color:#9fd8ff; font-variant-numeric:tabular-nums; }
+.rank-rail__sub { display:inline-flex; align-items:center; gap:6px; }
+.rank-rail__champ { flex:none; width:18px; height:18px; margin:-2px 0; border-radius:50%; object-fit:cover; border:1px solid rgba(140,190,255,.45); box-shadow:0 1px 4px rgba(0,0,0,.4); background:#0c1224; pointer-events:none; user-select:none; }
 .rank-rail .rank-rail__empty { position:absolute; top:50%; left:calc(44% + 12px); max-width:none; margin:0; transform:translateY(-50%); font-size:.72rem; color:var(--rr-dim); }
 .rank-rail.is-done .rank-rail__track { box-shadow:0 0 14px rgba(94,231,255,.45); }
 

@@ -138,6 +138,25 @@ test.describe('Road to Diamond', () => {
     for (const img of await rail.locator('img').all()) expect(await img.evaluate((e) => e.complete && e.naturalWidth >= 96)).toBe(true);
   });
 
+  test('shows the last champion played as a small portrait beside the LP, inside the card', async ({ page }) => {
+    const icon = 'https://ddragon.leagueoflegends.com/cdn/16.22.1/img/champion/MonkeyKing.png';
+    await page.route('https://ddragon.leagueoflegends.com/**', (r) => r.fulfill({ path: 'public/league/emblems/gold.webp', contentType: 'image/webp' }));
+    await page.unroute('**/api/league/rank');
+    await page.route('**/api/league/rank', (r) => r.fulfill({ status: 200, json: { ...RANK, lastChampion: { name: 'Wukong', icon }, fetchedAt: new Date().toISOString() }, headers: cors }));
+    for (const width of [1440, 390]) {
+      await page.setViewportSize({ width, height: 900 });
+      await page.goto('/');
+      const champ = page.getByRole('img', { name: 'Last played: Wukong' });
+      await expect(champ).toBeVisible();
+      await expect(champ).toHaveAttribute('src', icon);
+      const [c, label, tile] = await Promise.all([box(page, '.rank-rail__champ'), box(page, '.rank-rail__now'), box(page, '.rank-rail')]);
+      expect(c.w).toBeLessThanOrEqual(20);
+      expect(c.x).toBeGreaterThanOrEqual(label.x);
+      expect(c.right).toBeLessThanOrEqual(label.right);
+      expect(label.right).toBeLessThanOrEqual(tile.right);
+    }
+  });
+
   test('falls back to the labelled manual rank when the API is unavailable', async ({ page }) => {
     await page.unroute('**/api/league/rank');
     await page.route('**/api/league/rank', (r) => r.fulfill({ status: 503, json: { error: 'not-configured' }, headers: cors }));
