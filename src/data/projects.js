@@ -3,15 +3,16 @@
 // expand (boolean) marks a tile for in-place expansion. A tile must never use
 // both href and expand. Tiles with neither behavior field are static.
 // Optional media: visual selects a registered illustration; image supplies a sanitized screenshot.
+// section places a tile on the homepage ('professional' or 'after-hours'); without one it is not shown there.
 const projects = [
   {
     id: 'quest-board',
-    title: 'Quest Board',
+    title: 'QuestBoard',
     summary: 'A personal dashboard for tracking job applications, practicing LeetCode, and preparing for interviews.',
     tags: [],
-    size: 'feature',
-    accent: true,
+    size: 'standard',
     area: 'quest',
+    section: 'professional',
     href: 'https://tracker.sherwinwang.dev',
     newTab: true,
     visual: 'quest',
@@ -23,10 +24,12 @@ const projects = [
     tags: [],
     size: 'wide',
     area: 'sketchbook',
+    section: 'after-hours',
     href: import.meta.env.BASE_URL + 'sketchbook/',
     newTab: true,
     visual: 'sketchbook',
   },
+  // Earlier projects, no longer on the homepage. Kept here (with their illustration) for reference.
   {
     id: 'privacy-visualization',
     title: 'Privacy Preserving Visualization Tool',
@@ -62,6 +65,7 @@ const projects = [
     tags: ['Voice', 'Pixel scenes', 'Runs in browser'],
     size: 'standard',
     area: 'mbti',
+    section: 'after-hours',
     href: import.meta.env.BASE_URL + 'mbti/',
     newTab: true,
     visual: 'mbti',
@@ -73,6 +77,7 @@ const projects = [
     tags: ['Practice Blackjack'],
     size: 'standard',
     area: 'blackjack',
+    section: 'after-hours',
     href: import.meta.env.BASE_URL + 'blackjack/',
     newTab: true,
     visual: 'blackjack',

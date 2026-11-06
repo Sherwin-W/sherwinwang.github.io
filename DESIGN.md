@@ -53,24 +53,28 @@ The name is smaller than before: identity is compact, and the Quest Board is the
 
 ## 4. Layout
 
-12 columns, `gap: 16px`, `grid-auto-rows: 140px`, content max 1200px, gutters 24px (16px mobile). Six tiles, no empty cells.
+Homepage redesign (2026-11-05, owner brief). Two sections, each with a small uppercase label: **PROFESSIONAL**, then **AFTER HOURS**. The owner asked for these labels and for the rank rail's labels, so they override the "no uppercase eyebrows" rule below for those places only. Content max 1200px, `gap: 16px`.
 
 ```
-cols:  1  2  3  4 | 5  6  7  8  9 10 11 12
-r1-2:  Identity   | Quest Board (8x4, media-led)
-r3-4:  Sketchbook | (Quest Board continues)
-r5-6:  Privacy diagram (c1-6) | HTML Transformer (c7-12, r5) / Flutter Event Planning App (c7-12, r6)
+Professional (>= 1024px): 10 flexible columns + one fixed 216px rail
+  r1:  Identity (c1-4) | Who am I? (c5-10)      | Road to
+  r2:  Résumé (c1-6)   | QuestBoard (c7-10)     | Diamond (r1-2)
+After Hours (12 columns)
+  r1:  Spotify, full width, horizontal player
+  r2:  Sketchbook (4) | MBTI-Inspired Test (4) | Blackjack Trainer (4), equal height (min 304px)
 ```
 
-- **Identity (c1-4, r1-2):** name, one line ("Computer science student focused on cybersecurity and AI."), GitHub link, and the four interests as small chips (Cybersecurity, Artificial intelligence, Web development, Mobile app development). No portrait, no About paragraph, no Contact or Interests tile.
-- **Quest Board (c5-12, r1-4):** dominant. Top: title, owner description, primary pill "Open Quest Board". Below: the media area (section 5).
-- **Sketchbook (c1-4, r3-4):** plain paper-colored stage (no texture image) with original object art; title and one line at the bottom.
-- **Privacy Preserving Visualization Tool (c1-6, r5-6):** abstract diagram media plus title and one line.
-- **HTML Transformer and Flutter Event Planning App (c7-12, one row each):** wide, short text tiles: title and one line on the left, tag on the right. No media (no assets exist).
-Tablet (640-1023px): 6 columns, auto rows. Identity full width; Quest Board full width; Sketchbook full; Privacy full; HTML 3 + Flutter 3.
-Mobile (< 640px): one column: Identity, Quest Board, Sketchbook, Privacy, HTML, Flutter. Media areas get fixed aspect ratios (Quest 4:3, Sketchbook 4:3, Privacy 16:9) so layout never shifts.
+- **Identity:** name, one-line summary, city (from `src/data/profile.ts`, shown as typed; nothing tracks location), and three 44px icon links (email, GitHub, LinkedIn). The interest chips were removed.
+- **Who am I?:** the owner's text, unedited. The last line, "Current side quest: Diamond.", is set apart by a hairline, and on desktop a faint line runs from it toward the rail.
+- **Road to Diamond:** a dark rail in both themes with a luminous track filling upward from Iron to Diamond IV, Riot's emblems, and the current rank and LP beside the marker. Below 1024px it becomes a horizontal bar after the "Who am I?" card. See `docs/mini-apps/LEAGUE.md`.
+- **Résumé:** a small document sheet (paper surface, dog-ear, section rules) showing education, experience and skills from `src/data/resume.ts`. The card and its "Learn more" button open the PDF viewer (native `<dialog>`). See `docs/RESUME.md`.
+- **QuestBoard:** a standard project card with the labelled illustration scaled down.
+- **After Hours art band:** art areas are a fixed height (120px; Sketchbook stage 144px because that tile has no padding), so all three titles sit on one line. Sketchbook stays cream and Blackjack is felt green in both themes. MBTI is unchanged.
+- **Removed from the homepage:** Privacy Preserving Visualization Tool, HTML Transformer, Flutter Event Planning App. Their data (`section` unset) and illustration code are kept.
 
-**Adding a project** stays a data-only change in `src/data/projects.js`. Fields: `id`, `title`, `summary`, `tags`, `size` (`feature | wide | standard | compact`), `area` (optional named placement for the desktop layout; unnamed tiles flow automatically), `accent`, `links`, `details`, and optional media: `image: { src, alt }` for a real screenshot, or `visual: '<key>'` to use a registered illustration component. A tile with neither renders as a clean text tile. Real screenshots go in `public/projects/` and must contain no private data.
+Tablet (640-1023px): one column, except MBTI and Blackjack side by side. Mobile (< 640px): one column in reading order (identity, about, rank bar, résumé, QuestBoard, Spotify, apps). Spotify reserves its loaded height so nothing below it shifts.
+
+**Adding a project** stays a data-only change in `src/data/projects.js`; set `section: 'professional' | 'after-hours'` to place it. Fields: `id`, `title`, `summary`, `tags`, `section`, `size` (`feature | wide | standard | compact`), `area` (optional named placement for the desktop layout; unnamed tiles flow automatically), `accent`, `links`, `details`, and optional media: `image: { src, alt }` for a real screenshot, or `visual: '<key>'` to use a registered illustration component. A tile with neither renders as a clean text tile. Real screenshots go in `public/projects/` and must contain no private data.
 
 ## 5. Media and honesty rules
 

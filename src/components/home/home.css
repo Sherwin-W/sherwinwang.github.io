@@ -1,0 +1,149 @@
+/* Homepage sections: Professional, then After Hours. Both grids share the bento tile system. */
+.home-page { --quest-ink:#7fd8ff; --resume-paper:#161a23; --resume-fold:#262c3c; }
+:root[data-theme="light"] .home-page { --quest-ink:#1d63c9; --resume-paper:#fffdf8; --resume-fold:#e7e0d1; }
+@media (prefers-color-scheme:light) { :root:not([data-theme="dark"]) .home-page { --quest-ink:#1d63c9; --resume-paper:#fffdf8; --resume-fold:#e7e0d1; } }
+
+.home-section { width:min(100%,1200px); margin:0 auto; }
+.home-section + .home-section { margin-top:44px; }
+.home-section__label { margin:0 0 12px 6px; color:var(--text-dim); font-size:.7rem; font-weight:600; line-height:1.2; letter-spacing:.16em; text-transform:uppercase; }
+.home-page__footer { width:min(100%,1200px); margin:44px auto 0; padding:0 6px; }
+.home-page__footer p { max-width:96ch; margin:0; color:var(--text-dim); font-size:.68rem; line-height:1.5; opacity:.85; }
+
+/* Desktop and laptop: a 10-column body with a fixed, narrow rail for Road to Diamond. */
+@media (min-width:1024px) {
+  .bento-grid--professional { grid-template-columns:repeat(10,minmax(0,1fr)) 216px; grid-auto-rows:auto; }
+  .bento-grid--professional .bento-slot--identity { grid-column:1 / span 4; grid-row:1; }
+  .bento-grid--professional .bento-slot--about { grid-column:5 / span 6; grid-row:1; }
+  .bento-grid--professional .bento-slot--league { grid-column:11; grid-row:1 / span 2; }
+  .bento-grid--professional .bento-slot--resume { grid-column:1 / span 6; grid-row:2; }
+  .bento-grid--professional .bento-slot--quest { grid-column:7 / span 4; grid-row:2; }
+  .bento-grid--after-hours { grid-template-rows:auto minmax(304px,auto); grid-auto-rows:auto; }
+  .bento-grid--after-hours .bento-slot--spotify { grid-column:1 / -1; }
+  .bento-grid--after-hours .bento-slot--sketchbook { grid-column:1 / span 4; }
+  .bento-grid--after-hours .bento-slot--mbti { grid-column:5 / span 4; }
+  .bento-grid--after-hours .bento-slot--blackjack { grid-column:9 / span 4; }
+}
+/* Tablet: one column for reading, the two pixel apps side by side. */
+@media (min-width:640px) and (max-width:1023px) {
+  .home-page .bento-slot { grid-column:1 / -1; }
+  .home-page .bento-grid--after-hours .bento-slot--mbti,.home-page .bento-grid--after-hours .bento-slot--blackjack { grid-column:span 3; }
+}
+
+/* Identity */
+.identity { justify-content:space-between; gap:24px; }
+.identity__text h1 + p { margin-top:var(--space-title-body); }
+.identity__foot { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px 16px; }
+.bento-tile .identity__place { display:inline-flex; align-items:center; gap:6px; margin:0; color:var(--text-dim); font-size:.875rem; }
+.identity__place svg { flex:none; width:16px; height:16px; }
+.identity__links { display:flex; gap:8px; margin:0; padding:0; list-style:none; }
+.identity__icon { display:inline-grid; place-items:center; width:44px; height:44px; border:1px solid var(--edge); border-radius:999px; color:var(--text); text-decoration:none; transition:background-color .18s ease-out,color .18s ease-out,border-color .18s ease-out; }
+.identity__icon svg { width:20px; height:20px; }
+.identity__icon:hover { background-color:var(--glass-strong); border-color:var(--edge-top); color:var(--accent); }
+.identity__icon:focus-visible { outline:2px solid var(--accent); outline-offset:3px; }
+
+/* Who am I? */
+.about { gap:12px; }
+.bento-tile.about p { max-width:64ch; color:var(--text); font-size:.9375rem; line-height:1.65; opacity:.92; }
+.bento-tile.about .about__quest { display:flex; align-items:center; gap:6px; margin-top:auto; padding-top:12px; border-top:1px solid var(--edge); color:var(--text-dim); opacity:1; }
+.about__quest strong { color:var(--quest-ink); font-weight:600; }
+@media (min-width:1024px) {
+  /* A faint line toward the rail beside this card. */
+  .about__quest::after { content:''; flex:1 1 auto; min-width:24px; height:1px; margin-left:6px; background:linear-gradient(to right,transparent,var(--quest-ink)); opacity:.55; }
+}
+
+/* Résumé preview: a small document on the tile. */
+.resume { gap:12px; padding:16px; }
+.resume__sheet { position:relative; display:flex; flex:1 1 auto; flex-direction:column; gap:14px; padding:18px 22px 20px; border:1px solid var(--edge); border-radius:16px; background:var(--resume-paper); box-shadow:inset 0 1px var(--edge-top); }
+.resume__sheet::after { content:''; position:absolute; top:-1px; right:-1px; width:22px; height:22px; border-bottom-left-radius:6px; background:linear-gradient(225deg,var(--surface) 50%,var(--resume-fold) 50%); }
+.resume__head { display:flex; align-items:baseline; justify-content:space-between; gap:12px; padding-bottom:10px; border-bottom:1px solid var(--edge); }
+.resume__kind { display:inline-flex; align-items:center; gap:4px; margin-right:18px; color:var(--text-dim); font-size:.7rem; font-weight:600; letter-spacing:.08em; }
+.resume__kind svg { width:14px; height:14px; }
+.resume__body { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px 28px; }
+.resume__section--skills { grid-column:1 / -1; }
+.resume__section h3 { margin:0 0 8px; padding-bottom:6px; border-bottom:1px solid var(--edge); color:var(--text-dim); font-size:.64rem; font-weight:600; line-height:1.3; letter-spacing:.14em; text-transform:uppercase; }
+.resume__entries { margin:0; padding:0; list-style:none; }
+.resume__entries li { display:flex; flex-direction:column; gap:2px; }
+.resume__entries li + li { margin-top:10px; }
+.resume__row { display:flex; flex-direction:column; gap:1px; }
+.resume__row strong { font-size:.84rem; font-weight:600; line-height:1.35; }
+.resume__when { color:var(--text-dim); font-size:.72rem; font-variant-numeric:tabular-nums; }
+.resume__org { color:var(--text-dim); font-size:.8rem; line-height:1.4; }
+.resume__skills { display:grid; gap:6px; margin:0; }
+.resume__skills div { display:grid; grid-template-columns:96px minmax(0,1fr); gap:10px; }
+.resume__skills dt { font-size:.74rem; font-weight:600; line-height:1.5; }
+.resume__skills dd { margin:0; color:var(--text-dim); font-size:.8rem; line-height:1.5; }
+.resume__more { display:inline-flex; align-self:flex-start; align-items:center; gap:4px; min-height:44px; margin-left:6px; padding:8px 16px; border:1px solid var(--edge); border-radius:999px; background:transparent; color:var(--text); font:inherit; font-size:.875rem; font-weight:500; cursor:pointer; transition:background-color .18s ease-out; }
+.resume__more svg { width:13px; height:13px; }
+.resume__more::after { content:''; position:absolute; inset:0; z-index:3; border-radius:28px; }
+.resume__more:focus-visible { outline:none; }
+.resume:has(.resume__more:focus-visible) { outline:2px solid var(--accent); outline-offset:3px; }
+@media (hover:hover) { .resume:hover .resume__more { background-color:var(--glass-strong); } }
+
+/* QuestBoard: a standard project card with the illustration scaled down. */
+.bento-tile--quest .quest-preview { flex:1 1 auto; height:auto; min-height:150px; }
+.bento-tile--quest .quest-panel { width:clamp(110px,46%,170px); min-height:0; padding:10px 11px; border-radius:14px; }
+.bento-tile--quest .quest-panel__heading { gap:6px; margin-bottom:7px; font-size:.7rem; }
+.bento-tile--quest .quest-panel__heading svg { flex:none; width:14px; height:14px; }
+.bento-tile--quest .quest-skeleton { height:4px; margin-top:6px; }
+.bento-tile--quest .quest-skeleton--bar { height:12px; margin-top:8px; }
+.bento-tile--quest .quest-panel--applications { left:5%; top:8%; }
+.bento-tile--quest .quest-panel--practice { left:27%; top:38%; }
+.bento-tile--quest .quest-panel--interviews { left:auto; right:5%; top:auto; bottom:9%; }
+.bento-tile--quest .quest-preview > .visual-caption { top:10px; right:12px; bottom:auto; left:auto; }
+
+/* After Hours: three apps with the same height, art band and title line. */
+@media (min-width:1024px) {
+  .bento-grid--after-hours :is(.bento-slot--sketchbook,.bento-slot--mbti,.bento-slot--blackjack) > .bento-tile { height:100%; min-height:0; }
+  .bento-grid--after-hours .mb-preview,.bento-grid--after-hours .bj-preview { flex:0 0 120px; min-height:0; }
+  .bento-grid--after-hours .bento-tile--sketchbook .sketchbook-stage { flex:0 0 144px; min-height:0; }
+  .bento-grid--after-hours .bento-tile__content { flex:1 1 auto; }
+}
+.bento-tile--blackjack { border-color:rgba(170,225,190,.2); background:radial-gradient(120% 85% at 50% 0%,#1f5c42 0%,#14432f 46%,#0c2c20 100%); color:#eef7f1; }
+.bento-tile.bento-tile--blackjack p { color:#c3dccd; }
+.bento-tile--blackjack .bento-tags li { border-color:rgba(205,238,218,.32); color:#d3e9dc; }
+.bento-tile--blackjack .bj-preview__table { box-shadow:0 0 0 2px #2c5a45,0 0 0 4px #08180f,0 0 18px 2px rgba(120,230,170,.16); }
+
+/* Spotify: a horizontal player when there is room. The tile keeps its loaded height while loading or
+   after an error, so the apps below never jump. */
+.bento-slot--spotify .spotify { min-height:262px; }
+@media (min-width:768px) {
+  .bento-slot--spotify .spotify { min-height:190px; }
+  .bento-slot--spotify .spotify__body { display:grid; grid-template-columns:minmax(0,1fr) minmax(300px,440px); grid-template-areas:"status player" "track player"; align-items:center; gap:10px 32px; }
+  .bento-slot--spotify .spotify__status { grid-area:status; }
+  .bento-slot--spotify .spotify__track { grid-area:track; }
+  .bento-slot--spotify .spotify__player { grid-area:player; min-width:0; }
+}
+
+/* Résumé viewer (native dialog) */
+.resume-viewer { width:min(920px,calc(100% - 32px)); height:min(92dvh,1120px); max-width:none; max-height:none; margin:auto; padding:0; overflow:hidden; border:1px solid var(--edge); border-radius:20px; background:var(--surface); color:var(--text); box-shadow:inset 0 1px var(--edge-top),var(--shadow-tile-hover); }
+.resume-viewer::backdrop { background:rgba(6,9,16,.62); -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px); }
+:root[data-theme="light"] .resume-viewer::backdrop { background:rgba(40,52,80,.42); }
+.resume-viewer__box { display:flex; flex-direction:column; height:100%; }
+.resume-viewer__bar { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:10px 16px; padding:12px 12px 12px 22px; border-bottom:1px solid var(--edge); }
+.resume-viewer__bar h2 { margin:0; font-size:1.0625rem; font-weight:600; }
+.resume-viewer__actions { display:flex; flex-wrap:wrap; gap:8px; }
+.resume-viewer__btn { display:inline-flex; align-items:center; gap:6px; min-height:44px; padding:8px 15px; border:1px solid var(--edge); border-radius:999px; background:transparent; color:var(--text); font:inherit; font-size:.85rem; font-weight:500; text-decoration:none; cursor:pointer; transition:background-color .18s ease-out; }
+.resume-viewer__btn svg { width:16px; height:16px; }
+.resume-viewer__btn:hover { background-color:var(--glass-strong); }
+.resume-viewer__btn:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+.resume-viewer__close { border-color:transparent; background:var(--accent); color:var(--accent-ink); }
+.resume-viewer__close:hover { background:var(--accent); filter:brightness(1.08); }
+.resume-viewer__pdf { display:block; flex:1 1 auto; width:100%; min-height:0; border:0; background:#fff; }
+.resume-viewer__fallback { display:grid; flex:1 1 auto; place-items:center; padding:32px 24px; text-align:center; }
+.resume-viewer__fallback p { max-width:40ch; margin:0; color:var(--text-dim); line-height:1.55; }
+
+@media (max-width:639px) {
+  .identity__foot { flex-direction:column; align-items:flex-start; }
+  .resume__body { grid-template-columns:minmax(0,1fr); }
+  .resume__sheet { padding:16px 18px; }
+  .resume__skills div { grid-template-columns:minmax(0,1fr); gap:0; }
+  .bento-tile--quest .quest-preview { flex:none; min-height:0; aspect-ratio:16 / 10; }
+  .bento-tile--quest .quest-panel { width:40%; }
+  .bento-tile--quest .quest-panel--practice { left:30%; top:33%; }
+  .bento-tile--quest .quest-panel--interviews { right:4%; bottom:6%; }
+  .bento-slot--mbti .bento-tile,.bento-slot--blackjack .bento-tile { min-height:0; }
+  .resume-viewer { width:100%; height:100dvh; max-height:100dvh; border:0; border-radius:0; }
+  .resume-viewer__bar { padding:max(10px,env(safe-area-inset-top)) 12px 10px 16px; }
+}
+@media (prefers-reduced-motion:reduce) { .identity__icon,.resume__more,.resume-viewer__btn { transition:none; } }
+@media (prefers-reduced-transparency:reduce) { .resume-viewer::backdrop { background:#080b12; -webkit-backdrop-filter:none; backdrop-filter:none; } :root[data-theme="light"] .resume-viewer::backdrop { background:#d5dbe6; } }

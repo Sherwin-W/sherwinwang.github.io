@@ -30,7 +30,7 @@ Values for Vercel: `SUPABASE_URL` is the project URL (`https://<ref>.supabase.co
 ## 4. Vercel project
 
 1. New Project → import this repo → **Root Directory: `server`**, framework: Other. (A separate project from Quest Board; same account is fine.) Optional: Settings → Git → Ignored Build Step `git diff --quiet HEAD^ HEAD -- .` so site-only pushes don't redeploy the API.
-2. Environment variables (Production): `SPOTIFY_CLIENT_ID`, `SPOTIFY_CLIENT_SECRET`, `SPOTIFY_REFRESH_TOKEN`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, optional `ALLOWED_ORIGINS`.
+2. Environment variables (Production): `SPOTIFY_CLIENT_ID`, `SPOTIFY_CLIENT_SECRET`, `SPOTIFY_REFRESH_TOKEN`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, optional `ALLOWED_ORIGINS`. For the Road to Diamond rank, also `RIOT_API_KEY` (see `LEAGUE.md`).
 3. Optionally add a domain such as `api.sherwinwang.dev` (CNAME at Porkbun to the value Vercel shows).
 4. Check: `curl https://<api-host>/api/spotify/last-played` returns track JSON.
 

@@ -223,7 +223,8 @@ test.describe('portfolio thumbnail', () => {
       const [mbti, bj, spotify] = await Promise.all(['.bento-slot--mbti', '.bento-slot--blackjack', '.bento-slot--spotify'].map((s) => box(page, s)));
       expect(Math.abs(mbti.h - bj.h)).toBeLessThanOrEqual(1);
       expect(Math.abs(mbti.y - bj.y)).toBeLessThanOrEqual(1);
-      expect(Math.abs(spotify.y - mbti.y)).toBeLessThanOrEqual(1);
+      // Spotify has its own row above the three app tiles.
+      expect(spotify.y + spotify.h).toBeLessThan(mbti.y);
       const [mArt, bArt] = await Promise.all([box(page, '.mb-preview'), box(page, '.bj-preview')]);
       expect(Math.abs(mArt.h - bArt.h)).toBeLessThanOrEqual(2);
       expect(mArt.h).toBeLessThanOrEqual(120);
@@ -242,6 +243,8 @@ test.describe('portfolio thumbnail', () => {
     const layout = () => page.evaluate(() => ['spotify', 'mbti', 'blackjack'].map((s) => { const e = document.querySelector('.bento-slot--' + s); return [e.offsetLeft, e.offsetTop, e.offsetWidth, e.offsetHeight]; }));
     await page.setViewportSize({ width: 1366, height: 900 });
     await page.goto('/');
+    // Rows now size to their text, so measure after the web font has swapped in.
+    await page.evaluate(() => document.fonts.ready);
     const before = await layout();
     await page.waitForTimeout(1500);
     expect(await layout()).toEqual(before);
