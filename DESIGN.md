@@ -53,26 +53,26 @@ The name is smaller than before: identity is compact, and the Quest Board is the
 
 ## 4. Layout
 
-Homepage redesign (2026-11-05, owner brief). Two sections, each with a small uppercase label: **PROFESSIONAL**, then **AFTER HOURS**. The owner asked for these labels and for the rank rail's labels, so they override the "no uppercase eyebrows" rule below for those places only. Content max 1200px, `gap: 16px`.
+Homepage redesign (2026-11-05, owner brief). Two sections, each with a small uppercase label: **PROFESSIONAL**, then **AFTER HOURS**. The owner asked for these labels and for the Road to Diamond and Spotify card labels, so they override the "no uppercase eyebrows" rule below for those places only. Content max 1200px, `gap: 16px`.
 
 ```
-Professional (>= 1024px): 10 flexible columns + one fixed 216px rail
-  r1:  Identity (c1-4) | Who am I? (c5-10)      | Road to
-  r2:  Résumé (c1-6)   | QuestBoard (c7-10)     | Diamond (r1-2)
+Professional (>= 1024px): 10 flexible columns + one narrow column (clamp(232px, 20vw, 272px))
+  r1:  Identity (c1-4) | Who am I? (c5-10)      | Spotify
+  r2:  Résumé (c1-6)   | QuestBoard (c7-10)     | Road to Diamond
 After Hours (12 columns)
-  r1:  Spotify, full width, horizontal player
-  r2:  Sketchbook (4) | MBTI-Inspired Test (4) | Blackjack Trainer (4), equal height (min 304px)
+  r1:  Sketchbook (4) | MBTI-Inspired Test (4) | Blackjack Trainer (4), equal height (min 304px)
 ```
 
 - **Identity:** name, one-line summary, city (from `src/data/profile.ts`, shown as typed; nothing tracks location), and three 44px icon links (email, GitHub, LinkedIn). The interest chips were removed.
-- **Who am I?:** the owner's text, unedited. The last line, "Current side quest: Diamond.", is set apart by a hairline, and on desktop a faint line runs from it toward the rail.
-- **Road to Diamond:** a dark rail in both themes with a luminous track filling upward from Iron to Diamond IV, Riot's emblems, and the current rank and LP beside the marker. Below 1024px it becomes a horizontal bar after the "Who am I?" card. See `docs/mini-apps/LEAGUE.md`.
+- **Who am I?:** the owner's text, unedited. The last line, "Current side quest: Diamond.", is set apart by a hairline.
+- **Spotify (compact):** the only Spotify player on the page. Status, small album art, title (two lines, then an ellipsis), artist (one line), a play button and a Spotify link. Play swaps the details for Spotify's official compact embed, unaltered, with a "Close player" button. Layout follows the card's own width (container queries): stacked in the desktop column, art beside the text from 260px, controls on the right from 420px.
+- **Road to Diamond:** a dark card in both themes. A ring fills from Iron IV (empty) to Diamond IV (full) using the ladder formula in `src/league/rank.ts`, with small ticks where each tier begins and the current emblem inside. Below it (or beside it when the card is at least 300px wide): rank, LP, "61% to Diamond IV", and where the data came from. See `docs/mini-apps/LEAGUE.md`.
 - **Résumé:** a small document sheet (paper surface, dog-ear, section rules) showing education, experience and skills from `src/data/resume.ts`. The card and its "Learn more" button open the PDF viewer (native `<dialog>`). See `docs/RESUME.md`.
 - **QuestBoard:** a standard project card with the labelled illustration scaled down.
 - **After Hours art band:** art areas are a fixed height (120px; Sketchbook stage 144px because that tile has no padding), so all three titles sit on one line. Sketchbook stays cream and Blackjack is felt green in both themes. MBTI is unchanged.
 - **Removed from the homepage:** Privacy Preserving Visualization Tool, HTML Transformer, Flutter Event Planning App. Their data (`section` unset) and illustration code are kept.
 
-Tablet (640-1023px): one column, except MBTI and Blackjack side by side. Mobile (< 640px): one column in reading order (identity, about, rank bar, résumé, QuestBoard, Spotify, apps). Spotify reserves its loaded height so nothing below it shifts.
+Tablet (640-1023px): one column, except Spotify beside Road to Diamond, and MBTI beside Blackjack. Mobile (< 640px): one column in reading order (identity, about, Spotify, Road to Diamond, résumé, QuestBoard, apps). Below 1024px Spotify reserves its loaded height so nothing below it shifts.
 
 **Adding a project** stays a data-only change in `src/data/projects.js`; set `section: 'professional' | 'after-hours'` to place it. Fields: `id`, `title`, `summary`, `tags`, `section`, `size` (`feature | wide | standard | compact`), `area` (optional named placement for the desktop layout; unnamed tiles flow automatically), `accent`, `links`, `details`, and optional media: `image: { src, alt }` for a real screenshot, or `visual: '<key>'` to use a registered illustration component. A tile with neither renders as a clean text tile. Real screenshots go in `public/projects/` and must contain no private data.
 

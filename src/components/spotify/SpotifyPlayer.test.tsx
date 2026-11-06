@@ -29,76 +29,46 @@ function fakeApi() {
   return { api, controller, fire };
 }
 
-describe('<SpotifyPlayer> strip', () => {
-  it('at rest: play, thin bar, time, Spotify link and menu — no art, no title, no iframe', () => {
-    render(<SpotifyPlayer track={track} />);
-    expect(screen.getByRole('button', { name: 'Play Yellow with Spotify' })).toBeTruthy();
-    expect(screen.getByRole('progressbar', { name: 'Playback position' }).getAttribute('aria-valuetext')).toBe('0:00 of 4:27');
-    expect(screen.getByText('0:00 / 4:27')).toBeTruthy();
-    expect(screen.getByRole('link', { name: 'Open in Spotify (new tab)' }).getAttribute('href')).toBe(track.spotifyUrl);
-    expect(screen.getByRole('button', { name: 'More options' })).toBeTruthy();
-    expect(document.querySelector('img')).toBeNull();
-    expect(screen.queryByText('Yellow')).toBeNull();
+const details = <p>Track details</p>;
+
+describe('<SpotifyPlayer>', () => {
+  it('at rest: the track details, then only play and a Spotify link to the song, no iframe', () => {
+    render(<SpotifyPlayer track={track}>{details}</SpotifyPlayer>);
+    expect(screen.getByText('Track details')).toBeTruthy();
+    const group = screen.getByRole('group', { name: 'Playback' });
+    expect([...group.querySelectorAll('button, a')].map((e) => e.getAttribute('aria-label'))).toEqual(['Play Yellow with Spotify', 'Open Yellow in Spotify (new tab)']);
+    const link = screen.getByRole('link', { name: 'Open Yellow in Spotify (new tab)' });
+    expect(link.getAttribute('href')).toBe(track.spotifyUrl);
+    expect(link.getAttribute('rel')).toBe('noopener noreferrer');
+    expect(screen.queryByRole('progressbar')).toBeNull();
     expect(document.querySelector('iframe')).toBeNull();
   });
 
-  it('play loads the official embed (unaltered, visible), starts it, and the strip reflects real progress after hiding it', async () => {
+  it('play swaps the details for the official embed (unaltered), starts it, and close returns focus to play', async () => {
     const { api, controller, fire } = fakeApi();
     vi.spyOn(iframeApi, 'loadIFrameApi').mockResolvedValue(api as unknown as iframeApi.IFrameAPI);
-    render(<SpotifyPlayer track={track} />);
+    render(<SpotifyPlayer track={track}>{details}</SpotifyPlayer>);
     await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Play Yellow with Spotify' })); });
     expect(api.createController).toHaveBeenCalledWith(expect.any(HTMLElement), { uri: `spotify:track:${ID}`, width: '100%', height: 80 }, expect.any(Function));
-    const frame = document.querySelector('iframe')!;
-    expect(frame.src).toContain(`/embed/track/${ID}`);
+    expect(document.querySelector('iframe')!.src).toContain(`/embed/track/${ID}`);
+    // The embed already shows the art, title and artist, so ours are not shown twice.
+    expect(screen.queryByText('Track details')).toBeNull();
     act(() => fire('ready'));
     expect(controller.play).toHaveBeenCalledTimes(1);
-    expect(screen.getByText('Spotify player')).toBeTruthy();
-    act(() => fire('playback_update', { data: { isPaused: false, isBuffering: false, duration: 30000, position: 12000 } }));
-    fireEvent.click(screen.getByRole('button', { name: /Hide player/ }));
+    expect(screen.getByText('Spotify player open')).toBeTruthy();
+    vi.useFakeTimers();
+    fireEvent.click(screen.getByRole('button', { name: /Close player/ }));
+    act(() => { vi.runAllTimers(); });
+    vi.useRealTimers();
     expect(controller.destroy).toHaveBeenCalled();
-    expect(screen.getByText('0:12 / 0:30')).toBeTruthy(); // real position and the length Spotify actually played
+    expect(screen.getByText('Track details')).toBeTruthy();
+    expect(document.activeElement).toBe(screen.getByRole('button', { name: 'Play Yellow with Spotify' }));
   });
 
   it('falls back to the plain official embed when the IFrame API cannot load', async () => {
     vi.spyOn(iframeApi, 'loadIFrameApi').mockRejectedValue(new Error('blocked'));
-    render(<SpotifyPlayer track={track} />);
+    render(<SpotifyPlayer track={track}>{details}</SpotifyPlayer>);
     await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Play Yellow with Spotify' })); });
     expect(screen.getByTitle('Spotify player: Yellow').getAttribute('src')).toContain(`/embed/track/${ID}`);
-  });
-});
-
-describe('options menu', () => {
-  it('opens from the keyboard, moves with arrows, closes with Escape and returns focus', () => {
-    render(<SpotifyPlayer track={track} />);
-    const more = screen.getByRole('button', { name: 'More options' });
-    fireEvent.click(more);
-    const items = screen.getAllByRole('menuitem');
-    expect(items.map((i) => i.textContent)).toEqual(['Open in the Spotify app', 'Open in the web player', 'Add to a playlist or queue in Spotify…', 'Copy song link']);
-    expect(document.activeElement).toBe(items[0]);
-    fireEvent.keyDown(items[0], { key: 'ArrowDown' });
-    expect(document.activeElement).toBe(items[1]);
-    fireEvent.keyDown(items[1], { key: 'ArrowUp' });
-    fireEvent.keyDown(items[0], { key: 'ArrowUp' });
-    expect(document.activeElement).toBe(items[3]);
-    fireEvent.keyDown(items[3], { key: 'Escape' });
-    expect(screen.queryByRole('menu')).toBeNull();
-    expect(document.activeElement).toBe(more);
-  });
-
-  it('only offers actions that go through Spotify itself (nothing acts on the site owner’s account)', () => {
-    render(<SpotifyPlayer track={track} />);
-    fireEvent.click(screen.getByRole('button', { name: 'More options' }));
-    const hrefs = screen.getAllByRole('menuitem').map((i) => i.getAttribute('href')).filter(Boolean);
-    expect(hrefs).toEqual([`spotify:track:${ID}`, track.spotifyUrl, track.spotifyUrl]);
-  });
-
-  it('copies the song link', async () => {
-    const writeText = vi.fn(async () => undefined);
-    Object.assign(navigator, { clipboard: { writeText } });
-    render(<SpotifyPlayer track={track} />);
-    fireEvent.click(screen.getByRole('button', { name: 'More options' }));
-    await act(async () => { fireEvent.click(screen.getByRole('menuitem', { name: 'Copy song link' })); });
-    expect(writeText).toHaveBeenCalledWith(track.spotifyUrl);
-    expect(screen.getByText('Song link copied')).toBeTruthy();
   });
 });

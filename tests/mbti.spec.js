@@ -220,11 +220,9 @@ test.describe('portfolio thumbnail', () => {
       await page.emulateMedia({ colorScheme: scheme, reducedMotion: 'reduce' });
       await page.setViewportSize({ width: 1366, height: 900 });
       await page.goto('/');
-      const [mbti, bj, spotify] = await Promise.all(['.bento-slot--mbti', '.bento-slot--blackjack', '.bento-slot--spotify'].map((s) => box(page, s)));
+      const [mbti, bj] = await Promise.all(['.bento-slot--mbti', '.bento-slot--blackjack'].map((s) => box(page, s)));
       expect(Math.abs(mbti.h - bj.h)).toBeLessThanOrEqual(1);
       expect(Math.abs(mbti.y - bj.y)).toBeLessThanOrEqual(1);
-      // Spotify has its own row above the three app tiles.
-      expect(spotify.y + spotify.h).toBeLessThan(mbti.y);
       const [mArt, bArt] = await Promise.all([box(page, '.mb-preview'), box(page, '.bj-preview')]);
       expect(Math.abs(mArt.h - bArt.h)).toBeLessThanOrEqual(2);
       expect(mArt.h).toBeLessThanOrEqual(120);
@@ -240,7 +238,7 @@ test.describe('portfolio thumbnail', () => {
 
   test('the thumbnail does not shift the grid after it renders', async ({ page }) => {
     // Layout boxes (offset*), which ignore the tiles' entrance animation transform.
-    const layout = () => page.evaluate(() => ['spotify', 'mbti', 'blackjack'].map((s) => { const e = document.querySelector('.bento-slot--' + s); return [e.offsetLeft, e.offsetTop, e.offsetWidth, e.offsetHeight]; }));
+    const layout = () => page.evaluate(() => ['sketchbook', 'mbti', 'blackjack'].map((s) => { const e = document.querySelector('.bento-slot--' + s); return [e.offsetLeft, e.offsetTop, e.offsetWidth, e.offsetHeight]; }));
     await page.setViewportSize({ width: 1366, height: 900 });
     await page.goto('/');
     // Rows now size to their text, so measure after the web font has swapped in.

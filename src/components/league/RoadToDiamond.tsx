@@ -1,11 +1,11 @@
-import { useState, type CSSProperties } from 'react';
+import type { CSSProperties } from 'react';
 import { ArrowUpRight } from '@phosphor-icons/react';
 import { motion } from 'framer-motion';
 import { useTileMotion } from '../bento/useTileMotion';
 import defaultConfig, { type LeagueConfig } from '../../data/league';
 import { relativeTime } from '../spotify/api';
-import type { Champion, RankView } from '../../league/api';
-import { emblemSrc, lpText, progress, rankName, reached, tierMarks, tierName, type Rank } from '../../league/rank';
+import type { RankView } from '../../league/api';
+import { emblemSrc, lpText, progress, rankName, reached, tierMarks, type Rank } from '../../league/rank';
 import { useRank } from '../../league/useRank';
 import './league.css';
 
@@ -30,29 +30,10 @@ export function sourceText(view: RankView): string {
   }
 }
 
-/** A small round portrait of the last champion played, beside the LP on the rank label. Hidden if it fails to load. */
-function ChampionBubble({ champion }: { champion: Champion }) {
-  const [failed, setFailed] = useState<string | null>(null);
-  if (failed === champion.icon) return null;
-  const when = relativeTime(champion.playedAt);
-  return (
-    <img
-      className="rank-rail__champ"
-      src={champion.icon}
-      alt={`Last played: ${champion.name}${when ? `, ${when}` : ''}`}
-      width="18"
-      height="18"
-      loading="lazy"
-      decoding="async"
-      referrerPolicy="no-referrer"
-      onError={() => setFailed(champion.icon)}
-    />
-  );
-}
-
 /**
- * Road to Diamond: a slim ladder from Iron to the goal tier, filled up to the current rank. The whole card
- * links to the account's OP.GG profile. Narrow screens lay the same ladder out horizontally (CSS only).
+ * Road to Diamond: the current emblem inside a ring that fills from Iron IV (empty) to the goal (full), using the
+ * same tested ladder formula as before. Small ticks on the ring mark where each tier begins. The whole card links
+ * to the account's OP.GG profile.
  */
 export default function RoadToDiamond({ apiBaseUrl, config = defaultConfig, view: fixed }: Props) {
   const tileMotion = useTileMotion();
@@ -66,47 +47,45 @@ export default function RoadToDiamond({ apiBaseUrl, config = defaultConfig, view
   const marks = tierMarks(goal).filter((m) => m.at > 0 && m.at < 1);
   const style = { '--p': p } as CSSProperties;
   const pct = Math.round(p * 100);
-  // Only Riot's answer carries a champion; a hand-entered rank never shows one.
-  const champion = view.source === 'live' || view.source === 'cached' ? view.champion : null;
 
   return (
-    <motion.article {...tileMotion} className={`bento-tile bento-tile--interactive rank-rail${done ? ' is-done' : ''}`} data-source={view.source} style={style} aria-busy={view.source === 'loading'}>
-      <div className="rank-rail__top">
-        <h2 className="rank-rail__title">
-          <a className="bento-tile__link" href={config.opggUrl} target="_blank" rel="noopener noreferrer">
-            Road to {tierName(goal.tier)}<ArrowUpRight aria-hidden="true" weight="regular" />
-            <span className="visually-hidden"> on OP.GG, {config.riotId} (opens in a new tab)</span>
-          </a>
-        </h2>
-        <img className="rank-rail__emblem rank-rail__emblem--goal" src={emblemSrc(goal.tier)} alt="" width="96" height="96" />
-        <span className="rank-rail__cap">{done ? 'Goal reached' : 'Goal'}<span className="rank-rail__cap-tier"> · {goalName}</span></span>
-      </div>
+    <motion.article {...tileMotion} className={`bento-tile bento-tile--interactive rank-ring${done ? ' is-done' : ''}`} data-source={view.source} style={style} aria-busy={view.source === 'loading'}>
+      <h2 className="rank-ring__title">
+        <a className="bento-tile__link" href={config.opggUrl} target="_blank" rel="noopener noreferrer">
+          Road to Diamond<ArrowUpRight aria-hidden="true" weight="regular" />
+          <span className="visually-hidden"> on OP.GG, {config.riotId} (opens in a new tab)</span>
+        </a>
+      </h2>
 
-      <div className="rank-rail__ladder">
-        <ol className="rank-rail__marks" aria-hidden="true">
-          {marks.map((m) => <li key={m.tier} style={{ '--at': m.at } as CSSProperties}><span>{tierName(m.tier)}</span></li>)}
-        </ol>
+      <div className="rank-ring__main">
         <div
-          className="rank-rail__track"
+          className="rank-ring__dial"
           {...(rank ? { role: 'progressbar', 'aria-label': `Progress to ${goalName}`, 'aria-valuemin': 0, 'aria-valuemax': 100, 'aria-valuenow': pct, 'aria-valuetext': `${rankName(rank)}, ${lpText(rank)}: ${done ? 'goal reached' : `${pct}% of the way from Iron IV`}` } : {})}
         >
-          <span className="rank-rail__fill" />
+          <svg className="rank-ring__svg" viewBox="0 0 120 120" aria-hidden="true" focusable="false">
+            <defs>
+              <linearGradient id="rank-ring-fill" x1="0" y1="1" x2="1" y2="0">
+                <stop offset="0" stopColor="#3a5bd9" />
+                <stop offset=".55" stopColor="#6f9bff" />
+                <stop offset="1" stopColor="#5ee7ff" />
+              </linearGradient>
+            </defs>
+            <circle className="rank-ring__track" cx="60" cy="60" r="52" />
+            <circle className="rank-ring__fill" cx="60" cy="60" r="52" pathLength={100} stroke="url(#rank-ring-fill)" />
+            {marks.map((m) => <line key={m.tier} className="rank-ring__tick" x1="60" y1="3" x2="60" y2="11" transform={`rotate(${m.at * 360} 60 60)`} />)}
+          </svg>
+          {rank && <img className="rank-ring__emblem" src={emblemSrc(rank.tier)} alt="" width="96" height="96" />}
         </div>
-        {rank ? (
-          <div className="rank-rail__marker">
-            <img className="rank-rail__emblem rank-rail__emblem--now" src={emblemSrc(rank.tier)} alt="" width="96" height="96" />
-            <p className="rank-rail__now"><strong>{rankName(rank)}</strong><span className="rank-rail__sub"><span>{lpText(rank)}</span>{champion && <ChampionBubble champion={champion} />}</span></p>
-          </div>
-        ) : (
-          <p className="rank-rail__empty">{view.source === 'loading' ? 'Loading…' : view.source === 'unranked' ? 'Unranked' : 'No rank to show'}</p>
-        )}
-      </div>
 
-      <div className="rank-rail__bottom">
-        <img className="rank-rail__emblem rank-rail__emblem--start" src={emblemSrc('IRON')} alt="" width="96" height="96" />
-        <span className="rank-rail__cap">Start<span className="rank-rail__cap-tier"> · Iron</span></span>
-        <span className="rank-rail__id">{config.riotId}</span>
-        <p className="rank-rail__source" role="status">{sourceText(view)}</p>
+        <div className="rank-ring__text">
+          {rank ? (
+            <p className="rank-ring__rank"><strong>{rankName(rank)}</strong><span>{lpText(rank)}</span></p>
+          ) : (
+            <p className="rank-ring__rank rank-ring__rank--empty"><strong>{view.source === 'loading' ? 'Loading…' : view.source === 'unranked' ? 'Unranked' : 'No rank to show'}</strong></p>
+          )}
+          <p className="rank-ring__goal">{done ? `Goal reached · ${goalName}` : rank ? `${pct}% to ${goalName}` : `Goal · ${goalName}`}</p>
+          <p className="rank-ring__source" role="status">{sourceText(view)}</p>
+        </div>
       </div>
     </motion.article>
   );

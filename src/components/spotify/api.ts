@@ -74,13 +74,6 @@ export function unverified(d: LastPlayedData): LastPlayedData {
   return { ...d, isCurrentlyPlaying: false, playedAt: d.playedAt ?? (d.isCurrentlyPlaying && d.updatedAt ? d.updatedAt : null), stale: true };
 }
 
-/** 266773 -> "4:27". */
-export function clock(ms: number): string {
-  const total = Math.max(0, Math.round(ms / 1000));
-  const h = Math.floor(total / 3600), m = Math.floor((total % 3600) / 60), sec = total % 60;
-  return h ? `${h}:${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}` : `${m}:${String(sec).padStart(2, '0')}`;
-}
-
 export function relativeTime(iso: string | null, now: number = Date.now()): string {
   if (!iso) return '';
   const minutes = Math.max(0, Math.round((now - Date.parse(iso)) / 60000));

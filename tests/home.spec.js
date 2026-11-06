@@ -22,8 +22,10 @@ test('Professional comes before After Hours, with the cards in reading order', a
   await expect(after.getByText('After Hours', { exact: true })).toBeVisible();
   expect((await box(page, '.bento-grid--professional')).bottom).toBeLessThan((await box(page, '.bento-grid--after-hours')).y);
   const order = (region) => region.locator('.bento-slot').evaluateAll((els) => els.map((e) => e.className.match(/bento-slot--(\S+)/)[1]));
-  expect(await order(pro)).toEqual(['identity', 'about', 'league', 'resume', 'quest']);
-  expect(await order(after)).toEqual(['spotify', 'sketchbook', 'mbti', 'blackjack']);
+  expect(await order(pro)).toEqual(['identity', 'about', 'spotify', 'league', 'resume', 'quest']);
+  expect(await order(after)).toEqual(['sketchbook', 'mbti', 'blackjack']);
+  // One Spotify player on the page.
+  await expect(page.locator('[data-spotify-tile]')).toHaveCount(1);
   for (const gone of ['Privacy Preserving Visualization Tool', 'HTML Transformer', 'Flutter Event Planning App']) await expect(page.getByText(gone)).toHaveCount(0);
 });
 
@@ -39,13 +41,13 @@ test('contact icons are labelled, keyboard reachable, and open mail or a safe ne
     await expect(link).toHaveAttribute('rel', 'noopener noreferrer');
   }
   await expect(page.getByText('Costa Mesa, CA')).toBeVisible();
-  // Tab order: theme toggle, the three icons, the rank card, the résumé, QuestBoard.
+  // Tab order: theme toggle, the three icons, Spotify, the rank card, the résumé, QuestBoard.
   const stops = [];
-  for (let i = 0; i < 7; i += 1) {
+  for (let i = 0; i < 9; i += 1) {
     await page.keyboard.press('Tab');
     stops.push(await page.evaluate(() => document.activeElement.getAttribute('aria-label') || document.activeElement.textContent.trim()));
   }
-  expect(stops).toEqual(['Switch to light theme', 'Email Sherwin', 'GitHub (opens in a new tab)', 'LinkedIn (opens in a new tab)', 'Road to Diamond on OP.GG, DippoBippo#cccc (opens in a new tab)', 'Learn more: open the full résumé', 'QuestBoard  (opens in a new tab)']);
+  expect(stops).toEqual(['Switch to light theme', 'Email Sherwin', 'GitHub (opens in a new tab)', 'LinkedIn (opens in a new tab)', 'Play Yellow with Spotify', 'Open Yellow in Spotify (new tab)', 'Road to Diamond on OP.GG, DippoBippo#cccc (opens in a new tab)', 'Learn more: open the full résumé', 'QuestBoard  (opens in a new tab)']);
   for (const a of await contact.getByRole('link').all()) {
     const b = await a.boundingBox();
     expect(b.width).toBeGreaterThanOrEqual(44);
@@ -113,102 +115,89 @@ test('the résumé downloads, opens in a new tab, and has a fallback where PDFs 
 });
 
 test.describe('Road to Diamond', () => {
-  test('shows the live rank on a tall, narrow rail that opens OP.GG', async ({ page }) => {
+  test('shows the live rank in a compact ring card under Spotify that opens OP.GG', async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto('/');
-    const rail = page.locator('.rank-rail');
-    await expect(rail.getByText('Platinum III')).toBeVisible();
-    await expect(rail.getByText('41 LP')).toBeVisible();
-    await expect(rail.getByText(/^Live from Riot/)).toBeVisible();
-    await expect(rail).toHaveAttribute('data-source', 'live');
+    const card = page.locator('.rank-ring');
+    await expect(card.getByText('Platinum III')).toBeVisible();
+    await expect(card.getByText('41 LP')).toBeVisible();
+    await expect(card.getByText(/^Live from Riot/)).toBeVisible();
+    await expect(card).toHaveAttribute('data-source', 'live');
     const link = page.getByRole('link', { name: /Road to Diamond/ });
     await expect(link).toHaveAttribute('href', 'https://op.gg/lol/summoners/na/DippoBippo-cccc');
+    await expect(link).toHaveAttribute('target', '_blank');
     await expect(link).toHaveAttribute('rel', 'noopener noreferrer');
-    const r = await box(page, '.bento-slot--league');
-    expect(r.w).toBeLessThan(240);
-    expect(r.h).toBeGreaterThan(r.w * 3);
-    // It spans both professional rows, beside the about card.
-    expect(Math.abs(r.y - (await box(page, '.bento-slot--about')).y)).toBeLessThanOrEqual(1);
-    expect(Math.abs(r.bottom - (await box(page, '.bento-slot--resume')).bottom)).toBeLessThanOrEqual(1);
-    // Marker height matches progress: Platinum III 41 LP is (4*4 + 1 + .41) / 24 of the way up.
-    const [track, marker] = await Promise.all([box(page, '.rank-rail__track'), box(page, '.rank-rail__marker')]);
-    const expected = (17.41 / 24);
-    expect(Math.abs((track.bottom - (marker.y + marker.h / 2)) / track.h - expected)).toBeLessThan(0.03);
-    // Riot's own emblems, loaded and not blurry placeholders.
-    for (const img of await rail.locator('img').all()) expect(await img.evaluate((e) => e.complete && e.naturalWidth >= 96)).toBe(true);
-  });
-
-  test('shows the last champion played as a small portrait beside the LP, inside the card', async ({ page }) => {
-    const icon = 'https://ddragon.leagueoflegends.com/cdn/16.22.1/img/champion/MonkeyKing.png';
-    await page.route('https://ddragon.leagueoflegends.com/**', (r) => r.fulfill({ path: 'public/league/emblems/gold.webp', contentType: 'image/webp' }));
-    await page.unroute('**/api/league/rank');
-    await page.route('**/api/league/rank', (r) => r.fulfill({ status: 200, json: { ...RANK, lastChampion: { name: 'Wukong', icon }, fetchedAt: new Date().toISOString() }, headers: cors }));
-    for (const width of [1440, 390]) {
-      await page.setViewportSize({ width, height: 900 });
-      await page.goto('/');
-      const champ = page.getByRole('img', { name: 'Last played: Wukong' });
-      await expect(champ).toBeVisible();
-      await expect(champ).toHaveAttribute('src', icon);
-      const [c, label, tile] = await Promise.all([box(page, '.rank-rail__champ'), box(page, '.rank-rail__now'), box(page, '.rank-rail')]);
-      expect(c.w).toBeLessThanOrEqual(20);
-      expect(c.x).toBeGreaterThanOrEqual(label.x);
-      expect(c.right).toBeLessThanOrEqual(label.right);
-      expect(label.right).toBeLessThanOrEqual(tile.right);
-    }
+    // The right column: Spotify beside "Who am I?", Road to Diamond beside the résumé, each about half of it.
+    const [spotify, league, about, resume] = await Promise.all(['spotify', 'league', 'about', 'resume'].map((k) => box(page, `.bento-slot--${k}`)));
+    expect(Math.abs(spotify.x - league.x)).toBeLessThanOrEqual(1);
+    expect(Math.abs(spotify.w - league.w)).toBeLessThanOrEqual(1);
+    expect(spotify.w).toBeLessThan(300);
+    expect(Math.abs(spotify.y - about.y)).toBeLessThanOrEqual(1);
+    expect(Math.abs(spotify.bottom - about.bottom)).toBeLessThanOrEqual(1);
+    expect(Math.abs(league.y - resume.y)).toBeLessThanOrEqual(1);
+    expect(Math.abs(league.bottom - resume.bottom)).toBeLessThanOrEqual(1);
+    for (const r of [spotify, league]) expect(r.h).toBeLessThan(460);
+    // The ring is filled to the overall ladder position: Platinum III 41 LP is (4*4 + 1 + .41) / 24 = 73%.
+    await expect(card.getByRole('progressbar', { name: 'Progress to Diamond IV' })).toHaveAttribute('aria-valuenow', '73');
+    await expect(card.getByText('73% to Diamond IV')).toBeVisible();
+    const offset = await page.locator('.rank-ring__fill').evaluate((e) => parseFloat(getComputedStyle(e).strokeDashoffset.replace(/^calc\(/, '')));
+    expect(Math.abs(offset - (100 - (17.41 / 24) * 100))).toBeLessThan(0.5);
+    // No tall Iron-to-Diamond track any more, and no champion portrait.
+    await expect(page.locator('.rank-rail, .rank-rail__track')).toHaveCount(0);
+    await expect(card.locator('img')).toHaveCount(1);
+    expect(await card.locator('img').evaluate((e) => e.complete && e.naturalWidth >= 96)).toBe(true);
   });
 
   test('falls back to the labelled manual rank when the API is unavailable', async ({ page }) => {
     await page.unroute('**/api/league/rank');
     await page.route('**/api/league/rank', (r) => r.fulfill({ status: 503, json: { error: 'not-configured' }, headers: cors }));
     await page.goto('/');
-    await expect(page.locator('.rank-rail')).toHaveAttribute('data-source', 'manual');
-    await expect(page.locator('.rank-rail').getByText(/^Updated by hand · /)).toBeVisible();
+    await expect(page.locator('.rank-ring')).toHaveAttribute('data-source', 'manual');
+    await expect(page.locator('.rank-ring').getByText(/^Updated by hand · /)).toBeVisible();
   });
 
-  test('shows unranked without a marker, and a saved rank as saved', async ({ page }) => {
+  test('shows unranked with an empty ring, and a saved rank as saved', async ({ page }) => {
     await page.unroute('**/api/league/rank');
     await page.route('**/api/league/rank', (r) => r.fulfill({ status: 200, json: { riotId: 'DippoBippo#cccc', queue: 'RANKED_SOLO_5x5', ranked: false, fetchedAt: new Date().toISOString(), stale: false }, headers: cors }));
     await page.goto('/');
-    await expect(page.locator('.rank-rail').getByText('Unranked')).toBeVisible();
-    await expect(page.locator('.rank-rail__marker')).toHaveCount(0);
+    await expect(page.locator('.rank-ring').getByText('Unranked')).toBeVisible();
+    await expect(page.locator('.rank-ring__emblem')).toHaveCount(0);
+    await expect(page.locator('.rank-ring').getByRole('progressbar')).toHaveCount(0);
     await page.unroute('**/api/league/rank');
     await page.route('**/api/league/rank', (r) => r.fulfill({ status: 200, json: { ...RANK, fetchedAt: new Date(Date.now() - 3 * 3600e3).toISOString(), stale: true }, headers: cors }));
     await page.reload();
-    await expect(page.locator('.rank-rail').getByText('Saved rank · Riot last answered 3 hours ago')).toBeVisible();
+    await expect(page.locator('.rank-ring').getByText('Saved rank · Riot last answered 3 hours ago')).toBeVisible();
   });
 
-  test('becomes a compact horizontal bar on phones', async ({ page }) => {
+  test('on phones, Spotify and the rank card follow "Who am I?" and stay short', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto('/');
-    const track = await box(page, '.rank-rail__track');
-    expect(track.w).toBeGreaterThan(track.h * 15);
-    const rail = await box(page, '.bento-slot--league');
-    expect(rail.h).toBeLessThan(260);
-    // It follows the "Who am I?" card that ends on the side quest.
-    expect(rail.y).toBeGreaterThan((await box(page, '.bento-slot--about')).bottom);
-    const label = await box(page, '.rank-rail__now');
-    expect(label.x).toBeGreaterThanOrEqual(rail.x);
-    expect(label.right).toBeLessThanOrEqual(rail.right);
+    const [about, spotify, league] = await Promise.all(['about', 'spotify', 'league'].map((k) => box(page, `.bento-slot--${k}`)));
+    expect(spotify.y).toBeGreaterThan(about.bottom);
+    expect(league.y).toBeGreaterThan(spotify.bottom);
+    expect(spotify.h).toBeLessThan(240);
+    expect(league.h).toBeLessThan(240);
+    // Ring beside the text.
+    const [dial, text] = await Promise.all([box(page, '.rank-ring__dial'), box(page, '.rank-ring__text')]);
+    expect(text.x).toBeGreaterThan(dial.right);
   });
 });
 
-test('After Hours: Spotify first, then three apps with equal height and aligned titles; Blackjack is green in both themes', async ({ page }) => {
+test('After Hours: three apps with equal height and aligned titles; Blackjack is green in both themes', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   for (const scheme of ['dark', 'light']) {
     await page.emulateMedia({ colorScheme: scheme, reducedMotion: 'reduce' });
     await page.goto('/');
-    const spotify = await box(page, '.bento-slot--spotify');
+    await expect(page.getByRole('region', { name: 'After Hours' }).locator('[data-spotify-tile]')).toHaveCount(0);
     const tiles = await Promise.all(['sketchbook', 'mbti', 'blackjack'].map((s) => box(page, `.bento-slot--${s}`)));
     const titles = await Promise.all(['sketchbook', 'mbti', 'blackjack'].map((s) => box(page, `.bento-slot--${s} h2`)));
-    expect(spotify.bottom).toBeLessThan(tiles[0].y);
-    expect(Math.abs(spotify.w - (tiles[2].right - tiles[0].x))).toBeLessThanOrEqual(1);
     for (const t of tiles) { expect(Math.abs(t.h - tiles[0].h)).toBeLessThanOrEqual(1); expect(Math.abs(t.y - tiles[0].y)).toBeLessThanOrEqual(1); expect(Math.abs(t.w - tiles[0].w)).toBeLessThanOrEqual(1); }
     for (const t of titles) expect(Math.abs(t.y - titles[0].y)).toBeLessThanOrEqual(2);
     const bj = await page.locator('.bento-tile--blackjack').evaluate((e) => [getComputedStyle(e).backgroundImage, getComputedStyle(e.querySelector('h2')).color]);
     expect(bj[0]).toContain('rgb(31, 92, 66)');
     expect(bj[1]).toBe('rgb(238, 247, 241)');
-    const rail = await page.locator('.rank-rail').evaluate((e) => getComputedStyle(e).backgroundImage);
-    expect(rail).toContain('rgb(18, 26, 50)');
+    const ring = await page.locator('.rank-ring').evaluate((e) => getComputedStyle(e).backgroundImage);
+    expect(ring).toContain('rgb(18, 26, 50)');
     await expect(page.getByRole('link', { name: /Blackjack Trainer/ })).toHaveAttribute('href', '/blackjack/');
   }
 });
@@ -243,14 +232,14 @@ for (const [width, height] of [[1440, 900], [1024, 768], [768, 1024], [390, 844]
       }
       for (const tile of document.querySelectorAll('.bento-tile')) {
         const t = tile.getBoundingClientRect();
-        for (const el of tile.querySelectorAll('h1,h2,h3,p,dt,dd,strong,.rank-rail__now,.rank-rail__cap,.rank-rail__id')) {
+        for (const el of tile.querySelectorAll('h1,h2,h3,p,dt,dd,strong,.rank-ring__rank span')) {
           if (getComputedStyle(el).display === 'none' || el.closest('.visually-hidden')) continue;
           const r = el.getBoundingClientRect();
           if (el.scrollWidth > el.clientWidth + 1 && getComputedStyle(el).display !== 'inline') out.push(`clipped text: ${el.textContent.slice(0, 30)}`);
           if (r.left < t.left + 12 || r.right > t.right - 12) out.push(`text too close to edge: ${el.textContent.slice(0, 30)}`);
         }
       }
-      for (const el of document.querySelectorAll('.identity__icon,.resume__more,.theme-toggle,.spotify__play')) {
+      for (const el of document.querySelectorAll('.identity__icon,.resume__more,.theme-toggle,.spotify__play,.spotify__brand')) {
         const r = el.getBoundingClientRect();
         if (r.width < 44 || r.height < 44) out.push(`small target ${el.className}`);
       }

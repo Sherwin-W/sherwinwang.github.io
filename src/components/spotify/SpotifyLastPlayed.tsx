@@ -8,7 +8,7 @@ import './spotify.css';
 export default function SpotifyLastPlayed({ apiBaseUrl }: { apiBaseUrl: string }) {
   const { data, state, error, waitUntil, retry } = useLastPlayed(apiBaseUrl);
   const waiting = waitUntil > Date.now();
-  const heading = <h2 className="spotify__heading">Music</h2>;
+  const heading = <h2 className="visually-hidden">Music</h2>;
 
   return (
     <section className="bento-tile spotify" data-spotify-tile aria-label="Spotify last played" aria-busy={state === 'loading'}>
@@ -23,8 +23,7 @@ export default function SpotifyLastPlayed({ apiBaseUrl }: { apiBaseUrl: string }
       {data && (
         <div className="spotify__body" key={data.track.id}>
           <SpotifyStatus playing={data.isCurrentlyPlaying} playedAt={data.playedAt} stale={Boolean(data.stale)} />
-          <SpotifyTrackInfo track={data.track} />
-          <SpotifyPlayer track={data.track} />
+          <SpotifyPlayer track={data.track}><SpotifyTrackInfo track={data.track} /></SpotifyPlayer>
         </div>
       )}
     </section>

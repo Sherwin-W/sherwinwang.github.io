@@ -1,6 +1,6 @@
 # Road to Diamond
 
-A narrow rail on the homepage that shows the ranked Solo/Duo progress of `DippoBippo#cccc` (NA) from Iron to Diamond IV. The whole card links to the account's OP.GG profile: https://op.gg/lol/summoners/na/DippoBippo-cccc (checked on 2026-11-05; the profile exists on NA).
+A compact card in the homepage's right column (below Spotify) that shows the ranked Solo/Duo progress of `DippoBippo#cccc` (NA) from Iron to Diamond IV. The whole card links to the account's OP.GG profile: https://op.gg/lol/summoners/na/DippoBippo-cccc (checked on 2026-11-05; the profile exists on NA).
 
 ## Where the rank comes from
 
@@ -15,14 +15,6 @@ The card always says which of these it is showing:
 | `Rank unavailable right now` | No answer and no manual rank. Nothing is guessed. |
 
 **Status today:** live. A Personal API Key is set in Vercel as `RIOT_API_KEY`, and on 2026-11-05 the API returned **Gold II, 63 LP**. The manual rank in `src/data/league.ts` (Gold II, 27 LP from OP.GG) is only the fallback.
-
-## Last champion played
-
-A small round portrait beside the LP shows the champion from the account's most recent ranked Solo/Duo match (queue 420); ARAM, normals and Flex are ignored. It appears only with Riot's answer (live or saved), never with the manual rank, and is hidden if the image fails to load. Its alt text reads "Last played: Wukong, 2 hours ago".
-
-- Match-V5 `GET americas.api.riotgames.com/lol/match/v5/matches/by-puuid/{puuid}/ids?queue=420&count=1`, then `GET …/lol/match/v5/matches/{matchId}` for the account's `championId`. This adds 2 requests per refresh.
-- Data Dragon (`ddragon.leagueoflegends.com`, Riot's public static CDN, no key sent) supplies the champion's name and portrait: `api/versions.json`, then `cdn/{version}/data/en_US/champion.json` to map the id. The id is used because some champions have a different internal name, such as Wukong, which is `MonkeyKing`.
-- If the match lookup fails, the rank still updates and the last known champion is kept. The site accepts only portrait URLs on Data Dragon.
 
 ## Settings
 
@@ -51,7 +43,7 @@ progress = steps / steps(Diamond IV)                           Diamond IV = 24 s
 Riot's rules (developer.riotgames.com, checked 2026-11-05):
 
 - **Development keys** expire every 24 hours, and Riot says they must not run a public product. Don't use one here.
-- **Personal API keys** are for "products that are intended for just the developer or a small private community". Riot's own list of acceptable uses includes "to display your own personal stats for your personal website", which is exactly this. Limits are 20 requests per second and 100 per 2 minutes. This setup uses about 3 requests every 45 minutes.
+- **Personal API keys** are for "products that are intended for just the developer or a small private community". Riot's own list of acceptable uses includes "to display your own personal stats for your personal website", which is exactly this. Limits are 20 requests per second and 100 per 2 minutes. This setup uses about 1 request every 45 minutes.
 - **Production keys** are for public apps used by many players. One is not needed here.
 
 Steps:
@@ -78,10 +70,9 @@ Steps:
 3. The function serves the cached rank while it is younger than the refresh window. After that it asks Riot once:
    - Account-V1 `GET americas.api.riotgames.com/riot/account/v1/accounts/by-riot-id/{gameName}/{tagLine}` returns the PUUID. This is cached for good, because it never changes.
    - League-V4 `GET na1.api.riotgames.com/lol/league/v4/entries/by-puuid/{puuid}` returns the entries. The API keeps the `RANKED_SOLO_5x5` one, and returns only tier, division, LP, Riot ID and time.
-   - Match-V5 and Data Dragon supply the last champion played (see above).
 4. If Riot fails or rejects the key, the API serves the last cached rank marked `stale`. A Riot 429 starts a cooldown for its `Retry-After`, and Riot is not called again until it ends.
 
-The key is sent only from the server, in the `X-Riot-Token` header. It is never in the browser bundle or in git. The public answer contains no key, PUUID, match ID or win/loss record. Nothing scrapes OP.GG; the card only links to it.
+The key is sent only from the server, in the `X-Riot-Token` header. It is never in the browser bundle or in git. The public answer contains no key, PUUID or win/loss record. Nothing scrapes OP.GG; the card only links to it.
 
 ## Assets and legal
 

@@ -10,7 +10,7 @@ beforeAll(() => {
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
 
 const show = (view: RankView) => render(<RoadToDiamond view={view} />);
-const tile = () => document.querySelector('.rank-rail') as HTMLElement;
+const tile = () => document.querySelector('.rank-ring') as HTMLElement;
 
 describe('Road to Diamond', () => {
   it('shows the current rank, LP and progress, labelled with where the data came from', () => {
@@ -31,43 +31,40 @@ describe('Road to Diamond', () => {
     expect(link.getAttribute('href')).toBe('https://op.gg/lol/summoners/na/DippoBippo-cccc');
     expect(link.getAttribute('target')).toBe('_blank');
     expect(link.getAttribute('rel')).toBe('noopener noreferrer');
-    expect(screen.getByText('DippoBippo#cccc')).toBeTruthy();
   });
 
   it('shows goal completion at Diamond IV and keeps working above Diamond', () => {
     show({ source: 'live', rank: { tier: 'DIAMOND', division: 'IV', lp: 0 }, asOf: new Date().toISOString() });
     expect(tile().classList.contains('is-done')).toBe(true);
-    expect(screen.getByText('Goal reached')).toBeTruthy();
+    expect(screen.getByText('Goal reached · Diamond IV')).toBeTruthy();
     expect(screen.getByRole('progressbar').getAttribute('aria-valuetext')).toBe('Diamond IV, 0 LP: goal reached');
     cleanup();
     show({ source: 'live', rank: { tier: 'MASTER', lp: 210 }, asOf: new Date().toISOString() });
     expect(screen.getByText('Master')).toBeTruthy();
     expect(screen.getByText('210 LP')).toBeTruthy();
     expect(tile().style.getPropertyValue('--p')).toBe('1');
-    expect((tile().querySelector('.rank-rail__emblem--now') as HTMLImageElement).src).toMatch(/league\/emblems\/master\.webp$/);
+    expect((tile().querySelector('.rank-ring__emblem') as HTMLImageElement).src).toMatch(/league\/emblems\/master\.webp$/);
   });
 
-  it('shows the last champion played as a small portrait on live or saved data only', () => {
-    const champion = { name: 'Wukong', icon: 'https://ddragon.leagueoflegends.com/cdn/16.22.1/img/champion/MonkeyKing.png', playedAt: new Date(Date.now() - 2 * 3600_000).toISOString() };
-    const rank = { tier: 'GOLD', division: 'II', lp: 63 } as const;
-    show({ source: 'live', rank, asOf: new Date().toISOString(), champion });
-    const img = screen.getByRole('img', { name: 'Last played: Wukong, 2 hours ago' }) as HTMLImageElement;
-    expect(img.src).toBe(champion.icon);
-    expect(img.closest('.rank-rail__now')).toBeTruthy();
-    cleanup();
-    show({ source: 'cached', rank, asOf: '2026-11-05T10:00:00Z', champion: { ...champion, playedAt: null } });
-    expect(screen.getByRole('img', { name: 'Last played: Wukong' })).toBeTruthy();
-    cleanup();
-    show({ source: 'manual', rank, asOf: '2026-11-05', champion });
-    expect(screen.queryByRole('img', { name: /Last played/ })).toBeNull();
+  it('draws the ring at the overall Iron IV to Diamond IV position, not the LP within the division', () => {
+    show({ source: 'live', rank: { tier: 'GOLD', division: 'II', lp: 63 }, asOf: new Date().toISOString() });
+    // Gold II 63 LP = (3*4 + 2 + .63) / 24 = 61%, not 63%.
+    expect(tile().style.getPropertyValue('--p')).toBe(String(14.63 / 24));
+    expect(screen.getByRole('progressbar').getAttribute('aria-valuenow')).toBe('61');
+    expect(screen.getByText('61% to Diamond IV')).toBeTruthy();
+    // One tick per tier boundary between Iron and Diamond.
+    expect(tile().querySelectorAll('.rank-ring__tick')).toHaveLength(5);
+    expect((tile().querySelector('.rank-ring__emblem') as HTMLImageElement).src).toMatch(/league\/emblems\/gold\.webp$/);
+    // Only the rank emblem: no champion portrait or match details.
+    expect(tile().querySelectorAll('img')).toHaveLength(1);
   });
 
-  it('shows no rank, marker or progress when unranked or unavailable', () => {
+  it('shows no rank, emblem or progress when unranked or unavailable', () => {
     show({ source: 'unranked', rank: null, asOf: '2026-11-05T10:00:00Z' });
     expect(screen.getByText('Unranked')).toBeTruthy();
     expect(screen.getByText('No ranked games this season yet')).toBeTruthy();
     expect(screen.queryByRole('progressbar')).toBeNull();
-    expect(tile().querySelector('.rank-rail__marker')).toBeNull();
+    expect(tile().querySelector('.rank-ring__emblem')).toBeNull();
     expect(tile().style.getPropertyValue('--p')).toBe('0');
     cleanup();
     show({ source: 'unavailable', rank: null, asOf: null });

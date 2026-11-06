@@ -1,69 +1,38 @@
-/* Road to Diamond: a dark rail in both themes (like the cream Sketchbook), one luminous track. */
-.rank-rail { --rr-ink:#e8edf8; --rr-dim:#93a1c2; --rr-faint:rgba(255,255,255,.09); --rr-glow:#5ee7ff; --rr-pad:10px; --rr-p:var(--p,0);
-  align-items:center; gap:10px; padding:20px 16px 16px; overflow:hidden; text-align:center; color:var(--rr-ink); border-color:rgba(140,170,255,.18);
-  background:radial-gradient(120% 40% at 50% 0%,rgba(111,155,255,.2),transparent 70%),linear-gradient(180deg,#121a32 0%,#0d1324 55%,#0a0e19 100%); }
-.rank-rail::before { opacity:.08; }
-.rank-rail__top,.rank-rail__bottom { position:relative; z-index:2; display:flex; flex:0 0 auto; flex-direction:column; align-items:center; gap:4px; width:100%; }
-.rank-rail .rank-rail__title { font-size:.72rem; font-weight:600; line-height:1.3; letter-spacing:.14em; text-transform:uppercase; color:#d6e3ff; }
-.rank-rail__title .bento-tile__link { display:inline-flex; align-items:center; gap:4px; }
-.rank-rail__title svg { flex:none; }
-.rank-rail__emblem { display:block; flex:none; object-fit:contain; pointer-events:none; user-select:none; }
-.rank-rail__emblem--goal { width:68px; height:68px; margin-top:4px; filter:drop-shadow(0 0 10px rgba(94,231,255,.35)); }
-.rank-rail__emblem--start { width:44px; height:44px; opacity:.85; }
-.rank-rail__cap { font-size:.62rem; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:var(--rr-dim); }
-.rank-rail.is-done .rank-rail__top .rank-rail__cap { color:var(--rr-glow); }
-.rank-rail__id { margin-top:2px; font-size:.72rem; color:var(--rr-dim); overflow-wrap:anywhere; }
-.rank-rail .rank-rail__source { max-width:none; margin:2px 0 0; font-size:.68rem; line-height:1.35; color:var(--rr-dim); }
+/* Road to Diamond: a dark card in both themes (like the cream Sketchbook) with one luminous progress ring. */
+.rank-ring { --rr-ink:#e8edf8; --rr-dim:#93a1c2; --rr-glow:#5ee7ff; --rr-p:var(--p,0);
+  container-type:inline-size; gap:14px; padding:20px; overflow:hidden; color:var(--rr-ink); border-color:rgba(140,170,255,.18);
+  background:radial-gradient(110% 60% at 50% 0%,rgba(111,155,255,.2),transparent 70%),linear-gradient(180deg,#121a32 0%,#0d1324 60%,#0a0e19 100%); }
+.rank-ring::before { opacity:.08; }
+.rank-ring .rank-ring__title { position:relative; z-index:2; margin:0; font-size:.72rem; font-weight:600; line-height:1.3; letter-spacing:.14em; text-transform:uppercase; color:#d6e3ff; }
+.rank-ring__title .bento-tile__link { display:inline-flex; align-items:center; gap:4px; }
+.rank-ring__title svg { flex:none; }
 
-/* Ladder (vertical) */
-.rank-rail__ladder { position:relative; z-index:2; flex:1 1 auto; width:100%; min-height:220px; }
-.rank-rail__track { position:absolute; top:var(--rr-pad); bottom:var(--rr-pad); left:44%; width:6px; margin-left:-3px; border-radius:3px; background:var(--rr-faint); box-shadow:inset 0 0 0 1px rgba(255,255,255,.04); }
-.rank-rail__fill { position:absolute; inset:auto 0 0; height:calc(var(--rr-p) * 100%); border-radius:inherit; background:linear-gradient(to top,#3a5bd9,#6f9bff 55%,var(--rr-glow)); box-shadow:0 0 10px rgba(94,231,255,.45),0 0 2px rgba(94,231,255,.9); transition:height .8s cubic-bezier(.2,.7,.2,1); }
-.rank-rail__marks { position:absolute; inset:0; margin:0; padding:0; list-style:none; }
-.rank-rail__marks li { position:absolute; left:0; right:0; bottom:calc(var(--rr-pad) + var(--at) * (100% - 2 * var(--rr-pad))); height:0; }
-.rank-rail__marks li::before { content:''; position:absolute; left:44%; width:14px; height:1px; margin-left:-7px; background:rgba(255,255,255,.22); }
-.rank-rail__marks span { position:absolute; right:calc(56% + 12px); transform:translateY(-50%); font-size:.58rem; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:#6f7ea3; white-space:nowrap; }
-.rank-rail__marker { position:absolute; left:44%; bottom:calc(var(--rr-pad) + var(--rr-p) * (100% - 2 * var(--rr-pad))); width:36px; height:36px; transform:translate(-50%,50%); transition:bottom .8s cubic-bezier(.2,.7,.2,1); }
-.rank-rail__emblem--now { width:36px; height:36px; filter:drop-shadow(0 0 6px rgba(94,231,255,.55)) drop-shadow(0 2px 3px rgba(0,0,0,.5)); }
-.rank-rail .rank-rail__now { position:absolute; top:50%; left:calc(100% + 4px); display:flex; flex-direction:column; align-items:flex-start; gap:1px; max-width:none; margin:0; padding:4px 7px; transform:translateY(-50%); border:1px solid rgba(140,190,255,.28); border-radius:9px; background:rgba(12,18,36,.9); box-shadow:0 4px 14px rgba(0,0,0,.35); color:var(--rr-ink); font-size:.66rem; line-height:1.25; text-align:left; white-space:nowrap; }
-.rank-rail__now strong { font-size:.78rem; font-weight:650; }
-.rank-rail__now span { color:#9fd8ff; font-variant-numeric:tabular-nums; }
-.rank-rail__sub { display:inline-flex; align-items:center; gap:6px; }
-.rank-rail__champ { flex:none; width:18px; height:18px; margin:-2px 0; border-radius:50%; object-fit:cover; border:1px solid rgba(140,190,255,.45); box-shadow:0 1px 4px rgba(0,0,0,.4); background:#0c1224; pointer-events:none; user-select:none; }
-.rank-rail .rank-rail__empty { position:absolute; top:50%; left:calc(44% + 12px); max-width:none; margin:0; transform:translateY(-50%); font-size:.72rem; color:var(--rr-dim); }
-.rank-rail.is-done .rank-rail__track { box-shadow:0 0 14px rgba(94,231,255,.45); }
+/* Narrow (the desktop column, small phones): ring above the text, centred. */
+.rank-ring__main { position:relative; z-index:2; display:flex; flex:1 1 auto; flex-direction:column; align-items:center; justify-content:center; gap:14px; text-align:center; }
+.rank-ring__dial { position:relative; flex:none; width:136px; height:136px; }
+.rank-ring__svg { display:block; width:100%; height:100%; transform:rotate(-90deg); overflow:visible; }
+.rank-ring__track { fill:none; stroke:rgba(255,255,255,.09); stroke-width:6; }
+.rank-ring__fill { fill:none; stroke-width:6; stroke-linecap:round; stroke-dasharray:100; stroke-dashoffset:calc(100 - var(--rr-p) * 100);
+  filter:drop-shadow(0 0 3px rgba(94,231,255,.55)); transition:stroke-dashoffset .9s cubic-bezier(.2,.7,.2,1); }
+/* An empty ring draws no dot from the round cap. */
+.rank-ring:not(:has(.rank-ring__emblem)) .rank-ring__fill { visibility:hidden; }
+.rank-ring__tick { stroke:rgba(255,255,255,.24); stroke-width:1.5; stroke-linecap:round; }
+.rank-ring__emblem { position:absolute; inset:22%; width:56%; height:56%; object-fit:contain; pointer-events:none; user-select:none; filter:drop-shadow(0 0 8px rgba(94,231,255,.35)) drop-shadow(0 2px 3px rgba(0,0,0,.5)); }
+.rank-ring__text { display:flex; flex-direction:column; align-items:center; gap:6px; min-width:0; }
+.rank-ring .rank-ring__rank { display:flex; flex-direction:column; align-items:center; gap:2px; max-width:none; margin:0; color:var(--rr-ink); line-height:1.2; }
+.rank-ring__rank strong { font-size:1.125rem; font-weight:650; }
+.rank-ring__rank span { color:#9fd8ff; font-size:.875rem; font-variant-numeric:tabular-nums; }
+.rank-ring .rank-ring__goal { max-width:none; margin:0; color:var(--rr-dim); font-size:.68rem; font-weight:600; letter-spacing:.12em; text-transform:uppercase; }
+.rank-ring.is-done .rank-ring__goal { color:var(--rr-glow); }
+.rank-ring .rank-ring__source { max-width:none; margin:0; color:var(--rr-dim); font-size:.72rem; line-height:1.35; }
 
-@media (hover:hover) { .rank-rail:hover { border-color:rgba(140,190,255,.38); } }
-.rank-rail:has(.bento-tile__link:focus-visible) { outline:2px solid var(--accent); outline-offset:3px; }
-
-/* Narrow screens: the same ladder, laid out left (Iron) to right (goal). */
-@media (max-width:1023px) {
-  .rank-rail { display:grid; grid-template-columns:auto minmax(0,1fr) auto; grid-template-areas:"title title title" "start ladder goal" "startcap ladder goalcap" "id id source"; align-items:center; column-gap:14px; row-gap:6px; padding:18px 20px; text-align:left; }
-  .rank-rail__top,.rank-rail__bottom { display:contents; }
-  .rank-rail__title { grid-area:title; justify-self:start; }
-  .rank-rail__emblem--goal { grid-area:goal; justify-self:center; width:52px; height:52px; margin:0; }
-  .rank-rail__top .rank-rail__cap { grid-area:goalcap; justify-self:center; align-self:start; }
-  .rank-rail__emblem--start { grid-area:start; justify-self:center; width:38px; height:38px; }
-  .rank-rail__bottom .rank-rail__cap { grid-area:startcap; justify-self:center; align-self:start; }
-  .rank-rail__id { grid-area:id; justify-self:start; margin:4px 0 0; }
-  .rank-rail .rank-rail__source { grid-area:source; justify-self:end; margin:4px 0 0; text-align:right; }
-  .rank-rail__ladder { grid-area:ladder; align-self:stretch; min-height:104px; }
-  .rank-rail__track { inset:auto var(--rr-pad); top:58%; left:var(--rr-pad); width:auto; height:6px; margin:-3px 0 0; }
-  .rank-rail__fill { inset:0 auto 0 0; width:calc(var(--rr-p) * 100%); height:auto; transition-property:width; background:linear-gradient(to right,#3a5bd9,#6f9bff 55%,var(--rr-glow)); }
-  .rank-rail__marks li { top:58%; bottom:auto; left:calc(var(--rr-pad) + var(--at) * (100% - 2 * var(--rr-pad))); right:auto; width:0; height:auto; }
-  .rank-rail__marks li::before { left:0; width:1px; height:12px; margin:-6px 0 0; }
-  .rank-rail__marks span { top:12px; right:auto; left:0; transform:translateX(-50%); }
-  .rank-rail__marker { top:58%; bottom:auto; left:calc(var(--rr-pad) + var(--rr-p) * (100% - 2 * var(--rr-pad))); transform:translate(-50%,-50%); transition-property:left; }
-  .rank-rail .rank-rail__now { top:auto; bottom:calc(100% + 4px); left:50%; flex-direction:row; align-items:baseline; gap:6px; transform:translateX(calc(-1 * var(--rr-p) * 100%)); }
-  .rank-rail .rank-rail__empty { top:auto; bottom:calc(42% + 10px); left:50%; transform:translateX(-50%); }
-}
-@media (max-width:639px) {
-  .rank-rail { grid-template-areas:"title title title" "start ladder goal" "startcap ladder goalcap" "id id id" "source source source"; column-gap:10px; }
-  .rank-rail .rank-rail__source { justify-self:start; margin:0; text-align:left; }
-  .rank-rail__marks span,.rank-rail__cap-tier { display:none; }
-  .rank-rail__emblem--goal { width:44px; height:44px; }
-  .rank-rail__emblem--start { width:32px; height:32px; }
+/* Wide (tablets, phones at 390+): ring beside the text, so the card stays short. */
+@container (min-width:300px) {
+  .rank-ring__main { flex-direction:row; justify-content:flex-start; gap:20px; text-align:left; }
+  .rank-ring__dial { width:112px; height:112px; }
+  .rank-ring__text,.rank-ring .rank-ring__rank { align-items:flex-start; }
 }
 
-@media (prefers-reduced-motion:reduce) { .rank-rail__fill,.rank-rail__marker { transition:none; } }
-@media (prefers-reduced-transparency:reduce) { .rank-rail .rank-rail__now { background:#0c1224; } }
+@media (hover:hover) { .rank-ring:hover { border-color:rgba(140,190,255,.38); } }
+.rank-ring:has(.bento-tile__link:focus-visible) { outline:2px solid var(--accent); outline-offset:3px; }
+@media (prefers-reduced-motion:reduce) { .rank-ring__fill { transition:none; } }

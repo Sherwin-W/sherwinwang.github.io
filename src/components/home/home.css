@@ -9,23 +9,26 @@
 .home-page__footer { width:min(100%,1200px); margin:44px auto 0; padding:0 6px; }
 .home-page__footer p { max-width:96ch; margin:0; color:var(--text-dim); font-size:.68rem; line-height:1.5; opacity:.85; }
 
-/* Desktop and laptop: a 10-column body with a fixed, narrow rail for Road to Diamond. */
+/* Desktop and laptop: a 10-column body and a narrow right column with Spotify above Road to Diamond. */
 @media (min-width:1024px) {
-  .bento-grid--professional { grid-template-columns:repeat(10,minmax(0,1fr)) 216px; grid-auto-rows:auto; }
+  .bento-grid--professional { grid-template-columns:repeat(10,minmax(0,1fr)) clamp(232px,20vw,272px); grid-auto-rows:auto; }
   .bento-grid--professional .bento-slot--identity { grid-column:1 / span 4; grid-row:1; }
   .bento-grid--professional .bento-slot--about { grid-column:5 / span 6; grid-row:1; }
-  .bento-grid--professional .bento-slot--league { grid-column:11; grid-row:1 / span 2; }
+  .bento-grid--professional .bento-slot--spotify { grid-column:11; grid-row:1; }
+  .bento-grid--professional .bento-slot--league { grid-column:11; grid-row:2; }
+  .bento-grid--professional:not(:has(.bento-slot--spotify)) .bento-slot--league { grid-row:1 / span 2; }
   .bento-grid--professional .bento-slot--resume { grid-column:1 / span 6; grid-row:2; }
   .bento-grid--professional .bento-slot--quest { grid-column:7 / span 4; grid-row:2; }
-  .bento-grid--after-hours { grid-template-rows:auto minmax(304px,auto); grid-auto-rows:auto; }
-  .bento-grid--after-hours .bento-slot--spotify { grid-column:1 / -1; }
+  .bento-grid--after-hours { grid-template-rows:minmax(304px,auto); grid-auto-rows:auto; }
   .bento-grid--after-hours .bento-slot--sketchbook { grid-column:1 / span 4; }
   .bento-grid--after-hours .bento-slot--mbti { grid-column:5 / span 4; }
   .bento-grid--after-hours .bento-slot--blackjack { grid-column:9 / span 4; }
 }
-/* Tablet: one column for reading, the two pixel apps side by side. */
+/* Tablet: one column for reading; Spotify beside Road to Diamond, and the two pixel apps side by side. */
 @media (min-width:640px) and (max-width:1023px) {
   .home-page .bento-slot { grid-column:1 / -1; }
+  .home-page .bento-grid--professional :is(.bento-slot--spotify,.bento-slot--league) { grid-column:span 3; }
+  .home-page .bento-grid--professional:not(:has(.bento-slot--spotify)) .bento-slot--league { grid-column:1 / -1; }
   .home-page .bento-grid--after-hours .bento-slot--mbti,.home-page .bento-grid--after-hours .bento-slot--blackjack { grid-column:span 3; }
 }
 
@@ -46,10 +49,6 @@
 .bento-tile.about p { max-width:64ch; color:var(--text); font-size:.9375rem; line-height:1.65; opacity:.92; }
 .bento-tile.about .about__quest { display:flex; align-items:center; gap:6px; margin-top:auto; padding-top:12px; border-top:1px solid var(--edge); color:var(--text-dim); opacity:1; }
 .about__quest strong { color:var(--quest-ink); font-weight:600; }
-@media (min-width:1024px) {
-  /* A faint line toward the rail beside this card. */
-  .about__quest::after { content:''; flex:1 1 auto; min-width:24px; height:1px; margin-left:6px; background:linear-gradient(to right,transparent,var(--quest-ink)); opacity:.55; }
-}
 
 /* Résumé preview: a small document on the tile. */
 .resume { gap:12px; padding:16px; }
@@ -103,16 +102,8 @@
 .bento-tile--blackjack .bento-tags li { border-color:rgba(205,238,218,.32); color:#d3e9dc; }
 .bento-tile--blackjack .bj-preview__table { box-shadow:0 0 0 2px #2c5a45,0 0 0 4px #08180f,0 0 18px 2px rgba(120,230,170,.16); }
 
-/* Spotify: a horizontal player when there is room. The tile keeps its loaded height while loading or
-   after an error, so the apps below never jump. */
-.bento-slot--spotify .spotify { min-height:262px; }
-@media (min-width:768px) {
-  .bento-slot--spotify .spotify { min-height:190px; }
-  .bento-slot--spotify .spotify__body { display:grid; grid-template-columns:minmax(0,1fr) minmax(300px,440px); grid-template-areas:"status player" "track player"; align-items:center; gap:10px 32px; }
-  .bento-slot--spotify .spotify__status { grid-area:status; }
-  .bento-slot--spotify .spotify__track { grid-area:track; }
-  .bento-slot--spotify .spotify__player { grid-area:player; min-width:0; }
-}
+/* Spotify keeps roughly its loaded height while loading or after an error, so the cards below never jump. */
+@media (max-width:1023px) { .bento-slot--spotify .spotify { min-height:150px; } }
 
 /* Résumé viewer (native dialog) */
 .resume-viewer { width:min(920px,calc(100% - 32px)); height:min(92dvh,1120px); max-width:none; max-height:none; margin:auto; padding:0; overflow:hidden; border:1px solid var(--edge); border-radius:20px; background:var(--surface); color:var(--text); box-shadow:inset 0 1px var(--edge-top),var(--shadow-tile-hover); }

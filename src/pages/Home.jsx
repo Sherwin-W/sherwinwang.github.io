@@ -18,19 +18,17 @@ const inSection = (name) => projects.filter((project) => project.section === nam
 export default function Home() {
   const [resumeOpen, setResumeOpen] = useState(false);
 
-  // DOM order follows the visual order: identity, about, the rank rail, then résumé and projects.
+  // DOM order: identity and about, then the right column (Spotify above Road to Diamond), then résumé and projects.
+  // The music tile needs the API; without one configured it is left out rather than faked.
   const professional = [
     { id: 'identity', area: 'identity', render: () => <IdentityCard /> },
     { id: 'about', area: 'about', render: () => <AboutCard /> },
+    ...(apiBaseUrl ? [{ id: 'spotify', area: 'spotify', render: () => <SpotifyLastPlayed apiBaseUrl={apiBaseUrl} /> }] : []),
     { id: 'league', area: 'league', render: () => <RoadToDiamond apiBaseUrl={apiBaseUrl} /> },
     { id: 'resume', area: 'resume', render: () => <ResumeCard onOpen={() => setResumeOpen(true)} /> },
     ...inSection('professional'),
   ];
-  // The music tile needs the API; without one configured it is left out rather than faked.
-  const afterHours = [
-    ...(apiBaseUrl ? [{ id: 'spotify', area: 'spotify', render: () => <SpotifyLastPlayed apiBaseUrl={apiBaseUrl} /> }] : []),
-    ...inSection('after-hours'),
-  ];
+  const afterHours = inSection('after-hours');
 
   return (
     <main className="home-page">

@@ -29,44 +29,52 @@ test.beforeEach(async ({ page }) => {
   await page.route('https://i.scdn.co/**', route => route.fulfill({ status: 404 }));
 });
 
-test('last played track renders with a compact strip, and play brings in the official player', async ({ page }) => {
+test('compact card: art, status, title, artist, play and a Spotify link; play brings in the official player', async ({ page }) => {
   await mock(page, 200, body());
   await page.goto('/');
+  await expect(page.locator('[data-spotify-tile]')).toHaveCount(1);
   const tile = page.locator('[data-spotify-tile]');
-  await expect(tile.getByRole('link', { name: /Yellow/ })).toHaveAttribute('href', `https://open.spotify.com/track/${ID}`);
   await expect(tile.getByText('Last played on Spotify')).toBeVisible();
   await expect(tile.getByText('1 hour ago')).toBeVisible();
-  // At rest: no third-party iframe, and no repeated art or title in the strip.
+  await expect(tile.getByRole('heading', { name: 'Yellow' })).toBeVisible();
+  await expect(tile.getByText('Coldplay')).toBeVisible();
+  await expect(tile.getByRole('link', { name: 'Open Yellow in Spotify (new tab)' })).toHaveAttribute('href', `https://open.spotify.com/track/${ID}`);
+  // Only two controls, no progress bar, time or menu, and no third-party iframe until play.
+  await expect(tile.locator('button, a')).toHaveCount(2);
+  await expect(tile.getByRole('progressbar')).toHaveCount(0);
   await expect(tile.locator('iframe')).toHaveCount(0);
-  const strip = tile.getByRole('group', { name: 'Playback' });
-  await expect(strip.getByText('0:00 / 4:27')).toBeVisible();
-  await expect(strip.locator('img')).toHaveCount(0);
-  await expect(strip.getByText('Yellow')).toHaveCount(0);
-  // Keyboard: play from the strip.
-  await strip.getByRole('button', { name: 'Play Yellow with Spotify' }).focus();
+  // Keyboard: play.
+  await tile.getByRole('button', { name: 'Play Yellow with Spotify' }).focus();
   await page.keyboard.press('Enter');
   await expect(tile.locator('iframe')).toHaveAttribute('src', new RegExp(`/embed/track/${ID}`));
   await expect(tile.locator('iframe')).toBeVisible();
   await expect.poll(() => page.evaluate(() => window.__spotifyCalls)).toContain('play');
-  await tile.getByRole('button', { name: /Hide player/ }).click();
+  // The official player replaces our details instead of repeating them, and fits inside the card.
+  await expect(tile.getByRole('heading', { name: 'Yellow' })).toHaveCount(0);
+  const [frame, card] = await Promise.all([tile.locator('iframe').boundingBox(), tile.boundingBox()]);
+  expect(frame.height).toBeGreaterThanOrEqual(80);
+  expect(frame.x >= card.x && frame.x + frame.width <= card.x + card.width && frame.y + frame.height <= card.y + card.height).toBe(true);
+  await tile.getByRole('button', { name: /Close player/ }).click();
   await expect(tile.locator('iframe')).toHaveCount(0);
-  await expect(strip.getByText('0:09 / 0:30')).toBeVisible();
-  await expect(strip.getByRole('button', { name: 'Play Yellow with Spotify' })).toBeFocused();
+  await expect(tile.getByRole('button', { name: 'Play Yellow with Spotify' })).toBeFocused();
 });
 
-test('options menu works from the keyboard and only links to Spotify', async ({ page }) => {
-  await mock(page, 200, body());
-  await page.goto('/');
-  const tile = page.locator('[data-spotify-tile]');
-  await tile.getByRole('button', { name: 'More options' }).click();
-  const items = tile.getByRole('menuitem');
-  await expect(items).toHaveCount(4);
-  await expect(items.first()).toBeFocused();
-  await page.keyboard.press('ArrowDown');
-  await expect(items.nth(1)).toBeFocused();
-  await page.keyboard.press('Escape');
-  await expect(tile.getByRole('menu')).toHaveCount(0);
-  await expect(tile.getByRole('button', { name: 'More options' })).toBeFocused();
+test('a very long title wraps to two lines and the artist truncates, inside the compact card', async ({ page }) => {
+  const title = 'Supercalifragilisticexpialidocious (Remastered 2024) - From the Original Motion Picture Soundtrack';
+  await mock(page, 200, body({ track: { ...body().track, title, artists: ['Julie Andrews', 'Dick Van Dyke', 'The Pearlies', 'Orchestra and Chorus'] } }));
+  for (const [width, height] of [[1440, 900], [1024, 768], [390, 844], [320, 640]]) {
+    await page.setViewportSize({ width, height });
+    await page.goto('/');
+    const tile = page.locator('[data-spotify-tile]');
+    await expect(tile.getByRole('heading', { name: title })).toBeVisible();
+    const fit = await tile.evaluate((t) => {
+      const c = t.getBoundingClientRect();
+      const inside = (s) => { const r = t.querySelector(s).getBoundingClientRect(); return r.left >= c.left && r.right <= c.right && r.bottom <= c.bottom; };
+      const h = t.querySelector('.spotify__title');
+      return { lines: Math.round(h.getBoundingClientRect().height / parseFloat(getComputedStyle(h).lineHeight)), parts: ['.spotify__title', '.spotify__artist', '.spotify__play', '.spotify__brand'].every(inside), page: document.documentElement.scrollWidth <= innerWidth };
+    });
+    expect(fit).toEqual({ lines: 2, parts: true, page: true });
+  }
 });
 
 test('now listening state', async ({ page }) => {
@@ -84,7 +92,7 @@ test('API failure shows a retry that recovers', async ({ page }) => {
   await expect(page.getByText('Spotify is unavailable right now.')).toBeVisible();
   fail = false;
   await page.getByRole('button', { name: 'Try again' }).click();
-  await expect(page.getByRole('link', { name: /Yellow/ })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Yellow' })).toBeVisible();
 });
 
 test('tile fits at phone width and in both themes', async ({ page }) => {
@@ -93,9 +101,9 @@ test('tile fits at phone width and in both themes', async ({ page }) => {
   for (const colorScheme of ['dark', 'light']) {
     await page.emulateMedia({ colorScheme });
     await page.goto('/');
-    await expect(page.locator('[data-spotify-tile] .spotify__strip')).toBeVisible();
+    await expect(page.locator('[data-spotify-tile] .spotify__controls')).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
-    for (const b of await page.locator('[data-spotify-tile] .spotify__strip').locator('button, a').all()) {
+    for (const b of await page.locator('[data-spotify-tile] .spotify__controls').locator('button, a').all()) {
       const box = await b.boundingBox();
       expect(box.height).toBeGreaterThanOrEqual(44);
     }
